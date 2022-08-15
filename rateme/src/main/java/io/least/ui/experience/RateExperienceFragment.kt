@@ -156,6 +156,7 @@ class RateExperienceFragment(
         binding.textViewHeader.text = config.title
         binding.ratingBar.numStars = config.numberOfStars
         binding.ratingBar.stepSize = 1f
+        binding.tagGroup.removeAllViews()
         config.tags.forEach { tag ->
             val chip = layoutInflater.inflate(R.layout.layout_single_chip, binding.tagGroup, false) as Chip
             chip.apply {
