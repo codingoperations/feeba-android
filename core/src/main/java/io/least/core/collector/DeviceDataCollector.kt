@@ -5,7 +5,7 @@ class DeviceDataCollector {
         return CommonContext(
             "android",
             moduleVersion,
-            android.os.Build.VERSION.RELEASE_OR_CODENAME,
+            android.os.Build.VERSION.CODENAME,
             android.os.Build.VERSION.SDK_INT.toString(),
             android.os.Build.MODEL.toString(),
         )

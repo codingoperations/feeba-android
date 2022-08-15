@@ -79,7 +79,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.codingoperations'
                 artifactId = 'rateme'
-                version = 'v0.0.6'
+                version = 'v0.0.9'
             }
         }
     }

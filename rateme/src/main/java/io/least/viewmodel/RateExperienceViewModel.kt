@@ -57,6 +57,8 @@ class RateExperienceViewModel(
                     )
                     _uiState.value = RateExperienceState.SubmissionSuccess(rateExpConfig)
                 } catch (t: Throwable) {
+                    Log.e(this.javaClass.simpleName, Log.getStackTraceString(t))
+
                     _uiState.value = RateExperienceState.SubmissionError
                 }
             }
