@@ -21,10 +21,27 @@ Please refer to [least-service](https://github.com/codingoperations/least-servic
 
 Sample UI already includes capability
 
-[<img src="img.png" width="250"/>](images/img.png)
-[<img src="img_1.png" width="250"/>](images/img_1.png)
-[<img src="img_2.png" width="250"/>](images/img_2.png)
+[<img src="images/img.png" width="250"/>](images/img.png)
+[<img src="images/img_1.png" width="250"/>](images/img_1.png)
+[<img src="images/img_2.png" width="250"/>](images/img_2.png)
 
 ## Backend logic
 
+### RateExperienceViewModel
+
+This class keeps track of the UI state `RateExperienceState`
+T
+```kotlin
+val uiState: StateFlow<RateExperienceState>
+```
+The `uiState` gets current state of the UI from `MutableStateFlow`. UI updates are controlled by two important methods:
+
+- onFeedbackSubmit() -> receives 3 parameters
+  - text - A text input obtained from the user of the application.
+  - rating - A floating number selected by the user.
+  - selectedTags - A list of tags selected by the user.
+- onRateSelected()   -> receives a rating number and displays corresponding label based on the rating number.
+
+Initially, configurations of `RateExperienceState` must be loaded. Configuration of the `RateExperienceState` is obtained from
+MongoDB database.
 
