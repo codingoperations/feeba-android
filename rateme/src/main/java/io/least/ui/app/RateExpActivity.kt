@@ -45,7 +45,8 @@ class RateExpActivity : AppCompatActivity() {
             null,
             ServerConfig(
                 hostUrl = "https://least-service.herokuapp.com/",
-                apiToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDQ2ODQ4MjYsInBheWxvYWQiOnsidXNlcklkIjoiNjJjMjU2NzE1ZjRiZjJlODE5N2Q0NTRmIiwicHJvamVjdE5hbWUiOiJhYSJ9LCJpYXQiOjE2NTgyODQ4MjZ9.pzAu6pYWaW7D7STzE6q55NJHOwSs_GorgunNSfUal0E"
+                langCode = "uz",
+                apiToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI5MTMzMDksInBheWxvYWQiOnsidXNlcklkIjoiNjMxZmJkZmI0YzVjMmUxMTBlNzAzOTkzIiwicHJvamVjdE5hbWUiOiJ0ZXN0In0sImlhdCI6MTY2NjUxMzMwOX0.s0sq5TvSu6TRky61ypJ6iPIrj94uJrCf2YMOLXjNrx4"
             ),
             withBackStack = false,
             usersContext = UserSpecificContext("bkodirov1986@gmail.com"),
@@ -55,7 +56,7 @@ class RateExpActivity : AppCompatActivity() {
 
     companion object {
         @JvmStatic
-        fun startActivity(activity: Activity) {
+        fun startActivity(activity: Activity, ) {
             activity.startActivity(Intent(activity, RateExpActivity::class.java))
         }
     }

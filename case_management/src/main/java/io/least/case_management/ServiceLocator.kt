@@ -18,6 +18,7 @@ object ServiceLocator {
 
 
     fun getCaseListRepository(hostUrl: String): CaseListRepository {
-        return ServiceLocator.retrofitInstance(ServerConfig(hostUrl, "")).create(CaseListRepository::class.java)
+        return ServiceLocator.retrofitInstance(ServerConfig(hostUrl, "uz", ""))
+            .create(CaseListRepository::class.java)
     }
 }

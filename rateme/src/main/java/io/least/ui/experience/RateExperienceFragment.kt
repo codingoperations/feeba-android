@@ -70,11 +70,8 @@ class RateExperienceFragment(
 
     private val viewModel: RateExperienceViewModel by viewModels {
         createWithFactory {
-            RateExperienceViewModel(
-                rateExperienceConfig,
-                RateExperienceRepository(ServiceLocator.getHttpClient(serverConfig), DeviceDataCollector()),
-                usersContext
-            )
+            rateExperienceConfig?.let { RateExperienceViewModel(it, serverConfig, usersContext) }
+                ?: kotlin.run { RateExperienceViewModel(serverConfig, usersContext) }
         }
     }
 
@@ -158,7 +155,8 @@ class RateExperienceFragment(
         binding.ratingBar.stepSize = 1f
         binding.tagGroup.removeAllViews()
         config.tags.forEach { tag ->
-            val chip = layoutInflater.inflate(R.layout.layout_single_chip, binding.tagGroup, false) as Chip
+            val chip =
+                layoutInflater.inflate(R.layout.layout_single_chip, binding.tagGroup, false) as Chip
             chip.apply {
                 text = tag.text
                 this.tag = tag

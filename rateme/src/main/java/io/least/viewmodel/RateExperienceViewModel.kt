@@ -3,17 +3,16 @@ package io.least.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.least.ServiceLocator
+import io.least.core.ServerConfig
+import io.least.core.collector.DeviceDataCollector
 import io.least.core.collector.UserSpecificContext
 import io.least.data.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class RateExperienceViewModel(
-    @Volatile private var config: RateExperienceConfig?,
-    private val repository: RateExperienceRepository,
-    private val usersContext: UserSpecificContext,
-) : ViewModel() {
+class RateExperienceViewModel : ViewModel {
 
     // Backing property to avoid state updates from other classes
     private val _uiState = MutableStateFlow<RateExperienceState>(RateExperienceState.ConfigLoading)
@@ -21,22 +20,48 @@ class RateExperienceViewModel(
     // The UI collects from this StateFlow to get its state updates
     val uiState: StateFlow<RateExperienceState> = _uiState
 
-    init {
-        config?.let {
-            _uiState.value = RateExperienceState.ConfigLoaded(it)
-        } ?: kotlin.run {
-            _uiState.value = RateExperienceState.ConfigLoading
-            viewModelScope.launch {
-                kotlin.runCatching { repository.fetchRateExperienceConfig() }
-                    .onSuccess {
-                        _uiState.value = RateExperienceState.ConfigLoaded(it)
-                        config = it
-                    }
-                    .onFailure {
-                        Log.e(this.javaClass.simpleName,"Failed to fetch config: ${Log.getStackTraceString(it)}")
-                        _uiState.value = RateExperienceState.ConfigLoadFailed
-                    }
-            }
+    private var config: RateExperienceConfig? = null
+    private val repository: RateExperienceRepository
+    private val usersContext: UserSpecificContext
+
+    constructor(
+        config: RateExperienceConfig,
+        serverConfig: ServerConfig,
+        usersContext: UserSpecificContext,
+        repository: RateExperienceRepository = RateExperienceRepository(
+            ServiceLocator.getHttpClient(serverConfig), DeviceDataCollector(), serverConfig
+        )
+    ) {
+        this.config = config
+        this.usersContext = usersContext
+        this.repository = repository
+        _uiState.value = RateExperienceState.ConfigLoaded(config)
+    }
+
+    constructor(
+        serverConfig: ServerConfig,
+        usersContext: UserSpecificContext,
+        repository: RateExperienceRepository = RateExperienceRepository(
+            ServiceLocator.getHttpClient(serverConfig), DeviceDataCollector(), serverConfig
+        )
+    ) {
+        this.usersContext = usersContext
+        this.repository = repository
+        _uiState.value = RateExperienceState.ConfigLoading
+
+        viewModelScope.launch {
+            kotlin.runCatching { repository.fetchRateExperienceConfig() }
+                .onSuccess {
+                    _uiState.value = RateExperienceState.ConfigLoaded(it)
+                    config = it
+                }
+                .onFailure {
+                    Log.e(
+                        this.javaClass.simpleName,
+                        "Failed to fetch config: ${Log.getStackTraceString(it)}"
+                    )
+                    _uiState.value = RateExperienceState.ConfigLoadFailed
+                }
         }
     }
 

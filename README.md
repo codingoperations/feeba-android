@@ -1,8 +1,8 @@
-# RateMe Android app
+ # RateMe Android app
 
 * [Overview](#overview)
 * [UI](#ui)
-* [Backend logic](#backend-logic)
+* [Backend logic](#backend-logic) 
 
 
 ## Overview
@@ -16,8 +16,12 @@ This repo provides the information how to integrate android application. A clien
 - Rate limit
 
 Please refer to [least-service](https://github.com/codingoperations/least-service) documentation of how to create proper configuration. 
+## Configuration
+### Server config
 
-## UI
+### Custom Payload passing
+
+## With Default UI
 
 Sample UI already includes capability
 
@@ -25,9 +29,16 @@ Sample UI already includes capability
 [<img src="images/img_1.png" width="250"/>](images/img_1.png)
 [<img src="images/img_2.png" width="250"/>](images/img_2.png)
 
-## Backend logic
+## Headless mode
+#### _Overview_
 
-### RateExperienceViewModel
+#### _Integration and Initialization_
+
+#### _Call & Communication patterns_
+
+#### _Exception handling_
+
+
 
 This class keeps track of the UI state `RateExperienceState`
 T
