@@ -5,8 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import io.least.case_management.ui.cases.CaseListFragment
-import io.least.case_management.viewmodel.CaseListConfig
 import io.least.ui.app.RateAppFragment
 import io.least.ui.app.RateExpActivity
 import io.least.viewmodel.RateAppConfig
@@ -30,21 +28,15 @@ class ShowCaseFragment : Fragment() {
             RateAppFragment.show(
                 parentFragmentManager,
                 requireActivity().classLoader,
-//                RestConnector(DeviceDataCollector(), ""),
                 RateAppConfig(minPositiveRate = 3.0f)
             )
         }
         
-        binding.buttonRateExperience.setOnClickListener {
+        binding.buttonRateExperienceDefaultUi.setOnClickListener {
             RateExpActivity.startActivity(requireActivity())
         }
-        binding.buttonCaseManagement.setOnClickListener {
-            CaseListFragment.show(
-                parentFragmentManager,
-                R.id.fragmentContainer,
-                requireActivity().classLoader,
-                CaseListConfig("https://example.com/v1/case-list", "profile-id-beka")
-            )
+        binding.buttonRateExperienceHeadless.setOnClickListener {
+            HeadlessRateExpActivity.startActivity(requireActivity())
         }
         return binding.root
     }

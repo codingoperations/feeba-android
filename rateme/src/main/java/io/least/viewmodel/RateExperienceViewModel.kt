@@ -11,6 +11,7 @@ import io.least.data.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
 class RateExperienceViewModel : ViewModel {
 
@@ -105,7 +106,7 @@ class RateExperienceViewModel : ViewModel {
 sealed class RateExperienceState {
     object ConfigLoading : RateExperienceState()
     class RateSelected(val reaction: String) : RateExperienceState()
-    class ConfigLoaded(val config: RateExperienceConfig) : RateExperienceState()
+    @Serializable class ConfigLoaded(val config: RateExperienceConfig) : RateExperienceState()
     object ConfigLoadFailed : RateExperienceState()
     object Submitting : RateExperienceState()
     object SubmissionError : RateExperienceState()

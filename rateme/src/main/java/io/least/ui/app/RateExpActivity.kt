@@ -49,7 +49,7 @@ class RateExpActivity : AppCompatActivity() {
                 apiToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI5MTMzMDksInBheWxvYWQiOnsidXNlcklkIjoiNjMxZmJkZmI0YzVjMmUxMTBlNzAzOTkzIiwicHJvamVjdE5hbWUiOiJ0ZXN0In0sImlhdCI6MTY2NjUxMzMwOX0.s0sq5TvSu6TRky61ypJ6iPIrj94uJrCf2YMOLXjNrx4"
             ),
             withBackStack = false,
-            usersContext = UserSpecificContext("bkodirov1986@gmail.com"),
+            usersContext = UserSpecificContext("info@feeba.io"),
 //                View.inflate(requireContext(), R.layout.c, null)
         )
     }
