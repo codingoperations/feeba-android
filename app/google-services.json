@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "470546552732",
-    "project_id": "least-chat-sdk",
-    "storage_bucket": "least-chat-sdk.appspot.com"
+    "project_number": "528690100232",
+    "project_id": "feeba-85b00",
+    "storage_bucket": "feeba-85b00.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:470546552732:android:a472ba7ff5db1d60a01a59",
+        "mobilesdk_app_id": "1:528690100232:android:db6d38a11f557245f9f9bd",
         "android_client_info": {
           "package_name": "io.least"
         }
       },
       "oauth_client": [
         {
-          "client_id": "470546552732-q4ln5tjvv6f21tm36m1fb06g86fit4pi.apps.googleusercontent.com",
+          "client_id": "528690100232-vr69kthbbsd8q7ceguagjm4h0emcnhc8.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBdvCibFTt-hE0A8AKJ1YBt8f5Gwjzx9dw"
+          "current_key": "AIzaSyB2LsZp9_x605ESeNwkJL3k4NgQfrzhgwg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "470546552732-q4ln5tjvv6f21tm36m1fb06g86fit4pi.apps.googleusercontent.com",
+              "client_id": "528690100232-vr69kthbbsd8q7ceguagjm4h0emcnhc8.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

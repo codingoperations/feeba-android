@@ -44,9 +44,9 @@ class RateExpActivity : AppCompatActivity() {
 //            ),
             null,
             ServerConfig(
-                hostUrl = "https://least-service.herokuapp.com/",
+                hostUrl = "http://ec2-3-137-137-197.us-east-2.compute.amazonaws.com:8080",
                 langCode = "uz",
-                apiToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI5MTMzMDksInBheWxvYWQiOnsidXNlcklkIjoiNjMxZmJkZmI0YzVjMmUxMTBlNzAzOTkzIiwicHJvamVjdE5hbWUiOiJ0ZXN0In0sImlhdCI6MTY2NjUxMzMwOX0.s0sq5TvSu6TRky61ypJ6iPIrj94uJrCf2YMOLXjNrx4"
+                apiToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTUwNTg2NjAsInBheWxvYWQiOnsidXNlcklkIjoiNjM3NWIzYTFiODMyZDE3ZmI2YmE1NTFjIiwicHJvamVjdE5hbWUiOiJ6YWZhci10ZXN0In0sImlhdCI6MTY2ODY1ODY2MH0.qpCgz57-rkWfjI3NiAH_8sihpGyfScOixN20XlyDDMc"
             ),
             withBackStack = false,
             usersContext = UserSpecificContext("info@feeba.io"),
