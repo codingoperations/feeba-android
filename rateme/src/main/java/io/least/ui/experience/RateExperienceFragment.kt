@@ -95,7 +95,8 @@ class RateExperienceFragment(
                             binding.groupFinalLayout.visibility = View.GONE
                             populateView(uiState.config)
                         }
-                        RateExperienceState.ConfigLoading -> {
+                        is RateExperienceState.TagsUpdated -> updateTags(uiState.tagUpdate)
+                        is RateExperienceState.ConfigLoading -> {
                             binding.groupLoading.visibility = View.VISIBLE
                             binding.groupLoaded.visibility = View.GONE
                             binding.groupFinalLayout.visibility = View.GONE
@@ -103,7 +104,7 @@ class RateExperienceFragment(
                         is RateExperienceState.RateSelected -> {
                             binding.textViewReaction.text = uiState.reaction
                         }
-                        RateExperienceState.SubmissionError -> {
+                        is RateExperienceState.SubmissionError -> {
                             binding.buttonSubmit.text = getString(R.string.rate_exp_retry)
                             binding.buttonSubmit.isEnabled = true
                         }
@@ -113,14 +114,15 @@ class RateExperienceFragment(
                             binding.groupFinalLayout.visibility = View.VISIBLE
                             binding.finalRatingBar.numStars = binding.ratingBar.numStars
                             binding.finalRatingBar.rating = binding.ratingBar.rating
+                            binding.finalRatingBar.stepSize = binding.ratingBar.stepSize
                             binding.finalGratitudeText.text = uiState.config.postSubmitText
                             activity?.title = uiState.config.postSubmitTitle
                         }
-                        RateExperienceState.Submitting -> {
+                        is RateExperienceState.Submitting -> {
                             binding.buttonSubmit.text = getString(R.string.rate_exp_submitted)
                             binding.buttonSubmit.isEnabled = false
                         }
-                        RateExperienceState.ConfigLoadFailed -> {
+                        is RateExperienceState.ConfigLoadFailed -> {
                             activity?.finish()
                         }
                     }
@@ -138,11 +140,7 @@ class RateExperienceFragment(
         binding.buttonSubmit.setOnClickListener {
             viewModel.onFeedbackSubmit(
                 binding.editFeedback.text.toString(),
-                binding.ratingBar.rating,
-                binding.tagGroup.checkedChipIds.map {
-                    val chipView: Chip = binding.tagGroup.findViewById(it)
-                    chipView.tag as Tag
-                }
+                binding.ratingBar.rating
             )
         }
         customView?.let { binding.customViewHolder.addView(it) }
@@ -154,6 +152,7 @@ class RateExperienceFragment(
         binding.ratingBar.numStars = config.numberOfStars
         binding.ratingBar.stepSize = 1f
         binding.tagGroup.removeAllViews()
+
         config.tags.forEach { tag ->
             val chip =
                 layoutInflater.inflate(R.layout.layout_single_chip, binding.tagGroup, false) as Chip
@@ -163,9 +162,13 @@ class RateExperienceFragment(
                 isCheckable = true
                 isClickable = true
                 isFocusable = true
+                setOnCheckedChangeListener { compoundButton, b ->
+                    viewModel.onTagSelectionUpdate(tag, compoundButton.isChecked)
+                }
             }
             binding.tagGroup.addView(chip)
         }
+
         binding.ratingBar.setOnRatingBarChangeListener { _, rating, fromUser ->
             if (fromUser) {
                 viewModel.onRateSelected(rating)
@@ -173,6 +176,51 @@ class RateExperienceFragment(
         }
         binding.finalGratitudeText.text = config.postSubmitText
         activity?.title = config.title
+    }
+
+    private fun updateTags(tagUpdate: TagUpdate) {
+        binding.tagGroup.removeAllViews()
+        val tagSet = tagUpdate.tags.associateBy { it.id }
+
+        for (selectedId in tagUpdate.selectionHistory) {
+            val tag = tagSet.get(selectedId) ?: continue
+            val chip = (layoutInflater.inflate(
+                R.layout.layout_single_chip,
+                binding.tagGroup,
+                false
+            ) as Chip)
+                .apply {
+                    text = tag.text
+                    this.tag = tag
+                    isCheckable = true
+                    isClickable = true
+                    isFocusable = true
+                    isChecked = true
+                    setOnCheckedChangeListener { compoundButton, b ->
+                        viewModel.onTagSelectionUpdate(tag, compoundButton.isChecked)
+                    }
+                }
+            binding.tagGroup.addView(chip)
+        }
+        for (tag in tagUpdate.tags) {
+            if (tagUpdate.selectionHistory.contains(tag.id))  continue
+            val chip = (layoutInflater.inflate(
+                R.layout.layout_single_chip,
+                binding.tagGroup,
+                false
+            ) as Chip)
+                .apply {
+                    text = tag.text
+                    this.tag = tag
+                    isCheckable = true
+                    isClickable = true
+                    isFocusable = true
+                    setOnCheckedChangeListener { compoundButton, b ->
+                        viewModel.onTagSelectionUpdate(tag, compoundButton.isChecked)
+                    }
+                }
+            binding.tagGroup.addView(chip)
+        }
     }
 
     override fun onDestroyView() {

@@ -28,9 +28,9 @@ class HeadlessRateExpActivity : AppCompatActivity() {
      */
     private val viewModel = RateExperienceViewModel(
         ServerConfig(
-            hostUrl = "https://least-service.herokuapp.com/",
+            hostUrl = "https://api.feeba.io/",
             langCode = "ru",
-            apiToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI5MTMzMDksInBheWxvYWQiOnsidXNlcklkIjoiNjMxZmJkZmI0YzVjMmUxMTBlNzAzOTkzIiwicHJvamVjdE5hbWUiOiJ0ZXN0In0sImlhdCI6MTY2NjUxMzMwOX0.s0sq5TvSu6TRky61ypJ6iPIrj94uJrCf2YMOLXjNrx4"
+            apiToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY3MDU0NzMsInBheWxvYWQiOnsidXNlcklkIjoiNjM3MThjNWQwOWE3YTYyMWJmZjZkMmYyIiwicHJvamVjdE5hbWUiOiJzc3MifSwiaWF0IjoxNjcwMzA1NDczfQ.CuBqKrgCvdJjuoW0PapKY6yOtkbeM-sO6l8W8W8cMsc"
         ),
         usersContext = UserSpecificContext("info@feeba.io"),
     )

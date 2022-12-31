@@ -1,10 +1,7 @@
 package io.least.data
 
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface HttpClient {
 
@@ -16,4 +13,7 @@ interface HttpClient {
         @Body result: RateExperienceResult,
         @Query("lang") langCode: String
     ): Response<Unit>
+
+    @PUT("/v1/rating/sdk/tag-selection")
+    suspend fun tagSelected(@Body tagUpdate: TagUpdate, @Query("lang") langCode: String): Response<TagUpdate>
 }

@@ -19,6 +19,7 @@ data class RateExperienceConfig(
     val postSubmitTitle: String,
     val postSubmitText: String,
     val autoClosePostSubmission: Boolean = true,
+    val isPremium: Boolean? = false, // this is a signaling to avoid unnecessary backend calls. Server will run the validation without depending on this field
 )
 
 @Serializable
@@ -33,3 +34,6 @@ data class RateExperienceResult(
     val userContext: UserSpecificContext,
     var commonContext: CommonContext? = null,
 )
+
+@Serializable
+data class TagUpdate(val tags: List<Tag>, val selectionHistory: List<String>)

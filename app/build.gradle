@@ -43,8 +43,8 @@ dependencies {
     implementation project(":case_management")
     implementation project(":core")
     // Remote
-//    implementation 'com.github.codingoperations.least-android:core:v0.1.1'
-//    implementation 'com.github.codingoperations.least-android:rateme:v0.1.1'
+//    implementation 'com.github.codingoperations.least-android:core:v0.1.2'
+//    implementation 'com.github.codingoperations.least-android:rateme:v0.1.2'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.7.0'

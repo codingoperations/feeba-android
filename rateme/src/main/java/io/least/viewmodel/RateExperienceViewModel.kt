@@ -24,6 +24,8 @@ class RateExperienceViewModel : ViewModel {
     private var config: RateExperienceConfig? = null
     private val repository: RateExperienceRepository
     private val usersContext: UserSpecificContext
+    private val tagSelectionHistory = LinkedHashMap<String, Tag>()
+    private val TAG = this.javaClass.simpleName
 
     constructor(
         config: RateExperienceConfig,
@@ -57,24 +59,21 @@ class RateExperienceViewModel : ViewModel {
                     config = it
                 }
                 .onFailure {
-                    Log.e(
-                        this.javaClass.simpleName,
-                        "Failed to fetch config: ${Log.getStackTraceString(it)}"
-                    )
+                    Log.e(TAG, "Failed to fetch config: ${Log.getStackTraceString(it)}")
                     _uiState.value = RateExperienceState.ConfigLoadFailed
                 }
         }
     }
 
-    fun onFeedbackSubmit(text: String, rating: Float, selectedTags: List<Tag>) {
-        Log.d(this.javaClass.simpleName, "Creating a case --> $text")
+    fun onFeedbackSubmit(text: String, rating: Float) {
+        Log.d(TAG, "Creating a case --> $text")
         _uiState.value = RateExperienceState.Submitting
         config?.let { rateExpConfig ->
             viewModelScope.launch {
                 try {
                     repository.publishRateResults(
                         RateExperienceResult(
-                            selectedTags,
+                            tagSelectionHistory.values.toList(),
                             rating.toInt(),
                             rateExpConfig.numberOfStars,
                             text,
@@ -83,7 +82,7 @@ class RateExperienceViewModel : ViewModel {
                     )
                     _uiState.value = RateExperienceState.SubmissionSuccess(rateExpConfig)
                 } catch (t: Throwable) {
-                    Log.e(this.javaClass.simpleName, Log.getStackTraceString(t))
+                    Log.e(TAG, Log.getStackTraceString(t))
 
                     _uiState.value = RateExperienceState.SubmissionError
                 }
@@ -101,12 +100,43 @@ class RateExperienceViewModel : ViewModel {
             }
         }
     }
+
+    /**
+     * The function to be called when user clicks on Tags. ViewModel might update tags dynamically based on the selection.
+     * The effect of the function is observed through UI State flow, reactive back channel.
+     */
+    fun onTagSelectionUpdate(tag: Tag, isChecked: Boolean) {
+        config?.also {
+            if (isChecked) {
+                tagSelectionHistory[tag.id] = tag
+                if (it.isPremium == true) {
+                    viewModelScope.launch {
+                        try {
+                            val tagUpdate = repository.tagSelected(
+                                TagUpdate(it.tags, tagSelectionHistory.values.map { e -> e.id })
+                            ) ?: return@launch
+                            config = it.copy(tags = tagUpdate.tags)
+                            _uiState.value = RateExperienceState.TagsUpdated(tagUpdate)
+                        } catch (t: Throwable) {
+                            Log.e(TAG, Log.getStackTraceString(t))
+                        }
+                    }
+                }
+            } else {
+                tagSelectionHistory.remove(tag.id)
+            }
+        } ?: kotlin.run {
+            Log.w(TAG, "Config is not available yet")
+        }
+    }
 }
 
 sealed class RateExperienceState {
     object ConfigLoading : RateExperienceState()
     class RateSelected(val reaction: String) : RateExperienceState()
-    @Serializable class ConfigLoaded(val config: RateExperienceConfig) : RateExperienceState()
+    @Serializable
+    class ConfigLoaded(val config: RateExperienceConfig) : RateExperienceState()
+    class TagsUpdated(val tagUpdate: TagUpdate) : RateExperienceState()
     object ConfigLoadFailed : RateExperienceState()
     object Submitting : RateExperienceState()
     object SubmissionError : RateExperienceState()
