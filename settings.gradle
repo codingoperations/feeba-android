@@ -1,0 +1,6 @@
+include ':survey'
+include ':case_management'
+include ':app'
+include ':rateme'
+include ':core'
+rootProject.name = "RateMe"

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="RatemeChip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/color_choice_chip_background_color</item>
+        <item name="chipStrokeColor">@color/color_choice_chip_strokecolor_selector</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="RatemeRatingBar" parent="Theme.AppCompat">
+        <item name="colorControlNormal">?attr/colorPrimary</item>
+        <item name="colorControlActivated">?attr/colorPrimaryVariant</item>
+    </style>
+</resources>
