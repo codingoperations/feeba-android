@@ -61,11 +61,11 @@ android {
 dependencies {
     // Import rateme
     implementation project(":case_management")
-    implementation project(":rateme")
-    implementation project(":core")
-    // Remote
-//    implementation 'com.github.codingoperations.least-android:core:v0.1.3'
-//    implementation 'com.github.codingoperations.least-android:rateme:v0.1.3'
+//    implementation project(":rateme")
+//    implementation project(":core")
+//     Remote
+    implementation 'com.github.codingoperations.least-android:core:v0.1.5'
+    implementation 'com.github.codingoperations.least-android:rateme:v0.1.5'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.7.0'

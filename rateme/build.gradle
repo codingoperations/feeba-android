@@ -77,9 +77,9 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 from components.release
-                groupId = 'com.github.codingoperations'
+                groupId = 'com.github.feebaio'
                 artifactId = 'rateme'
-                version = 'v0.0.9'
+                version = 'v0.1.6'
             }
         }
     }
