@@ -4,7 +4,7 @@ private val prodConfig = ServerConfig(
     "https://api.feeba.io", "ru",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjE4MDE5OTYsInBheWxvYWQiOnsidXNlcklkIjoiNjNkYzliMDFjN2IxNjYyZWE3MmQ3OTllIiwicHJvamVjdE5hbWUiOiJmZWViYSJ9LCJpYXQiOjE2NzU0MDE5OTZ9.VuIAQ90oQar5958nZHNKc6nOa8m3abzoFvGnk0cbpnY"
 )
-private val devConfig = ServerConfig("", "", "")
+private val devConfig = ServerConfig("", "ru", "")
 
 object ConfigHolder {
     private var currentConfig = prodConfig
