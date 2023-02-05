@@ -20,7 +20,7 @@ data class RateExperienceConfig(
     val postSubmitText: String,
     val autoClosePostSubmission: Boolean = true,
     val isPremium: Boolean? = false, // this is a signaling to avoid unnecessary backend calls. Server will run the validation without depending on this field
-)
+): java.io.Serializable
 
 @Serializable
 data class LabelValue(val value: Int, val label: String)

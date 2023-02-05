@@ -1,7 +1,6 @@
 package io.least.data
 
 import android.util.Log
-import android.util.LogPrinter
 import io.least.core.ServerConfig
 import io.least.core.collector.DeviceDataCollector
 import io.least.rate.BuildConfig

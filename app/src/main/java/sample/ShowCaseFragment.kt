@@ -5,10 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import io.least.core.ServerConfig
+import io.least.core.collector.UserSpecificContext
 import io.least.ui.app.RateAppFragment
 import io.least.ui.app.RateExpActivity
 import io.least.viewmodel.RateAppConfig
-import io.sample.R
 import io.sample.databinding.FragmentSampleShowcaseBinding
 
 class ShowCaseFragment : Fragment() {
@@ -31,13 +32,30 @@ class ShowCaseFragment : Fragment() {
                 RateAppConfig(minPositiveRate = 3.0f)
             )
         }
-        
+
         binding.buttonRateExperienceDefaultUi.setOnClickListener {
-            RateExpActivity.startActivity(requireActivity())
+            RateExpActivity.startActivity(requireActivity(),
+                ServerConfig(ConfigHolder.hostUrl, ConfigHolder.langCode, ConfigHolder.jwtToken),
+                UserSpecificContext("info@feeba.io"),
+                null,
+                //            RateExperienceConfig(
+//                tags = listOf(Tag("id1", "tag1"), Tag("id2", "tag2"), Tag("id3", "tag3")),
+//                numberOfStars = 6,
+//                valueReaction = listOf(
+//                    LabelValue(1, "too bad :("),
+//                    LabelValue(2, "Nice ;)"),
+//                    LabelValue(8, "Great!")
+//                ),
+//                title = "MY TITLE",
+//                postSubmitTitle = "It is post submit Title",
+//                postSubmitText = "It is post submit BODY TEXT",
+//            ),
+            )
         }
         binding.buttonRateExperienceHeadless.setOnClickListener {
             HeadlessRateExpActivity.startActivity(requireActivity())
         }
+        binding.switchEnv.setOnCheckedChangeListener { _, isChecked -> ConfigHolder.setEnv(isChecked) }
         return binding.root
     }
 

@@ -28,9 +28,9 @@ class HeadlessRateExpActivity : AppCompatActivity() {
      */
     private val viewModel = RateExperienceViewModel(
         ServerConfig(
-            hostUrl = "http://ec2-3-137-137-197.us-east-2.compute.amazonaws.com:8080",
-            langCode = "ru",
-            apiToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjE4MDE5OTYsInBheWxvYWQiOnsidXNlcklkIjoiNjNkYzliMDFjN2IxNjYyZWE3MmQ3OTllIiwicHJvamVjdE5hbWUiOiJmZWViYSJ9LCJpYXQiOjE2NzU0MDE5OTZ9.VuIAQ90oQar5958nZHNKc6nOa8m3abzoFvGnk0cbpnY"
+            hostUrl = ConfigHolder.hostUrl,
+            langCode = ConfigHolder.langCode,
+            apiToken = ConfigHolder.jwtToken
         ),
         usersContext = UserSpecificContext("info@feeba.io"),
     )

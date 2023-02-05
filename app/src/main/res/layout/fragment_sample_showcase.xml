@@ -47,4 +47,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/buttonRateExperienceDefaultUi" />
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switchEnv"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Keep it on to use Prod or Off for Dev environemnt"
+        android:checked="true"
+        android:textOff="DEV"
+        android:textOn="PROD"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

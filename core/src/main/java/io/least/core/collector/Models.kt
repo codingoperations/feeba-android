@@ -16,4 +16,4 @@ data class CommonContext(
 data class UserSpecificContext(
     val userIdentifier: String,
     val custom: JsonElement? = null
-)
+): java.io.Serializable

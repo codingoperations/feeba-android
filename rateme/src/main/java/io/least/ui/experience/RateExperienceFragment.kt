@@ -13,12 +13,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.chip.Chip
-import io.least.ServiceLocator
-import io.least.core.collector.DeviceDataCollector
-import io.least.core.collector.UserSpecificContext
 import io.least.core.ServerConfig
+import io.least.core.collector.UserSpecificContext
 import io.least.core.createWithFactory
-import io.least.data.*
+import io.least.data.RateExperienceConfig
+import io.least.data.TagUpdate
 import io.least.rate.R
 import io.least.rate.databinding.RateExpFragmentBinding
 import io.least.viewmodel.RateExperienceState

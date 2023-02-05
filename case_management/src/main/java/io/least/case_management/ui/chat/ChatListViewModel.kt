@@ -4,10 +4,8 @@ import androidx.lifecycle.ViewModel
 import io.least.case_management.data.Message
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.bouncycastle.asn1.x500.style.RFC4519Style.uid
 import org.jivesoftware.smack.chat2.ChatManager
 import org.jivesoftware.smack.tcp.XMPPTCPConnection
-import org.jivesoftware.smackx.mam.MamManager
 
 
 class ChatListViewModel(private val connection: XMPPTCPConnection) : ViewModel() {
