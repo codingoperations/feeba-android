@@ -1,9 +1,11 @@
 #!/bin/bash
-IFS=. read major minor patch <<< "$(git describe --tags --abbrev=0)"
+currTag="$(git describe --tags --abbrev=0)"
+echo "currTag: ${currTag}"
+IFS=. read major minor patch <<< $currTag
 
-echo "${major}"
-echo "${minor}"
-echo "${patch}"
+echo "major: ${major}"
+echo "minor: ${minor}"
+echo "patch: ${patch}"
 
 newTag="${major}.${minor}.${patch}"
 echo "Old tag: ${newTag}"
