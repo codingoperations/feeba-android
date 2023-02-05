@@ -53,6 +53,7 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           ./new_release.sh
+
       - name: Get release-APK from artifacts
         uses: actions/download-artifact@v2
         with:
