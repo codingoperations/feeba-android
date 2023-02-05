@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 IFS=. read major minor patch <<< "$(git describe --tags --abbrev=0)"
 
 newTag="${major}.${minor}.${patch}"
