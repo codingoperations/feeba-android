@@ -1,6 +1,8 @@
-[![](https://jitpack.io/v/USER/REPO/month.svg)](https://jitpack.io/#USER/REPO)
-[![](https://jitpack.io/v/jitpack/maven-simple/month.svg)](https://jitpack.io/#feebaio/feeba-android)
-[![](https://jitpack.io/v/feebaio/feeba-android/week.svg)](https://jitpack.io/#feebaio/feeba-android)
+[![Release](https://jitpack.io/v/User/Repo.svg)]
+(https://jitpack.io/#feebaio/feeba-android)
+
+[![Downloads](https://jitpack.io/v/feebaio/feeba-android/month.svg)](https://jitpack.io/#feebaio/feeba-android)
+[![Downloads](https://jitpack.io/v/feebaio/feeba-android/week.svg)](https://jitpack.io/#feebaio/feeba-android)
 
 
 # RateMe Android app
