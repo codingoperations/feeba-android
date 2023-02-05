@@ -4,11 +4,6 @@ on:
   pull_request:
     types: [ closed ]
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'New Library version release'
-        required: true
-        type: string
 
 jobs:
   build:
