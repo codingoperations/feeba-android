@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.least.rate">
+
+    <application>
+        <activity
+            android:name="io.least.ui.app.RateExpActivity"
+            android:label="RateExp"
+            android:theme="@style/Theme.RateMe"/>
+    </application>
+</manifest>

@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "331157148826",
+    "project_id": "feeba-1d867",
+    "storage_bucket": "feeba-1d867.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:331157148826:android:fe79d3f6d8c305a188fb23",
+        "android_client_info": {
+          "package_name": "io.feeba.demo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "331157148826-aagorqoechajr0f1fqullqnd1lr3e7ak.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAw-ZfI-1dyQojO_AYNEqoDfhI0NYIpnE0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "331157148826-aagorqoechajr0f1fqullqnd1lr3e7ak.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "331157148826-2bmgho5l1okl9vqfajd3ke10kc75bru6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.feeba.demo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
