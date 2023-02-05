@@ -2,7 +2,8 @@ name: Validation
 
 on:
   push:
-    branches: [ "!master" ]
+    branches:
+      - '!master'
 
 jobs:
   validation:
