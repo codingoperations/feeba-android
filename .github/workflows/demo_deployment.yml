@@ -3,6 +3,7 @@ name: Android CI
 on:
   pull_request:
     types: [ closed ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -49,7 +50,7 @@ jobs:
         with:
           name: release-apk
       - name: Release new tag
-        run: sh new_release.sh
+        run: ./new_release.sh
       - name: Preparing firebase credentials
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
