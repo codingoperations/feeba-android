@@ -1,7 +1,7 @@
 #!/bin/bash
-currTag="$(git describe --tags --abbrev=0)"
+currTag="$(git describe --tags $(git rev-list --tags --max-count=1))"
 echo "currTag: ${currTag}"
-IFS=. read major minor patch <<< $currTag
+IFS=. read major minor patch <<< "$currTag"
 
 echo "major: ${major}"
 echo "minor: ${minor}"
