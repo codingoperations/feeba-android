@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
@@ -56,6 +57,8 @@ class ShowCaseFragment : Fragment() {
             HeadlessRateExpActivity.startActivity(requireActivity())
         }
         binding.switchEnv.setOnCheckedChangeListener { _, isChecked -> ConfigHolder.setEnv(isChecked) }
+        ConfigHolder.langCode= binding.editTextLangCode.text.toString()
+        binding.editTextLangCode.addTextChangedListener { text -> ConfigHolder.langCode= text.toString() }
         return binding.root
     }
 
