@@ -17,7 +17,7 @@ import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
 import io.least.core.createWithFactory
 import io.least.data.RateExperienceConfig
-import io.least.data.TagUpdate
+import io.least.data.Tag
 import io.least.rate.R
 import io.least.rate.databinding.RateExpFragmentBinding
 import io.least.viewmodel.RateExperienceState
@@ -94,7 +94,7 @@ class RateExperienceFragment(
                             binding.groupFinalLayout.visibility = View.GONE
                             populateView(uiState.config)
                         }
-                        is RateExperienceState.TagsUpdated -> updateTags(uiState.tagUpdate)
+                        is RateExperienceState.TagsUpdated -> updateTags(uiState)
                         is RateExperienceState.ConfigLoading -> {
                             binding.groupLoading.visibility = View.VISIBLE
                             binding.groupLoaded.visibility = View.GONE
@@ -170,19 +170,19 @@ class RateExperienceFragment(
 
         binding.ratingBar.setOnRatingBarChangeListener { _, rating, fromUser ->
             if (fromUser) {
-                viewModel.onRateSelected(rating)
+                viewModel.onRateSelected(rating.toInt())
             }
         }
         binding.finalGratitudeText.text = config.postSubmitText
         activity?.title = config.title
     }
 
-    private fun updateTags(tagUpdate: TagUpdate) {
+    private fun updateTags(udated: RateExperienceState.TagsUpdated) {
         binding.tagGroup.removeAllViews()
-        val tagSet = tagUpdate.tags.associateBy { it.id }
+        val tagSet: Map<String, Tag> = udated.tags.associateBy { it.id }
 
-        for (selectedId in tagUpdate.selectionHistory) {
-            val tag = tagSet.get(selectedId) ?: continue
+        for (selectedId: Tag in udated.selectionHistory) {
+            val tag = tagSet[selectedId.id] ?: continue
             val chip = (layoutInflater.inflate(
                 R.layout.layout_single_chip,
                 binding.tagGroup,
@@ -201,8 +201,8 @@ class RateExperienceFragment(
                 }
             binding.tagGroup.addView(chip)
         }
-        for (tag in tagUpdate.tags) {
-            if (tagUpdate.selectionHistory.contains(tag.id))  continue
+        for (tag in udated.tags) {
+            if (udated.selectionHistory.contains(tag))  continue
             val chip = (layoutInflater.inflate(
                 R.layout.layout_single_chip,
                 binding.tagGroup,

@@ -15,6 +15,9 @@ import kotlinx.serialization.Serializable
 
 class RateExperienceViewModel : ViewModel {
 
+    // That last known rating from the user
+    private var lastKnownRating: Int = 0
+
     // Backing property to avoid state updates from other classes
     private val _uiState = MutableStateFlow<RateExperienceState>(RateExperienceState.ConfigLoading)
 
@@ -90,7 +93,7 @@ class RateExperienceViewModel : ViewModel {
         }
     }
 
-    fun onRateSelected(rating: Float) {
+    fun onRateSelected(rating: Int) {
         config?.let {
             for (it in it.valueReactions) {
                 if (rating.toInt() <= it.value) {
@@ -98,7 +101,26 @@ class RateExperienceViewModel : ViewModel {
                     break
                 }
             }
+            // Don't fet tags if the rating is the same(Negative or Positive)
+            if (
+                (lastKnownRating < it.firstPositiveRate && rating >= it.firstPositiveRate)
+                ||
+                (lastKnownRating >= it.firstPositiveRate && rating < it.firstPositiveRate)
+            ) {
+                viewModelScope.launch {
+                    try {
+                        val tags = repository.fetchTags(rating)
+                        _uiState.value = RateExperienceState.TagsUpdated(
+                            tags.tags,
+                            tagSelectionHistory.values.toList()
+                        )
+                    } catch (t: Throwable) {
+                        Log.e(TAG, Log.getStackTraceString(t))
+                    }
+                }
+            }
         }
+        this.lastKnownRating = rating
     }
 
     /**
@@ -109,22 +131,22 @@ class RateExperienceViewModel : ViewModel {
         config?.also {
             if (isChecked) {
                 tagSelectionHistory[tag.id] = tag
-                if (it.isPremium == true) {
-                    viewModelScope.launch {
-                        try {
-                            val tagUpdate = repository.tagSelected(
-                                TagUpdate(it.tags, tagSelectionHistory.values.map { e -> e.id })
-                            ) ?: return@launch
-                            config = it.copy(tags = tagUpdate.tags)
-                            _uiState.value = RateExperienceState.TagsUpdated(tagUpdate)
-                        } catch (t: Throwable) {
-                            Log.e(TAG, Log.getStackTraceString(t))
-                        }
-                    }
-                }
+//                if (it.isPremium == true) {
+//                    viewModelScope.launch {
+//                        try {
+//                            val tagUpdate = repository.fetchTags(TagUpdate(it.tags)
+//                            ) ?: return@launch
+//                            config = it.copy(tags = tagUpdate.tags)
+
+//                        } catch (t: Throwable) {
+//                            Log.e(TAG, Log.getStackTraceString(t))
+//                        }
+//                    }
+//                }
             } else {
                 tagSelectionHistory.remove(tag.id)
             }
+            _uiState.value = RateExperienceState.TagsUpdated(it.tags, tagSelectionHistory.values.toList())
         } ?: kotlin.run {
             Log.w(TAG, "Config is not available yet")
         }
@@ -134,9 +156,10 @@ class RateExperienceViewModel : ViewModel {
 sealed class RateExperienceState {
     object ConfigLoading : RateExperienceState()
     class RateSelected(val reaction: String) : RateExperienceState()
+
     @Serializable
     class ConfigLoaded(val config: RateExperienceConfig) : RateExperienceState()
-    class TagsUpdated(val tagUpdate: TagUpdate) : RateExperienceState()
+    class TagsUpdated(val tags: List<Tag>, val selectionHistory: List<Tag>) : RateExperienceState()
     object ConfigLoadFailed : RateExperienceState()
     object Submitting : RateExperienceState()
     object SubmissionError : RateExperienceState()

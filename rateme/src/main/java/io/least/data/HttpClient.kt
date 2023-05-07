@@ -14,6 +14,9 @@ interface HttpClient {
         @Query("lang") langCode: String
     ): Response<Unit>
 
-    @PUT("/v1/rating/sdk/tag-selection")
-    suspend fun tagSelected(@Body tagUpdate: TagUpdate, @Query("lang") langCode: String): Response<TagUpdate>
+    @GET("/v1/rating/sdk/tags")
+    suspend fun fetchTags(
+        @Query("lang") langCode: String,
+        @Query("rate") rate: Int
+    ): Response<TagUpdate>
 }

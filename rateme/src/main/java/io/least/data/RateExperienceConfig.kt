@@ -8,12 +8,13 @@ import kotlinx.serialization.Serializable
 
 @Parcelize
 @Serializable
-data class Tag(val id: String, val text: String) : Parcelable
+data class Tag(val id: String, val text: String, val isNegative: Boolean) : Parcelable
 
 @Serializable
 data class RateExperienceConfig(
     val tags: List<Tag>,
     val numberOfStars: Int,
+    val firstPositiveRate: Int,
     val valueReactions: List<LabelValue>,
     val title: String,
     val postSubmitTitle: String,
@@ -36,4 +37,4 @@ data class RateExperienceResult(
 )
 
 @Serializable
-data class TagUpdate(val tags: List<Tag>, val selectionHistory: List<String>)
+data class TagUpdate(val tags: List<Tag>)
