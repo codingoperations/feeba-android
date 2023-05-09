@@ -7,7 +7,10 @@ import io.least.ServiceLocator
 import io.least.core.ServerConfig
 import io.least.core.collector.DeviceDataCollector
 import io.least.core.collector.UserSpecificContext
-import io.least.data.*
+import io.least.data.RateExperienceConfig
+import io.least.data.RateExperienceRepository
+import io.least.data.RateExperienceResult
+import io.least.data.Tag
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -94,22 +97,25 @@ class RateExperienceViewModel : ViewModel {
     }
 
     fun onRateSelected(rating: Int) {
-        config?.let {
-            for (it in it.valueReactions) {
-                if (rating.toInt() <= it.value) {
+        config?.let {localConfig ->
+            for (it in localConfig.valueReactions) {
+                if (rating <= it.value) {
                     _uiState.value = RateExperienceState.RateSelected(it.label)
                     break
                 }
             }
             // Don't fet tags if the rating is the same(Negative or Positive)
             if (
-                (lastKnownRating < it.firstPositiveRate && rating >= it.firstPositiveRate)
+                lastKnownRating == 0 // If this a first time selection
                 ||
-                (lastKnownRating >= it.firstPositiveRate && rating < it.firstPositiveRate)
+                (lastKnownRating < localConfig.minPositiveStep && rating >= localConfig.minPositiveStep)
+                ||
+                (lastKnownRating >= localConfig.minPositiveStep && rating < localConfig.minPositiveStep)
             ) {
                 viewModelScope.launch {
                     try {
                         val tags = repository.fetchTags(rating)
+                        config = localConfig.copy(tags = tags.tags)
                         _uiState.value = RateExperienceState.TagsUpdated(
                             tags.tags,
                             tagSelectionHistory.values.toList()
@@ -123,26 +129,11 @@ class RateExperienceViewModel : ViewModel {
         this.lastKnownRating = rating
     }
 
-    /**
-     * The function to be called when user clicks on Tags. ViewModel might update tags dynamically based on the selection.
-     * The effect of the function is observed through UI State flow, reactive back channel.
-     */
     fun onTagSelectionUpdate(tag: Tag, isChecked: Boolean) {
+        Log.d("onTagSelectionUpdate", tag.text + " " + isChecked)
         config?.also {
             if (isChecked) {
                 tagSelectionHistory[tag.id] = tag
-//                if (it.isPremium == true) {
-//                    viewModelScope.launch {
-//                        try {
-//                            val tagUpdate = repository.fetchTags(TagUpdate(it.tags)
-//                            ) ?: return@launch
-//                            config = it.copy(tags = tagUpdate.tags)
-
-//                        } catch (t: Throwable) {
-//                            Log.e(TAG, Log.getStackTraceString(t))
-//                        }
-//                    }
-//                }
             } else {
                 tagSelectionHistory.remove(tag.id)
             }
@@ -156,7 +147,6 @@ class RateExperienceViewModel : ViewModel {
 sealed class RateExperienceState {
     object ConfigLoading : RateExperienceState()
     class RateSelected(val reaction: String) : RateExperienceState()
-
     @Serializable
     class ConfigLoaded(val config: RateExperienceConfig) : RateExperienceState()
     class TagsUpdated(val tags: List<Tag>, val selectionHistory: List<Tag>) : RateExperienceState()

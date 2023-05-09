@@ -8,20 +8,26 @@ import kotlinx.serialization.Serializable
 
 @Parcelize
 @Serializable
-data class Tag(val id: String, val text: String, val isNegative: Boolean) : Parcelable
+data class Tag(
+    val id: String,
+    val text: String,
+    val isPositive: Boolean,
+    val clickCount: Int,
+    val staticImageUrl: String? = "https://img.favpng.com/21/22/17/car-reckless-driving-computer-icons-motor-vehicle-png-favpng-wT0c9HJvn4DeX7h86amzWcMy9.jpg",
+) : Parcelable
 
 @Serializable
 data class RateExperienceConfig(
     val tags: List<Tag>,
     val numberOfStars: Int,
-    val firstPositiveRate: Int,
+    val minPositiveStep: Int,
     val valueReactions: List<LabelValue>,
     val title: String,
     val postSubmitTitle: String,
     val postSubmitText: String,
     val autoClosePostSubmission: Boolean = true,
     val isPremium: Boolean? = false, // this is a signaling to avoid unnecessary backend calls. Server will run the validation without depending on this field
-): java.io.Serializable
+) : java.io.Serializable
 
 @Serializable
 data class LabelValue(val value: Int, val label: String)
