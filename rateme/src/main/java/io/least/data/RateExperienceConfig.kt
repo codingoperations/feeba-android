@@ -13,7 +13,7 @@ data class Tag(
     val text: String,
     val isPositive: Boolean,
     val clickCount: Int,
-    val staticImageUrl: String? = "https://img.favpng.com/21/22/17/car-reckless-driving-computer-icons-motor-vehicle-png-favpng-wT0c9HJvn4DeX7h86amzWcMy9.jpg",
+    val staticImageUrl: String?,
 ) : Parcelable
 
 @Serializable
