@@ -96,6 +96,11 @@ class RateExperienceViewModel : ViewModel {
         }
     }
 
+    /**
+     * THis function needs to be called when the user selects a rating. If the rating is changed backend
+     * will potentially will send new set of Tags that are related to  the rate user selected.
+     * If the Tags are changed, the UI RateExperienceState.TagsUpdated will be emitted with the new set of Tags.
+     */
     fun onRateSelected(rating: Int) {
         config?.let {localConfig ->
             for (it in localConfig.valueReactions) {
@@ -108,14 +113,15 @@ class RateExperienceViewModel : ViewModel {
             if (
                 lastKnownRating == 0 // If this a first time selection
                 ||
-                (lastKnownRating < localConfig.minPositiveStep && rating >= localConfig.minPositiveStep)
+                (lastKnownRating < localConfig.minPositiveRate && rating >= localConfig.minPositiveRate)
                 ||
-                (lastKnownRating >= localConfig.minPositiveStep && rating < localConfig.minPositiveStep)
+                (lastKnownRating >= localConfig.minPositiveRate && rating < localConfig.minPositiveRate)
             ) {
                 viewModelScope.launch {
                     try {
                         val tags = repository.fetchTags(rating)
                         config = localConfig.copy(tags = tags.tags)
+                        tagSelectionHistory.clear()
                         _uiState.value = RateExperienceState.TagsUpdated(
                             tags.tags,
                             tagSelectionHistory.values.toList()

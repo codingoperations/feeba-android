@@ -13,14 +13,14 @@ data class Tag(
     val text: String,
     val isPositive: Boolean,
     val clickCount: Int,
-    val staticImageUrl: String?,
+    val staticImageUrl: String? = null,
 ) : Parcelable
 
 @Serializable
 data class RateExperienceConfig(
     val tags: List<Tag>,
     val numberOfStars: Int,
-    val minPositiveStep: Int,
+    val minPositiveRate: Int,
     val valueReactions: List<LabelValue>,
     val title: String,
     val postSubmitTitle: String,
