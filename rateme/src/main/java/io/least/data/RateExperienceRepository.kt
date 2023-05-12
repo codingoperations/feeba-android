@@ -29,12 +29,13 @@ class RateExperienceRepository(
         httpClient.publishResult(result, serverConfig.langCode)
     }
 
-    suspend fun tagSelected(tagUpdate: TagUpdate): TagUpdate? {
+    suspend fun fetchTags(rate: Int): TagUpdate {
         return try {
-            httpClient.tagSelected(tagUpdate, serverConfig.langCode).body()
+            val body = httpClient.fetchTags(serverConfig.langCode, rate).body()
+            body ?: throw NullPointerException("Server returned an empty response")
         } catch (t: Throwable) {
             Log.e(TAG, Log.getStackTraceString(t))
-            null
+            TagUpdate(listOf())
         }
     }
 }

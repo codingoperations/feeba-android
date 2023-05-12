@@ -54,15 +54,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ratingBar" />
 
-
-    <com.google.android.material.chip.ChipGroup
+    <HorizontalScrollView
         android:id="@+id/tagGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@id/editFeedback"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewReaction" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewReaction">
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/tagsParent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </HorizontalScrollView>
 
     <EditText
         android:id="@+id/editFeedback"
@@ -110,8 +114,8 @@
         android:layout_height="match_parent"
         android:visibility="visible"
         app:constraint_referenced_ids="finalGratitudeText, finalRatingBar"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp" />
+        tools:layout_editor_absoluteX="-180dp"
+        tools:layout_editor_absoluteY="0dp" />
 
     <TextView
         android:id="@+id/finalGratitudeText"
