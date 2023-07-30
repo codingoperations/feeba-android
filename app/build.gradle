@@ -60,12 +60,10 @@ android {
 
 dependencies {
     // Import rateme
-    implementation project(":case_management")
-    implementation project(":rateme")
-    implementation project(":core")
+//    implementation project(":rateme")
 //     This is how you should import Feeba Android
-//    implementation 'com.github.feebaio.feeba-android:core:0.0.5'
-//    implementation 'com.github.feebaio.feeba-android:rateme:0.0.5'
+    implementation 'com.github.feebaio.feeba-android:core:0.0.9'
+    implementation 'com.github.feebaio.feeba-android:rateme:0.0.9'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.7.0'

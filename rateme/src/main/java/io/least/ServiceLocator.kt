@@ -7,6 +7,6 @@ import io.least.data.HttpClient
 object ServiceLocator {
 
     fun getHttpClient(config: ServerConfig): HttpClient {
-        return ServiceLocator.retrofitInstance(config).create(HttpClient::class.java)
+        return ServiceLocator.okhttpInstance(config).create(HttpClient::class.java)
     }
 }

@@ -11,9 +11,9 @@ import io.least.data.RateExperienceConfig
 import io.least.data.RateExperienceRepository
 import io.least.data.RateExperienceResult
 import io.least.data.Tag
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 class RateExperienceViewModel : ViewModel {
@@ -75,24 +75,19 @@ class RateExperienceViewModel : ViewModel {
         Log.d(TAG, "Creating a case --> $text")
         _uiState.value = RateExperienceState.Submitting
         config?.let { rateExpConfig ->
-            viewModelScope.launch {
-                try {
-                    repository.publishRateResults(
-                        RateExperienceResult(
-                            tagSelectionHistory.values.toList(),
-                            rating.toInt(),
-                            rateExpConfig.numberOfStars,
-                            text,
-                            usersContext
-                        )
+            @OptIn(DelicateCoroutinesApi::class)
+            GlobalScope.launch {
+                repository.publishRateResults(
+                    RateExperienceResult(
+                        tagSelectionHistory.values.toList(),
+                        rating.toInt(),
+                        rateExpConfig.numberOfStars,
+                        text,
+                        usersContext
                     )
-                    _uiState.value = RateExperienceState.SubmissionSuccess(rateExpConfig)
-                } catch (t: Throwable) {
-                    Log.e(TAG, Log.getStackTraceString(t))
-
-                    _uiState.value = RateExperienceState.SubmissionError
-                }
+                )
             }
+            _uiState.value = RateExperienceState.SubmissionSuccess(rateExpConfig)
         }
     }
 
@@ -102,7 +97,7 @@ class RateExperienceViewModel : ViewModel {
      * If the Tags are changed, the UI RateExperienceState.TagsUpdated will be emitted with the new set of Tags.
      */
     fun onRateSelected(rating: Int) {
-        config?.let {localConfig ->
+        config?.let { localConfig ->
             for (it in localConfig.valueReactions) {
                 if (rating <= it.value) {
                     _uiState.value = RateExperienceState.RateSelected(it.label)
@@ -153,11 +148,16 @@ class RateExperienceViewModel : ViewModel {
 sealed class RateExperienceState {
     object ConfigLoading : RateExperienceState()
     class RateSelected(val reaction: String) : RateExperienceState()
+
     @Serializable
     class ConfigLoaded(val config: RateExperienceConfig) : RateExperienceState()
     class TagsUpdated(val tags: List<Tag>, val selectionHistory: List<Tag>) : RateExperienceState()
     object ConfigLoadFailed : RateExperienceState()
+
+    @Deprecated("This will be removed in the future. Use SubmissionSuccess instead")
     object Submitting : RateExperienceState()
+
+    @Deprecated("This will be removed in the future. Use SubmissionSuccess instead")
     object SubmissionError : RateExperienceState()
     class SubmissionSuccess(val config: RateExperienceConfig) : RateExperienceState()
 }
