@@ -1,12 +1,15 @@
 package io.least.viewmodel
 
+import android.app.Application
+import android.content.Context
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.least.ServiceLocator
 import io.least.core.ServerConfig
 import io.least.core.collector.DeviceDataCollector
 import io.least.core.collector.UserSpecificContext
+import io.least.data.HttpClient
 import io.least.data.RateExperienceConfig
 import io.least.data.RateExperienceRepository
 import io.least.data.RateExperienceResult
@@ -16,7 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 
-class RateExperienceViewModel : ViewModel {
+class RateExperienceViewModel : AndroidViewModel {
 
     // That last known rating from the user
     private var lastKnownRating: Int = 0
@@ -34,32 +37,32 @@ class RateExperienceViewModel : ViewModel {
     private val TAG = this.javaClass.simpleName
 
     constructor(
+        application: Application,
         config: RateExperienceConfig,
         serverConfig: ServerConfig,
         usersContext: UserSpecificContext,
-        repository: RateExperienceRepository = RateExperienceRepository(
-            ServiceLocator.getHttpClient(serverConfig), DeviceDataCollector(), serverConfig
-        )
-    ) {
+    ) : super(application) {
         this.config = config
         this.usersContext = usersContext
-        this.repository = repository
+        this.repository = RateExperienceRepository(
+            application, HttpClient(serverConfig), DeviceDataCollector(), serverConfig
+        )
         _uiState.value = RateExperienceState.ConfigLoaded(config)
     }
 
     constructor(
+        application: Application,
         serverConfig: ServerConfig,
         usersContext: UserSpecificContext,
-        repository: RateExperienceRepository = RateExperienceRepository(
-            ServiceLocator.getHttpClient(serverConfig), DeviceDataCollector(), serverConfig
-        )
-    ) {
+    ) : super(application) {
         this.usersContext = usersContext
-        this.repository = repository
+        this.repository = RateExperienceRepository(
+            application, HttpClient(serverConfig), DeviceDataCollector(), serverConfig
+        )
         _uiState.value = RateExperienceState.ConfigLoading
 
         viewModelScope.launch {
-            kotlin.runCatching { repository.fetchRateExperienceConfig() }
+            withContext(Dispatchers.IO) { runCatching { repository.fetchRateExperienceConfig() } }
                 .onSuccess {
                     _uiState.value = RateExperienceState.ConfigLoaded(it)
                     config = it
@@ -68,12 +71,12 @@ class RateExperienceViewModel : ViewModel {
                     Log.e(TAG, "Failed to fetch config: ${Log.getStackTraceString(it)}")
                     _uiState.value = RateExperienceState.ConfigLoadFailed
                 }
+
         }
     }
 
     fun onFeedbackSubmit(text: String, rating: Float) {
         Log.d(TAG, "Creating a case --> $text")
-        _uiState.value = RateExperienceState.Submitting
         config?.let { rateExpConfig ->
             @OptIn(DelicateCoroutinesApi::class)
             GlobalScope.launch {
@@ -112,7 +115,7 @@ class RateExperienceViewModel : ViewModel {
                 ||
                 (lastKnownRating >= localConfig.minPositiveRate && rating < localConfig.minPositiveRate)
             ) {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     try {
                         val tags = repository.fetchTags(rating)
                         config = localConfig.copy(tags = tags.tags)

@@ -1,15 +1,16 @@
 package io.least.data
 
+import android.app.Application
 import android.util.Log
+import io.feeba.BuildConfig
 import io.least.core.ServerConfig
 import io.least.core.collector.DeviceDataCollector
 import io.least.core.readLocalFile
 import io.least.core.writeToLocalFile
-import io.least.rate.BuildConfig
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 class RateExperienceRepository(
+    private val application: Application,
     private val httpClient: HttpClient,
     private val dataCollector: DeviceDataCollector,
     private var serverConfig: ServerConfig,
@@ -25,23 +26,27 @@ class RateExperienceRepository(
      */
     suspend fun fetchRateExperienceConfig(): RateExperienceConfig {
         val response = httpClient.fetchRateExperienceConfig(serverConfig.langCode)
+        Log.d(TAG, " ----------------- HTTP response: ${response.data}")
         val config = response.data?.let {
             // if parsing was successful, update the local cache in a fire and forget mode
             // We want to use a full URL with query params as a cache key. It will help us to have isolated caches for different configurations
-            writeToLocalFile(response.data, response.path)
+            writeToLocalFile(response.data, application, response.path)
+            Log.d(TAG, "decodeFromString executing")
             Json.decodeFromString<RateExperienceConfig>(response.data)
         } ?: run {
             Log.d(TAG, " ----------------- Reading from local cache")
             // Read from local cache
-            Json.decodeFromString(readLocalFile(response.path))
+            val cachedValue = readLocalFile(application, response.path)
+            Json.decodeFromString(cachedValue)
         }
         return config
     }
 
     suspend fun publishRateResults(result: RateExperienceResult) {
-            result.commonContext = dataCollector.collect(BuildConfig.VERSION_NAME)
-            // Fire and forget mode. release the coroutine as soon as possible
-            httpClient.publishResult(result, serverConfig.langCode)
+        result.commonContext = dataCollector.collect(BuildConfig.VERSION_NAME)
+        // Fire and forget mode. release the coroutine as soon as possible
+        kotlin.runCatching { httpClient.publishResult(result, serverConfig.langCode) }
+            .onFailure { Log.w(TAG, "Error publishing results. This feedback will be ignored") }
     }
 
     suspend fun fetchTags(rate: Int): TagUpdate {
@@ -49,12 +54,13 @@ class RateExperienceRepository(
         val tags = response.data?.let {
             // if parsing was successful, update the local cache in a fire and forget mode
             // We want to use a full URL with query params as a cache key. It will help us to have isolated caches for different configurations
-            writeToLocalFile(response.data, response.path)
+            writeToLocalFile(response.data, application, response.path)
             Json.decodeFromString<TagUpdate>(response.data)
         } ?: run {
             Log.d(TAG, " ----------------- Reading from local cache")
             // Read from local cache
-            Json.decodeFromString<TagUpdate>(response.path)
+            val cachedValue = readLocalFile(application, response.path)
+            Json.decodeFromString<TagUpdate>(cachedValue)
         }
         return tags
     }

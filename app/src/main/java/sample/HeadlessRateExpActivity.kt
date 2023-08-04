@@ -27,6 +27,7 @@ class HeadlessRateExpActivity : AppCompatActivity() {
      * based on what lang code is passed, backend returns the correlated config
      */
     private val viewModel = RateExperienceViewModel(
+        application,
         ServerConfig(
             hostUrl = ConfigHolder.hostUrl,
             langCode = ConfigHolder.langCode,
@@ -50,11 +51,17 @@ class HeadlessRateExpActivity : AppCompatActivity() {
                     is RateExperienceState.ConfigLoaded -> {
                         binding.textView.text = Json.encodeToString(uiState)
                     }
+
                     RateExperienceState.ConfigLoading -> {
                         binding.textView.text = "Loading"
                     }
+
                     RateExperienceState.ConfigLoadFailed -> {
                         binding.textView.text = "Loading Failed"
+                    }
+
+                    else -> {
+                        binding.textView.text = uiState.toString()
                     }
                 }
             }

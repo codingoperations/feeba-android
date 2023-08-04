@@ -8,16 +8,6 @@
     tools:context="sample.SampleShowCaseActivity">
 
     <Button
-        android:id="@+id/buttonCaseManagement"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="Case Management"
-        app:layout_constraintBottom_toTopOf="@+id/buttonRateApp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
         android:id="@+id/buttonRateApp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

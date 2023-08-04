@@ -14,8 +14,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import io.least.core.createWithFactory
-import io.least.rate.R
-import io.least.rate.databinding.RateAppFragmentBinding
+import io.feeba.R
+import io.feeba.databinding.RateAppFragmentBinding
 import io.least.ui.showKeyboard
 import io.least.viewmodel.RateAppConfig
 import io.least.viewmodel.RateMeUiState

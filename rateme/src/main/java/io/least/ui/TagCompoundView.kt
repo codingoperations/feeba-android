@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.bumptech.glide.Glide
-import io.least.rate.R
+import io.feeba.R
 
 class TagCompoundView : LinearLayout {
     constructor(context: Context) : super(context) {

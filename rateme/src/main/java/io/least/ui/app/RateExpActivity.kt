@@ -7,8 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
 import io.least.data.RateExperienceConfig
-import io.least.rate.R
-import io.least.rate.databinding.ActivityRatemeExpBinding
+import io.feeba.R
+import io.feeba.databinding.ActivityRatemeExpBinding
 import io.least.ui.experience.RateExperienceFragment
 
 const val KEY_SERVER_CONFIG = "server-config"

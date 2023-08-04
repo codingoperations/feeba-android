@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-parcelize'
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.0'
     id 'maven-publish'
+    id 'com.palantir.git-version' version '3.0.0'
 }
 
 android {
@@ -11,11 +12,10 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
+        version gitVersion()
+        versionName gitVersion()
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 1
-        versionName "1.0"
-        buildConfigField("long", "VERSION_CODE", "${defaultConfig.versionCode}")
         buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -41,6 +41,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    namespace 'io.feeba'
 }
 
 dependencies {
