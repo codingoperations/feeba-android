@@ -17,6 +17,7 @@ class RateExperienceRepository(
 ) {
 
     private val TAG = this.javaClass.simpleName
+    private val jsonInstance = Json { ignoreUnknownKeys = true }
 
     /**
      * Check the followings
@@ -32,12 +33,12 @@ class RateExperienceRepository(
             // We want to use a full URL with query params as a cache key. It will help us to have isolated caches for different configurations
             writeToLocalFile(response.data, application, response.path)
             Log.d(TAG, "decodeFromString executing")
-            Json.decodeFromString<RateExperienceConfig>(response.data)
+            jsonInstance.decodeFromString<RateExperienceConfig>(response.data)
         } ?: run {
             Log.d(TAG, " ----------------- Reading from local cache")
             // Read from local cache
             val cachedValue = readLocalFile(application, response.path)
-            Json.decodeFromString(cachedValue)
+            jsonInstance.decodeFromString(cachedValue)
         }
         return config
     }
@@ -55,12 +56,12 @@ class RateExperienceRepository(
             // if parsing was successful, update the local cache in a fire and forget mode
             // We want to use a full URL with query params as a cache key. It will help us to have isolated caches for different configurations
             writeToLocalFile(response.data, application, response.path)
-            Json.decodeFromString<TagUpdate>(response.data)
+            jsonInstance.decodeFromString<TagUpdate>(response.data)
         } ?: run {
             Log.d(TAG, " ----------------- Reading from local cache")
             // Read from local cache
             val cachedValue = readLocalFile(application, response.path)
-            Json.decodeFromString<TagUpdate>(cachedValue)
+            jsonInstance.decodeFromString<TagUpdate>(cachedValue)
         }
         return tags
     }
