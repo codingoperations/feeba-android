@@ -14,12 +14,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import io.feeba.databinding.RateExpFragmentBinding
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
 import io.least.core.createWithFactory
 import io.least.data.RateExperienceConfig
 import io.least.data.Tag
-import io.feeba.databinding.RateExpFragmentBinding
 import io.least.ui.TagCompoundView
 import io.least.ui.dpToPx
 import io.least.viewmodel.RateExperienceState

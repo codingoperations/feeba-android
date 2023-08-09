@@ -4,11 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import io.feeba.R
+import io.feeba.databinding.ActivityRatemeExpBinding
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
 import io.least.data.RateExperienceConfig
-import io.feeba.R
-import io.feeba.databinding.ActivityRatemeExpBinding
 import io.least.ui.experience.RateExperienceFragment
 
 const val KEY_SERVER_CONFIG = "server-config"

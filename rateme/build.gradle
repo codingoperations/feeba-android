@@ -8,12 +8,9 @@ plugins {
 }
 
 android {
-    compileSdkVersion 34
-    buildToolsVersion "30.0.3"
+    compileSdk 34
 
     defaultConfig {
-        version gitVersion()
-        versionName gitVersion()
         minSdkVersion 21
         targetSdkVersion 34
         buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
@@ -40,6 +37,12 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
     }
     namespace 'io.feeba'
 }
@@ -72,17 +75,4 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-}
-
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                from components.release
-                groupId = 'com.github.feebaio'
-                artifactId = 'rateme'
-                version = 'v0.1.11'
-            }
-        }
-    }
 }

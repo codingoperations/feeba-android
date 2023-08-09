@@ -8,10 +8,10 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
+import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import io.least.ui.app.RateAppFragment
 import io.least.ui.app.RateExpActivity
 import io.least.viewmodel.RateAppConfig
-import io.sample.databinding.FragmentSampleShowcaseBinding
 
 class ShowCaseFragment : Fragment() {
 
