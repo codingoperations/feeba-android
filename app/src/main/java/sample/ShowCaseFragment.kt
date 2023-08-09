@@ -8,10 +8,10 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
+import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import io.least.ui.app.RateAppFragment
 import io.least.ui.app.RateExpActivity
 import io.least.viewmodel.RateAppConfig
-import io.sample.databinding.FragmentSampleShowcaseBinding
 
 class ShowCaseFragment : Fragment() {
 
@@ -33,9 +33,9 @@ class ShowCaseFragment : Fragment() {
                 RateAppConfig(minPositiveRate = 3.0f)
             )
         }
-
         binding.buttonRateExperienceDefaultUi.setOnClickListener {
-            RateExpActivity.startActivity(requireActivity(),
+            RateExpActivity.startActivity(
+                requireActivity(),
                 ServerConfig(ConfigHolder.hostUrl, ConfigHolder.langCode, ConfigHolder.jwtToken),
                 UserSpecificContext("info@feeba.io"),
                 null,
@@ -57,8 +57,8 @@ class ShowCaseFragment : Fragment() {
             HeadlessRateExpActivity.startActivity(requireActivity())
         }
         binding.switchEnv.setOnCheckedChangeListener { _, isChecked -> ConfigHolder.setEnv(isChecked) }
-        ConfigHolder.langCode= binding.editTextLangCode.text.toString()
-        binding.editTextLangCode.addTextChangedListener { text -> ConfigHolder.langCode= text.toString() }
+        ConfigHolder.langCode = binding.editTextLangCode.text.toString()
+        binding.editTextLangCode.addTextChangedListener { text -> ConfigHolder.langCode = text.toString() }
         return binding.root
     }
 

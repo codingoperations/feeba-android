@@ -8,10 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
+import io.least.demo.databinding.ActivityRateExpHeadlessBinding
 import io.least.viewmodel.RateExperienceState
 import io.least.viewmodel.RateExperienceViewModel
-import io.sample.databinding.ActivityRateExpHeadlessBinding
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -27,6 +26,7 @@ class HeadlessRateExpActivity : AppCompatActivity() {
      * based on what lang code is passed, backend returns the correlated config
      */
     private val viewModel = RateExperienceViewModel(
+        application,
         ServerConfig(
             hostUrl = ConfigHolder.hostUrl,
             langCode = ConfigHolder.langCode,
@@ -50,11 +50,17 @@ class HeadlessRateExpActivity : AppCompatActivity() {
                     is RateExperienceState.ConfigLoaded -> {
                         binding.textView.text = Json.encodeToString(uiState)
                     }
+
                     RateExperienceState.ConfigLoading -> {
                         binding.textView.text = "Loading"
                     }
+
                     RateExperienceState.ConfigLoadFailed -> {
                         binding.textView.text = "Loading Failed"
+                    }
+
+                    else -> {
+                        binding.textView.text = uiState.toString()
                     }
                 }
             }

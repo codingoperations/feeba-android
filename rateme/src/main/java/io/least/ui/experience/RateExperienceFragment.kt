@@ -14,18 +14,16 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import io.feeba.databinding.RateExpFragmentBinding
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
 import io.least.core.createWithFactory
 import io.least.data.RateExperienceConfig
 import io.least.data.Tag
-import io.least.rate.R
-import io.least.rate.databinding.RateExpFragmentBinding
 import io.least.ui.TagCompoundView
 import io.least.ui.dpToPx
 import io.least.viewmodel.RateExperienceState
 import io.least.viewmodel.RateExperienceViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
@@ -72,8 +70,8 @@ class RateExperienceFragment(
 
     private val viewModel: RateExperienceViewModel by viewModels {
         createWithFactory {
-            rateExperienceConfig?.let { RateExperienceViewModel(it, serverConfig, usersContext) }
-                ?: kotlin.run { RateExperienceViewModel(serverConfig, usersContext) }
+            rateExperienceConfig?.let { RateExperienceViewModel(requireActivity().application, it, serverConfig, usersContext) }
+                ?: kotlin.run { RateExperienceViewModel(requireActivity().application, serverConfig, usersContext) }
         }
     }
 
@@ -106,10 +104,6 @@ class RateExperienceFragment(
                         is RateExperienceState.RateSelected -> {
                             binding.textViewReaction.text = uiState.reaction
                         }
-                        is RateExperienceState.SubmissionError -> {
-                            binding.buttonSubmit.text = getString(R.string.rate_exp_retry)
-                            binding.buttonSubmit.isEnabled = true
-                        }
                         is RateExperienceState.SubmissionSuccess -> {
                             binding.groupLoading.visibility = View.GONE
                             binding.groupLoaded.visibility = View.GONE
@@ -120,12 +114,12 @@ class RateExperienceFragment(
                             binding.finalGratitudeText.text = uiState.config.postSubmitText
                             activity?.title = uiState.config.postSubmitTitle
                         }
-                        is RateExperienceState.Submitting -> {
-                            binding.buttonSubmit.text = getString(R.string.rate_exp_submitted)
-                            binding.buttonSubmit.isEnabled = false
-                        }
                         is RateExperienceState.ConfigLoadFailed -> {
                             activity?.finish()
+                        }
+                        RateExperienceState.SubmissionError, RateExperienceState.Submitting -> {
+                            // Depricated events.
+                            TODO()
                         }
                     }
                 }

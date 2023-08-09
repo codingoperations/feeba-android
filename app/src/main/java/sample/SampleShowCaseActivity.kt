@@ -2,8 +2,8 @@ package sample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import io.sample.R
-import io.sample.databinding.ActivitySampleShowcaseBinding
+import io.least.demo.R
+import io.least.demo.databinding.ActivitySampleShowcaseBinding
 
 class SampleShowCaseActivity : AppCompatActivity() {
     private var _binding: ActivitySampleShowcaseBinding? = null

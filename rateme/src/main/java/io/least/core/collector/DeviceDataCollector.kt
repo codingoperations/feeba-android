@@ -1,13 +1,15 @@
 package io.least.core.collector
 
+import android.os.Build
+
 class DeviceDataCollector {
     fun collect(moduleVersion: String): CommonContext {
         return CommonContext(
             "android",
             moduleVersion,
-            android.os.Build.VERSION.CODENAME,
-            android.os.Build.VERSION.SDK_INT.toString(),
-            android.os.Build.MODEL.toString(),
+            Build.VERSION.CODENAME,
+            Build.VERSION.SDK_INT.toString(),
+            Build.MODEL.toString(),
         )
     }
 }
