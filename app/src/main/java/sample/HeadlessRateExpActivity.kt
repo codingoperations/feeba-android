@@ -4,13 +4,17 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
+import io.least.core.createWithFactory
 import io.least.demo.databinding.ActivityRateExpHeadlessBinding
 import io.least.viewmodel.RateExperienceState
 import io.least.viewmodel.RateExperienceViewModel
+import io.least.viewmodel.RateMeViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -25,15 +29,20 @@ class HeadlessRateExpActivity : AppCompatActivity() {
      * View model is initialized here. All the config is passed as a part of the ViewModel initialization
      * based on what lang code is passed, backend returns the correlated config
      */
-    private val viewModel = RateExperienceViewModel(
-        application,
-        ServerConfig(
-            hostUrl = ConfigHolder.hostUrl,
-            langCode = ConfigHolder.langCode,
-            apiToken = ConfigHolder.jwtToken
-        ),
-        usersContext = UserSpecificContext("info@feeba.io"),
-    )
+    private val viewModel by viewModels<RateExperienceViewModel> {
+        createWithFactory {
+            RateExperienceViewModel(
+                this.application,
+                ServerConfig(
+                    hostUrl = ConfigHolder.hostUrl,
+                    langCode = ConfigHolder.langCode,
+                    apiToken = ConfigHolder.jwtToken
+                ),
+                usersContext = UserSpecificContext("info@feeba.io"),
+            )
+        }
+    }
+
 
     /**
      * Once the onCreate is invoked we start listening to changes from ViewModel

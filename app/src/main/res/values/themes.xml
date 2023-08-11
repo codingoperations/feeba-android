@@ -1,19 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.RateMe" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.FeebaTestApp" parent="Theme.MaterialComponents.Light">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">#1B62F1</item>
-        <item name="colorPrimaryVariant">#1B92F1</item>
+        <item name="colorPrimary">@android:color/holo_blue_dark</item>
+        <item name="colorPrimaryVariant">@android:color/holo_blue_light</item>
         <item name="colorOnPrimary">@android:color/white</item>
+        <item name="android:statusBarColor" >?attr/colorPrimaryVariant</item>
 
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
-        <item name="backgroundColor">@android:color/background_light</item>
         <item name="background">@android:color/background_light</item>
 
         <item name="colorControlNormal">?attr/colorPrimaryVariant</item>
         <item name="colorControlActivated">?attr/colorPrimary</item>
-
     </style>
 </resources>
