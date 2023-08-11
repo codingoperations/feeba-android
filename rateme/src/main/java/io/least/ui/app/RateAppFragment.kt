@@ -25,23 +25,15 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "RateMeFragment"
 
-class RateAppFragment(
-    private val config: RateAppConfig,
-//    private val connector: Connector<String>?
-) : DialogFragment() {
+class RateAppFragment(private val config: RateAppConfig) : DialogFragment() {
 
     companion object {
-
         fun show(
             supportFragmentManager: FragmentManager,
             classLoader: ClassLoader,
-//            connector: Connector<String>?,
             config: RateAppConfig
         ) {
-            supportFragmentManager.fragmentFactory = RatemeFragmentFactory(
-                config,
-//                connector
-            )
+            supportFragmentManager.fragmentFactory = RatemeFragmentFactory(config)
             val fragment: DialogFragment = supportFragmentManager.fragmentFactory.instantiate(
                 classLoader,
                 RateAppFragment::class.java.name
@@ -57,10 +49,7 @@ class RateAppFragment(
 
     private val viewModel: RateMeViewModel by viewModels {
         createWithFactory {
-            RateMeViewModel(
-                config,
-//                connector
-            )
+            RateMeViewModel(config)
         }
     }
 
