@@ -1,4 +1,4 @@
 if (!System.env.JITPACK)
     include ':app'
-include ':rateme'
+include ':feeba'
 rootProject.name = "Feeba"

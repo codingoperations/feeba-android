@@ -59,9 +59,9 @@ android {
 }
 
 dependencies {
+    implementation project(':feeba')
     // Import rateme
-    implementation project(":rateme")
-/// demo
+    /// demo
 //     This is how you should import Feeba Android
 //    implementation 'com.github.feebaio.feeba-android:core:0.0.9'
 //    implementation 'com.github.feebaio.feeba-android:rateme:0.0.9'
