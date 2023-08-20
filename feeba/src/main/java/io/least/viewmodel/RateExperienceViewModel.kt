@@ -30,7 +30,7 @@ class RateExperienceViewModel : AndroidViewModel {
 
     private var config: RateExperienceConfig? = null
     private val repository: RateExperienceRepository
-    private val usersContext: UserSpecificContext
+    var usersContext: UserSpecificContext
     private val tagSelectionHistory = LinkedHashMap<String, Tag>()
     private val TAG = this.javaClass.simpleName
 
