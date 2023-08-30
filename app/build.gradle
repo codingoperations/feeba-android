@@ -60,9 +60,9 @@ android {
 
 dependencies {
     // Development only!
-    implementation project(':feeba')
+//    implementation project(':feeba')
 //     This is how you should import
-//    implementation 'com.github.feebaio:feeba-android:core:0.0.16'
+    implementation 'com.github.feebaio.feeba-android:feeba:0.0.18'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.7.0'

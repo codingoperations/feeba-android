@@ -79,10 +79,15 @@ dependencies {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        release(MavenPublication) {
+
             groupId = 'com.github.feebaio'
             artifactId = 'feeba'
-            version = '0.0.16'
+            version = '0.0.19'
+
+            afterEvaluate {
+                from components.release
+            }
         }
     }
 }
