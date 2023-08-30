@@ -59,12 +59,10 @@ android {
 }
 
 dependencies {
+    // Development only!
     implementation project(':feeba')
-    // Import rateme
-    /// demo
-//     This is how you should import Feeba Android
-//    implementation 'com.github.feebaio.feeba-android:core:0.0.9'
-//    implementation 'com.github.feebaio.feeba-android:rateme:0.0.9'
+//     This is how you should import
+//    implementation 'com.github.feebaio:feeba-android:core:0.0.16'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.7.0'

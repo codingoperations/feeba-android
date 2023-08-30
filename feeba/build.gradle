@@ -81,7 +81,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = 'com.github.feebaio'
-            artifactId = 'core'
+            artifactId = 'feeba'
             version = '0.0.16'
         }
     }
