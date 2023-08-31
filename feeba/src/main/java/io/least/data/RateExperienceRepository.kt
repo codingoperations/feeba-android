@@ -7,6 +7,7 @@ import io.least.core.ServerConfig
 import io.least.core.collector.DeviceDataCollector
 import io.least.core.readLocalFile
 import io.least.core.writeToLocalFile
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 class RateExperienceRepository(

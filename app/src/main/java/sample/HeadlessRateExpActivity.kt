@@ -15,6 +15,7 @@ import io.least.demo.databinding.ActivityRateExpHeadlessBinding
 import io.least.viewmodel.RateExperienceState
 import io.least.viewmodel.RateExperienceViewModel
 import io.least.viewmodel.RateMeViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

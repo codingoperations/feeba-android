@@ -24,6 +24,7 @@ import io.least.ui.TagCompoundView
 import io.least.ui.dpToPx
 import io.least.viewmodel.RateExperienceState
 import io.least.viewmodel.RateExperienceViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
