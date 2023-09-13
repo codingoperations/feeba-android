@@ -20,6 +20,7 @@ import io.least.ui.showKeyboard
 import io.least.viewmodel.RateAppConfig
 import io.least.viewmodel.RateMeUiState
 import io.least.viewmodel.RateMeViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
