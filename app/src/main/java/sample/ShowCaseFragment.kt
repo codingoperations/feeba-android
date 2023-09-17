@@ -6,12 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import io.feeba.survey.KEY_SURVEY_URL
+import io.feeba.survey.SurveyFragment
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import io.least.ui.app.RateAppFragment
 import io.least.ui.app.RateExpActivity
 import io.least.viewmodel.RateAppConfig
+import kotlin.concurrent.fixedRateTimer
 
 class ShowCaseFragment : Fragment() {
 
@@ -55,6 +58,23 @@ class ShowCaseFragment : Fragment() {
         }
         binding.buttonRateExperienceHeadless.setOnClickListener {
             HeadlessRateExpActivity.startActivity(requireActivity())
+        }
+
+        // Survey
+        binding.surveyDialog.setOnClickListener {
+            SurveyFragment()
+                .apply {
+                    arguments = Bundle().apply {
+                        putString(
+                            KEY_SURVEY_URL,
+                            "http://dev-dashboard.feeba.io/s/feeba/6504ee57ba0d101292e066a8"
+                        )
+                    }
+                }
+                .show(
+                    parentFragmentManager,
+                    "SurveyFragment"
+                )
         }
         binding.switchEnv.setOnCheckedChangeListener { _, isChecked -> ConfigHolder.setEnv(isChecked) }
         ConfigHolder.langCode = binding.editTextLangCode.text.toString()

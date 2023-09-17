@@ -7,6 +7,17 @@
     android:layout_height="match_parent"
     tools:context="sample.SampleShowCaseActivity">
 
+
+    <Button
+        android:id="@+id/surveyDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="Survey Dialog"
+        app:layout_constraintBottom_toTopOf="@id/buttonRateApp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <Button
         android:id="@+id/buttonRateApp"
         android:layout_width="wrap_content"
@@ -39,13 +50,14 @@
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switchEnv"
-        android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Keep it on to use Prod or Off for Dev environemnt"
         android:checked="true"
+        android:padding="16dp"
+        android:text="Keep it on to use Prod or Off for Dev environemnt"
         android:textOff="DEV"
         android:textOn="PROD"
+        app:layout_constraintBottom_toTopOf="@+id/divider0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
