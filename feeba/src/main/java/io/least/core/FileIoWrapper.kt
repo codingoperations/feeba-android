@@ -11,7 +11,7 @@ fun readLocalFile(context: Context, fileName: String): String {
     return file.readText()
 }
 
-suspend fun writeToLocalFile(text: String, context: Context, fileName: String) {
+fun writeToLocalFile(text: String, context: Context, fileName: String) {
     val dir = File(context.filesDir, "cache")
     if (!dir.exists()) {
         dir.mkdir();

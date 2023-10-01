@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import io.feeba.Feeba
 import io.feeba.survey.KEY_SURVEY_URL
 import io.feeba.survey.SurveyFragment
 import io.least.core.ServerConfig
