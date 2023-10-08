@@ -11,14 +11,13 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import io.feeba.Feeba
 import io.feeba.databinding.LayoutSurveyBinding
 import io.least.core.createWithFactory
 
-
-const val KEY_SURVEY_ID = "survey_id"
 const val KEY_SURVEY_URL = "survey_url"
 
 class SurveyFragment : DialogFragment() {

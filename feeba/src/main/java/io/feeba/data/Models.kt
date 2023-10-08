@@ -1,6 +1,8 @@
 package io.feeba.data
 
+import io.least.core.ServerConfig
 import kotlinx.serialization.Serializable
+import java.util.Date
 
 @Serializable
 data class FeebaResponse(
@@ -11,7 +13,7 @@ data class FeebaResponse(
 @Serializable
 data class SurveyPlan(
     val id: String,
-    val surveyUrl: String,
+    val surveyPresentation: SurveyPresentation,
     val triggers: List<List<Trigger>>,
 )
 
@@ -32,26 +34,53 @@ data class SdkConfig    (
 @Serializable
 data class UserData(
     val userId: String,
-    val email: String,
-    val phoneNumber: String,
+    val email: String?,
+    val phoneNumber: String?,
 )
 
 @Serializable
 data class LocalState(
     val numberOfLaunches: Int,
-    val totalSessionTimeSec: Int,
-    val lastSessionTimeSec: Int,
+    val totalSessionDurationSec: Int,
+    val lastSessionDurationSec: Int,
+    val firstSessionDate: Int, // epoch in seconds
     val userData: UserData,
     val events: List<String>,
     val pages: List<String>,
 )
 
+data class FeebaConfig(
+    val serviceConfig : ServerConfig,
+)
+
+@Serializable
+class SurveyPresentation(
+    val contentHtml: String,
+    val useHeightMargin: Boolean,
+    val useWidthMargin: Boolean,
+    val isFullBleed: Boolean,
+    // The following properties are populated from Javascript events
+    val displayLocation: Position,
+    val displayDuration: Double,
+    val pageHeight: Int = 0,
+)
+
+enum class Position {
+    TOP_BANNER, BOTTOM_BANNER, CENTER_MODAL, FULL_SCREEN;
+
+    fun isBanner(): Boolean =
+        when (this) {
+            TOP_BANNER, BOTTOM_BANNER -> true
+            else -> false
+        }
+}
 
 object Defaults {
     val localState = LocalState(
         numberOfLaunches = 0,
-        totalSessionTimeSec = 0,
-        lastSessionTimeSec = 0,
+        totalSessionDurationSec = 0,
+        lastSessionDurationSec = 0,
+        firstSessionDate = Date().time.toInt() / 100,
         userData = UserData(
             userId = "",
             email = "",

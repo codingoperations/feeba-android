@@ -1,7 +1,6 @@
 package io.feeba.data
 
 import android.app.Application
-import io.feeba.Metadata
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.least.core.readLocalFile
@@ -11,10 +10,12 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class LocalStateHolder(private val app: Application) {
-    @Volatile private var lastKnownFeebaConfig: FeebaResponse? = null
+    @Volatile
+    private var lastKnownFeebaConfig: FeebaResponse? = null
     private val lastKnownLocalState: LocalState? = null
     private val surveyConfigFileName = "survey_onfig.json"
     private val localStateFileName = "local_state.json"
+    private val eventCountMap = mutableMapOf<String, Int>()
 
     fun setFeebaConfig(response: FeebaResponse) {
         // Update local reference
@@ -60,7 +61,7 @@ class LocalStateHolder(private val app: Application) {
         }
     }
 
-    fun login(userId: String, metadata: Metadata) {
+    fun login(userData: UserData) {
         // TODO("Not yet implemented")
     }
 
@@ -68,7 +69,8 @@ class LocalStateHolder(private val app: Application) {
         // TODO("Not yet implemented")
     }
 
-    fun addNewEvent(eventName: String) {
+    fun onEvent(eventName: String) {
         // TODO("Not yet implemented")
+        eventCountMap[eventName] = (eventCountMap[eventName] ?: 0) + 1
     }
 }

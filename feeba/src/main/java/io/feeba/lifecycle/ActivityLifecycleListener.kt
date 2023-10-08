@@ -9,12 +9,14 @@ import android.os.Bundle
  */
 internal class ActivityLifecycleListener() : Application.ActivityLifecycleCallbacks {
 
-
     private var activityCount = 0
     private var curActivity: Activity? = null
+    private val actvityNameSet = mutableSetOf<String>()
+
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         Logger.log(LogLevel.DEBUG, "onActivityCreated: $activity")
         activityCount++
+        actvityNameSet.add(activity::class.java.simpleName)
     }
 
     override fun onActivityStarted(activity: Activity) {
