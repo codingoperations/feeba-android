@@ -14,12 +14,40 @@ import java.net.URL
 class RestClient(private val requestUrl: String = "https://dev-api.feeba.io/survey-plans") {
 
     suspend fun getSurveyPlans(state: LocalState): FeebaResponse? {
-        try {
+        return try {
             val response = sendPostRequest(requestUrl, Json.encodeToString(state.userData))
-            return Json.decodeFromString<FeebaResponse>(response)
+            Json.decodeFromString<FeebaResponse>(response)
         } catch (t: Throwable) {
             Logger.log(LogLevel.WARN, "getSurveyPlans failed: $t")
-            return null
+//            null
+            FeebaResponse(
+                surveyPlans = listOf(
+                    SurveyPlan(
+                        id = "1",
+                        surveyPresentation = SurveyPresentation(
+                            contentHtml = "String",
+                            useHeightMargin = false,
+                            useWidthMargin = false,
+                            isFullBleed = false,
+                            displayLocation = Position.CENTER_MODAL,
+                            displayDuration = 10.toDouble(),
+                            pageHeight = 0,
+                        ),
+                        triggers = listOf(
+                            listOf(
+                                Trigger(
+                                    property = "String",
+                                    operator = "String",
+                                    value = "String"
+                                )
+                            ),
+                        ),
+                    )
+                ),
+                sdkConfig = SdkConfig(
+                    refreshIntervalSec = 60 * 1,
+                ),
+            )
         }
     }
 

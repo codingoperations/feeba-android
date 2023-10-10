@@ -3,6 +3,8 @@ package io.feeba.lifecycle
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import io.feeba.data.SurveyPresentation
+import io.feeba.survey.SurveyViewController
 
 /**
  * The following code is based on @see <a href="https://developer.android.com/guide/components/activities/activity-lifecycle#alc">Activity Lifecycle</a>.
@@ -11,12 +13,13 @@ internal class ActivityLifecycleListener() : Application.ActivityLifecycleCallba
 
     private var activityCount = 0
     private var curActivity: Activity? = null
-    private val actvityNameSet = mutableSetOf<String>()
+    private val activityNameSet = mutableSetOf<String>()
+    private var surveyViewController: SurveyViewController? = null
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         Logger.log(LogLevel.DEBUG, "onActivityCreated: $activity")
         activityCount++
-        actvityNameSet.add(activity::class.java.simpleName)
+        activityNameSet.add(activity::class.java.simpleName)
     }
 
     override fun onActivityStarted(activity: Activity) {
@@ -53,6 +56,13 @@ internal class ActivityLifecycleListener() : Application.ActivityLifecycleCallba
     }
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+    fun showSurveyDialogOnCurrentActivity(it: SurveyPresentation) {
+        curActivity?.let {
+            if (surveyViewController != null) return
+            surveyViewController = SurveyViewController(it, it.surveyUrl)
+        }
+        TODO("Not yet implemented")
+    }
 }
 
 enum class AppVisibility{

@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import io.feeba.Feeba
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
 import io.least.core.createWithFactory

@@ -40,18 +40,19 @@ import android.os.Handler
 import android.os.Looper
 import android.telephony.TelephonyManager
 import android.text.TextUtils
+import android.view.View
 import androidx.annotation.Keep
 import androidx.core.app.JobIntentService
 import androidx.core.app.NotificationManagerCompat
 import androidx.legacy.content.WakefulBroadcastReceiver
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
+import io.feeba.ui.ViewUtils
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.Collections
 import java.util.Random
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
 

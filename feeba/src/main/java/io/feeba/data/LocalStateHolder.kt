@@ -18,6 +18,7 @@ class LocalStateHolder(private val app: Application) {
     private val eventCountMap = mutableMapOf<String, Int>()
 
     fun setFeebaConfig(response: FeebaResponse) {
+        Logger.log(LogLevel.DEBUG, "LocalStateHolder:: Storing response: $response")
         // Update local reference
         this.lastKnownFeebaConfig = response
         // Write to local file
@@ -25,7 +26,7 @@ class LocalStateHolder(private val app: Application) {
             val json = Json.encodeToString(response)
             writeToLocalFile(json, app.applicationContext, surveyConfigFileName)
         } catch (t: Throwable) {
-            Logger.log(LogLevel.WARN, "Failed to write local config. Error: $t")
+            Logger.log(LogLevel.WARN, "LocalStateHolder:: Failed to write local config. Error: $t")
         }
     }
 

@@ -26,8 +26,8 @@ data class Trigger(
 
 @Serializable
 data class SdkConfig    (
-    val refreshInterval: Int,
-    val baseServerUrl: String?,
+    val refreshIntervalSec: Int,
+    val baseServerUrl: String? = null,
 )
 
 

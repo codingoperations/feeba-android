@@ -1,21 +1,17 @@
 package io.feeba.lifecycle
 
 import android.app.Activity
-import android.app.FragmentManager
-import android.os.Bundle
-import androidx.lifecycle.ReportFragment.Companion.reportFragment
-import io.feeba.survey.KEY_SURVEY_URL
-import io.feeba.survey.SurveyFragment
-import io.feeba.survey.showSurveyFragment
+import io.feeba.data.SurveyPresentation
 
 class TriggerValidator {
 
 
-    fun onEvent(eventName: String, value: String? = null) {
+    fun onEvent(eventName: String, value: String? = null): SurveyPresentation? {
         Logger.log(LogLevel.DEBUG, "onEvent -> $eventName, value: $value")
 //        localStateHolder.onEvent(eventName)
         // check if we have a survey for this event
         // check if conditions are met
+        return null
     }
 
     fun onActivityPaused(activity: Activity) {

@@ -1,18 +1,12 @@
 package io.feeba.lifecycle
 
 import android.app.Activity
-import android.os.Handler
-import android.os.Looper
-import android.util.Base64
 import android.webkit.JavascriptInterface
-import io.feeba.Utils
 import io.feeba.data.Position
 import io.feeba.data.SurveyPresentation
 import io.feeba.ui.FeebaWebView
-import io.feeba.ui.ViewUtils
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.UnsupportedEncodingException
 
 // Manages WebView instances by pre-loading them, displaying them, and closing them when dismissed.
 //   Includes a static map for pre-loading, showing, and dismissed so these events can't be duplicated.

@@ -20,20 +20,21 @@ import android.widget.RelativeLayout
 import android.widget.RelativeLayout.LayoutParams
 import androidx.cardview.widget.CardView
 import androidx.core.widget.PopupWindowCompat
+import io.feeba.Feeba
 import io.feeba.Utils
 import io.feeba.data.Position
-import io.feeba.data.Position.TOP_BANNER
 import io.feeba.data.Position.BOTTOM_BANNER
 import io.feeba.data.Position.CENTER_MODAL
 import io.feeba.data.Position.FULL_SCREEN
+import io.feeba.data.Position.TOP_BANNER
 import io.feeba.data.SurveyPresentation
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.feeba.lifecycle.WebViewManager
+import io.feeba.ui.AnimationUtils
 import io.feeba.ui.DraggableRelativeLayout
 import io.feeba.ui.DraggableRelativeLayout.Companion.DRAGGABLE_DIRECTION_DOWN
 import io.feeba.ui.DraggableRelativeLayout.Companion.DRAGGABLE_DIRECTION_UP
-import io.feeba.ui.AnimationUtils
 import io.feeba.ui.FeebaBounceInterpolator
 import io.feeba.ui.ViewUtils
 import io.least.ui.dpToPx
@@ -63,7 +64,8 @@ private const val IN_APP_CENTER_ANIMATION_DURATION_MS = 1000
 private const val IN_APP_BACKGROUND_ANIMATION_DURATION_MS = 400
 private const val ACTIVITY_FINISH_AFTER_DISMISS_DELAY_MS = 600
 private const val ACTIVITY_INIT_DELAY = 200
-internal class SurveyViewController(webView: WebView, content: SurveyPresentation, private val disableDragDismiss: Boolean) {
+
+internal class SurveyViewController(private val webView: WebView, content: SurveyPresentation, private val disableDragDismiss: Boolean) {
     private var popupWindow: PopupWindow? = null
 
     internal interface SurveyViewLifecycleListener {
@@ -72,7 +74,6 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
         fun onSurveyWasDismissed()
     }
 
-    private var currentActivity: Activity? = null
     private val handler = Handler()
     private val pageWidth: Int
     private var pageHeight: Int
@@ -84,6 +85,7 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
     private val hasBackground: Boolean
     private var shouldDismissWhenActive = false
     private val DRAG_THRESHOLD_PX_SIZE: Int = dpToPx(4f)
+
     /**
      * Simple getter to know when the MessageView is in a dragging state
      */
@@ -91,19 +93,18 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
         private set
     private val messageContent: SurveyPresentation
     private val displayLocation: Position
-    private var webView: WebView?
     private var parentRelativeLayout: RelativeLayout? = null
     private var draggableRelativeLayout: DraggableRelativeLayout? = null
     private var messageController: SurveyViewLifecycleListener? = null
     private var scheduleDismissRunnable: Runnable? = null
 
     init {
-        this.webView = webView
         displayLocation = content.displayLocation
         pageHeight = content.pageHeight
         pageWidth = ViewGroup.LayoutParams.MATCH_PARENT
         displayDuration = content.displayDuration
         hasBackground = !displayLocation.isBanner()
+        webView.setBackgroundColor(Color.TRANSPARENT)
         messageContent = content
         setMarginsFromContent(content)
     }
@@ -114,17 +115,10 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
      * @param content in app message content and style
      */
     private fun setMarginsFromContent(content: SurveyPresentation) {
-        currentActivity?.let {
-            marginPxSizeTop = if (content.useHeightMargin) dpToPx(24f) else 0
-            marginPxSizeBottom = if (content.useHeightMargin) dpToPx(24f) else 0
-            marginPxSizeLeft = if (content.useWidthMargin) dpToPx(24f) else 0
-            marginPxSizeRight = if (content.useWidthMargin) dpToPx(24f) else 0
-        }
-    }
-
-    fun setWebView(webView: WebView?) {
-        this.webView = webView
-        this.webView!!.setBackgroundColor(Color.TRANSPARENT)
+        marginPxSizeTop = if (content.useHeightMargin) dpToPx(24f) else 0
+        marginPxSizeBottom = if (content.useHeightMargin) dpToPx(24f) else 0
+        marginPxSizeLeft = if (content.useWidthMargin) dpToPx(24f) else 0
+        marginPxSizeRight = if (content.useWidthMargin) dpToPx(24f) else 0
     }
 
     fun setMessageController(messageController: SurveyViewLifecycleListener?) {
@@ -148,41 +142,40 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
      *
      * @param pageHeight the provided height
      */
-    fun updateHeight(pageHeight: Int) {
-        this.pageHeight = pageHeight
-        Utils.runOnMainUIThread(Runnable {
-            if (webView == null) {
-                Logger.log(
-                    LogLevel.WARN,
-                    "WebView height update skipped, new height will be used once it is displayed."
-                )
-                return@Runnable
-            }
-            val layoutParams = webView!!.layoutParams
-            if (layoutParams == null) {
-                Logger.log(
-                    LogLevel.WARN,
-                    "WebView height update skipped because of null layoutParams, new height will be used once it is displayed."
-                )
-                return@Runnable
-            }
-            layoutParams.height = pageHeight
-            // We only need to update the WebView size since it's parent layouts are set to
-            //   WRAP_CONTENT to always match the height of the WebView. (Expect for fullscreen)
-            webView!!.layoutParams = layoutParams
-
-            // draggableRelativeLayout comes in null here sometimes, this is due to the IAM
-            //  not being ready to be shown yet
-            // When preparing the IAM, the correct height will be set and handle this job, so
-            //  all bases are covered and the draggableRelativeLayout will never have the wrong height
-            if (draggableRelativeLayout != null) draggableRelativeLayout?.setParams(createDraggableLayoutParams(pageHeight, displayLocation, disableDragDismiss))
-        })
+    fun updateHeight(pageHeight: Int, currentActivity: Activity) {
+//        this.pageHeight = pageHeight
+//        Utils.runOnMainUIThread(Runnable {
+//            val layoutParams = webView.layoutParams
+//            if (layoutParams == null) {
+//                Logger.log(
+//                    LogLevel.WARN,
+//                    "WebView height update skipped because of null layoutParams, new height will be used once it is displayed."
+//                )
+//                return@Runnable
+//            }
+//            layoutParams.height = pageHeight
+//            // We only need to update the WebView size since it's parent layouts are set to
+//            //   WRAP_CONTENT to always match the height of the WebView. (Expect for fullscreen)
+//            webView.layoutParams = layoutParams
+//
+//            // draggableRelativeLayout comes in null here sometimes, this is due to the IAM
+//            //  not being ready to be shown yet
+//            // When preparing the IAM, the correct height will be set and handle this job, so
+//            //  all bases are covered and the draggableRelativeLayout will never have the wrong height
+//            if (draggableRelativeLayout != null) draggableRelativeLayout?.setParams(
+//                createDraggableLayoutParams(
+//                    pageHeight,
+//                    displayLocation,
+//                    disableDragDismiss,
+//                    ViewUtils.getWindowHeight(currentActivity)
+//                )
+//            )
+//        })
     }
 
-    fun showInAppMessageView(currentActivity: Activity?) {
+    fun showSurvey(currentActivity: Activity) {
         /* IMPORTANT
          * The only place where currentActivity should be assigned to InAppMessageView */
-        this.currentActivity = currentActivity
         val webViewLayoutParams = LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             pageHeight
@@ -193,12 +186,10 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
             displayLocation,
             webViewLayoutParams,
             relativeLayoutParams,
-            createDraggableLayoutParams(pageHeight, displayLocation, disableDragDismiss)
+            createDraggableLayoutParams(pageHeight, displayLocation, disableDragDismiss, ViewUtils.getWindowHeight(currentActivity)),
+            currentActivity
         )
     }
-
-    private val displayYSize: Int
-        get() = currentActivity?.let { ViewUtils.getWindowHeight(it) } ?: 0
 
     private fun createParentRelativeLayoutParams(): LayoutParams {
         val relativeLayoutParams = LayoutParams(pageWidth, LayoutParams.MATCH_PARENT)
@@ -218,34 +209,34 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
         return relativeLayoutParams
     }
 
-    private fun createDraggableLayoutParams(pageHeight: Int, displayLocation: Position, disableDragging: Boolean): DraggableRelativeLayout.Params {
+    private fun createDraggableLayoutParams(pageHeight: Int, displayLocation: Position, disableDragging: Boolean, windowHeight: Int): DraggableRelativeLayout.Params {
         var pageHeight = pageHeight
         val draggableParams: DraggableRelativeLayout.Params = DraggableRelativeLayout.Params()
         draggableParams.maxXPos = marginPxSizeRight
         draggableParams.maxYPos = marginPxSizeTop
         draggableParams.draggingDisabled = disableDragging
         draggableParams.messageHeight = pageHeight
-        draggableParams.height = displayYSize
+        draggableParams.height = windowHeight
         when (displayLocation) {
             TOP_BANNER -> draggableParams.dragThresholdY = marginPxSizeTop - DRAG_THRESHOLD_PX_SIZE
             Position.BOTTOM_BANNER -> {
-                draggableParams.posY = displayYSize - pageHeight
+                draggableParams.posY = windowHeight - pageHeight
                 draggableParams.dragThresholdY = marginPxSizeBottom + DRAG_THRESHOLD_PX_SIZE
             }
 
             Position.FULL_SCREEN -> {
                 run {
-                    pageHeight = this.displayYSize - (marginPxSizeBottom + marginPxSizeTop)
+                    pageHeight = windowHeight - (marginPxSizeBottom + marginPxSizeTop)
                     draggableParams.messageHeight = pageHeight
                 }
-                val y = displayYSize / 2 - pageHeight / 2
+                val y = windowHeight / 2 - pageHeight / 2
                 draggableParams.dragThresholdY = y + DRAG_THRESHOLD_PX_SIZE
                 draggableParams.maxYPos = y
                 draggableParams.posY = y
             }
 
             Position.CENTER_MODAL -> {
-                val y = displayYSize / 2 - pageHeight / 2
+                val y = windowHeight / 2 - pageHeight / 2
                 draggableParams.dragThresholdY = y + DRAG_THRESHOLD_PX_SIZE
                 draggableParams.maxYPos = y
                 draggableParams.posY = y
@@ -260,23 +251,24 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
         displayLocation: Position,
         relativeLayoutParams: LayoutParams,
         draggableRelativeLayoutParams: LayoutParams?,
-        webViewLayoutParams: DraggableRelativeLayout.Params
+        webViewLayoutParams: DraggableRelativeLayout.Params,
+        currentActivity: Activity
     ) {
         Utils.runOnMainUIThread(Runnable {
-            if (webView == null) return@Runnable
-            webView!!.layoutParams = relativeLayoutParams
-            val context = currentActivity!!.applicationContext
+//            if (webView == null) return@Runnable
+            webView.layoutParams = relativeLayoutParams
+            val context = Feeba.appContext
             setUpDraggableLayout(context, draggableRelativeLayoutParams, webViewLayoutParams)
             setUpParentRelativeLayout(context)
-            createPopupWindow(parentRelativeLayout!!)
+            parentRelativeLayout?.let { createPopupWindow(it, currentActivity) }
             if (messageController != null) {
                 val localDraggableRef = draggableRelativeLayout
                 val localParentRef = parentRelativeLayout
                 if (localDraggableRef != null && localParentRef != null) {
-                    animateInAppMessage(displayLocation, localDraggableRef, localParentRef)
+                    animateSurvey(displayLocation, localDraggableRef, localParentRef)
                 }
             }
-            startDismissTimerIfNeeded()
+            startDismissTimerIfNeeded(currentActivity)
         })
     }
 
@@ -285,7 +277,7 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
      *
      * @param parentRelativeLayout root layout to attach to the pop up window
      */
-    private fun createPopupWindow(parentRelativeLayout: RelativeLayout) {
+    private fun createPopupWindow(parentRelativeLayout: RelativeLayout, currentActivity: Activity) {
         val popupWindow = PopupWindow(
             parentRelativeLayout,
             if (hasBackground) WindowManager.LayoutParams.MATCH_PARENT else pageWidth,
@@ -314,7 +306,7 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
             displayType
         )
         popupWindow.showAtLocation(
-            currentActivity!!.window.decorView.rootView,
+            currentActivity.window.decorView.rootView,
             gravity,
             0,
             0
@@ -367,7 +359,7 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
         }
         if (relativeLayoutParams != null) draggableRelativeLayout?.setLayoutParams(relativeLayoutParams)
 
-        if (webView!!.parent != null) (webView!!.parent as ViewGroup).removeAllViews()
+        if (webView.parent != null) (webView.parent as ViewGroup).removeAllViews()
 
     }
 
@@ -399,7 +391,7 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
     /**
      * Schedule dismiss behavior, if IAM has a dismiss after X number of seconds timer.
      */
-    private fun startDismissTimerIfNeeded() {
+    private fun startDismissTimerIfNeeded(currentActivity: Activity) {
         if (displayDuration <= 0) return
 
         if (scheduleDismissRunnable == null) {
@@ -421,7 +413,7 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
     // Do not add view until activity is ready
     private fun delayShowUntilAvailable(currentActivity: Activity) {
         if (ViewUtils.isActivityFullyReady(currentActivity) && parentRelativeLayout == null) {
-            showInAppMessageView(currentActivity)
+            showSurvey(currentActivity)
             return
         }
         Handler().postDelayed({ delayShowUntilAvailable(currentActivity) }, ACTIVITY_INIT_DELAY.toLong())
@@ -484,15 +476,15 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
         // Dereference so this can be cleaned up in the next GC
         parentRelativeLayout = null
         draggableRelativeLayout = null
-        webView = null
+//        webView = null
     }
 
-    private fun animateInAppMessage(displayLocation: Position, messageView: View, backgroundView: View) {
+    private fun animateSurvey(displayLocation: Position, messageView: View, backgroundView: View) {
         val messageViewCardView: CardView = messageView.findViewWithTag<CardView>(IN_APP_MESSAGE_CARD_VIEW_TAG)
         val cardViewAnimCallback = createAnimationListener(messageViewCardView)
         when (displayLocation) {
-            TOP_BANNER -> animateTop(messageViewCardView, webView!!.height, cardViewAnimCallback)
-            BOTTOM_BANNER -> animateBottom(messageViewCardView, webView!!.height, cardViewAnimCallback)
+            TOP_BANNER -> animateTop(messageViewCardView, webView.height, cardViewAnimCallback)
+            BOTTOM_BANNER -> animateBottom(messageViewCardView, webView.height, cardViewAnimCallback)
             CENTER_MODAL, FULL_SCREEN -> animateCenter(messageView, backgroundView, cardViewAnimCallback, null)
         }
     }
@@ -565,7 +557,7 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
         val animCallback: Animator.AnimatorListener = object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 cleanupViewsAfterDismiss()
-                if (callback != null) callback.onComplete()
+                callback?.onComplete()
             }
         }
 
@@ -592,7 +584,6 @@ internal class SurveyViewController(webView: WebView, content: SurveyPresentatio
 
     override fun toString(): String {
         return "InAppMessageView{" +
-                "currentActivity=" + currentActivity +
                 ", pageWidth=" + pageWidth +
                 ", pageHeight=" + pageHeight +
                 ", displayDuration=" + displayDuration +

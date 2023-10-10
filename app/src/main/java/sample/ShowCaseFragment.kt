@@ -77,6 +77,13 @@ class ShowCaseFragment : Fragment() {
                     "SurveyFragment"
                 )
         }
+        binding.onCloseAction.setOnClickListener {
+            Feeba.onEvent("on_ride_end")
+        }
+        binding.reportProblem.setOnClickListener {
+            Feeba.onEvent("report_problem")
+        }
+
         binding.switchEnv.setOnCheckedChangeListener { _, isChecked -> ConfigHolder.setEnv(isChecked) }
         ConfigHolder.langCode = binding.editTextLangCode.text.toString()
         binding.editTextLangCode.addTextChangedListener { text -> ConfigHolder.langCode = text.toString() }

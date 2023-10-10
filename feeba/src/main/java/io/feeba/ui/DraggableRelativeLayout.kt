@@ -43,8 +43,8 @@ internal class DraggableRelativeLayout(context: Context) : RelativeLayout(contex
     )
 
     private var params: Params? = null
-    val MARGIN_PX_SIZE = dpToPx(28f)
-    val EXTRA_PX_DISMISS = dpToPx(64f)
+    private val MARGIN_PX_SIZE = dpToPx(28f)
+    private val EXTRA_PX_DISMISS = dpToPx(64f)
 
     init {
         clipChildren = false

@@ -15,8 +15,27 @@
         android:layout_margin="8dp"
         android:text="Survey Dialog"
         app:layout_constraintBottom_toTopOf="@id/buttonRateApp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/onCloseAction"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/onCloseAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="on_ride_end"
+        app:layout_constraintBottom_toTopOf="@id/buttonRateApp"
+        app:layout_constraintEnd_toStartOf="@id/reportProblem"
+        app:layout_constraintStart_toEndOf="@id/surveyDialog" />
+    <Button
+        android:id="@+id/reportProblem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="Bug"
+        app:layout_constraintBottom_toTopOf="@id/buttonRateApp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/onCloseAction" />
 
     <Button
         android:id="@+id/buttonRateApp"
