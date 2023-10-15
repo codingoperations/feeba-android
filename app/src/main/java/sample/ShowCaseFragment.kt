@@ -1,12 +1,22 @@
 package sample
 
+import android.app.Activity
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.Button
+import android.widget.PopupWindow
+import android.widget.RelativeLayout
+import androidx.core.widget.PopupWindowCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import io.feeba.Feeba
+import io.feeba.data.Position
 import io.feeba.survey.KEY_SURVEY_URL
 import io.feeba.survey.SurveyFragment
 import io.least.core.ServerConfig

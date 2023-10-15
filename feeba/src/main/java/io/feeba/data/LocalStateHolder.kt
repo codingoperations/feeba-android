@@ -10,8 +10,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class LocalStateHolder(private val app: Application) {
-    @Volatile
-    private var lastKnownFeebaConfig: FeebaResponse? = null
+    @Volatile var lastKnownFeebaConfig: FeebaResponse? = null
     private val lastKnownLocalState: LocalState? = null
     private val surveyConfigFileName = "survey_onfig.json"
     private val localStateFileName = "local_state.json"

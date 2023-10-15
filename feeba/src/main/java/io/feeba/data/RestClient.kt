@@ -20,7 +20,7 @@ class RestClient(private val requestUrl: String = "https://dev-api.feeba.io/surv
         } catch (t: Throwable) {
             Logger.log(LogLevel.WARN, "getSurveyPlans failed: $t")
 //            null
-            FeebaResponse(
+            val result  = FeebaResponse(
                 surveyPlans = listOf(
                     SurveyPlan(
                         id = "1",
@@ -29,7 +29,7 @@ class RestClient(private val requestUrl: String = "https://dev-api.feeba.io/surv
                             useHeightMargin = false,
                             useWidthMargin = false,
                             isFullBleed = false,
-                            displayLocation = Position.CENTER_MODAL,
+                            displayLocation = Position.BOTTOM_BANNER,
                             displayDuration = 10.toDouble(),
                             pageHeight = 0,
                         ),
@@ -48,6 +48,8 @@ class RestClient(private val requestUrl: String = "https://dev-api.feeba.io/surv
                     refreshIntervalSec = 60 * 1,
                 ),
             )
+            Logger.log(LogLevel.WARN, "SCHEMA: ${Json.encodeToString(result)}")
+            result
         }
     }
 

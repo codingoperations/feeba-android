@@ -12,16 +12,12 @@ enum class CallToAction(val value: String) {
     }
 }
 
-class JsInterface(private val mContext: Context, private val dialog: DialogFragment) {
+class JsInterface(private val mContext: Context, private val onSurveyEndCallback: (cta: CallToAction) -> Unit)  {
 
     /** Show a toast from the web page  */
     @JavascriptInterface
     fun endOfSurvey(callToAction: String) {
         val cta: CallToAction = CallToAction.safeValueOf(callToAction)
-        when (cta) {
-            CallToAction.CLOSE_SURVEY -> {
-                dialog.dismiss()
-            }
-        }
+        onSurveyEndCallback(cta)
     }
 }

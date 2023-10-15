@@ -56,15 +56,32 @@ internal class ActivityLifecycleListener() : Application.ActivityLifecycleCallba
     }
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
-    fun showSurveyDialogOnCurrentActivity(it: SurveyPresentation) {
-        curActivity?.let {
+    fun showSurveyDialogOnCurrentActivity(presentation: SurveyPresentation) {
+        Logger.log(LogLevel.DEBUG, "ActivityLifecycleListener::showSurveyDialogOnCurrentActivity")
+        curActivity?.let {activity ->
             if (surveyViewController != null) return
-            surveyViewController = SurveyViewController(it, it.surveyUrl)
+            surveyViewController = SurveyViewController(presentation, false, object : SurveyViewController.SurveyViewLifecycleListener {
+                override fun onSurveyWasShown() {
+                    Logger.log(LogLevel.DEBUG, "SurveyViewController::onSurveyWasShown")
+                }
+
+                override fun onSurveyWillDismiss() {
+
+                }
+
+                override fun onSurveyWasDismissed() {
+                    Logger.log(LogLevel.DEBUG, "SurveyViewController::onSurveyWasDismissed")
+                    surveyViewController?.removeAllViews()
+                    surveyViewController = null
+                }
+
+            }).also {
+                it.showSurvey(activity)
+            }
         }
-        TODO("Not yet implemented")
     }
 }
 
-enum class AppVisibility{
+enum class AppVisibility {
     Backgrounded, Foregrounded
 }

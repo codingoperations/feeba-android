@@ -52,7 +52,7 @@ object Feeba {
         Logger.log(LogLevel.DEBUG, "onEvent -> $eventName, value: $value")
         localStateHolder.onEvent(eventName)
         // check if we have a survey for this event
-        val surveyPresentation = triggerValidator.onEvent(eventName, value)
+        val surveyPresentation = triggerValidator.onEvent(eventName, value, localStateHolder)
         surveyPresentation?.let {
             activityListener.showSurveyDialogOnCurrentActivity(it)
         }

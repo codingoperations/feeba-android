@@ -1,17 +1,22 @@
 package io.feeba.lifecycle
 
 import android.app.Activity
+import io.feeba.data.LocalStateHolder
 import io.feeba.data.SurveyPresentation
 
 class TriggerValidator {
 
 
-    fun onEvent(eventName: String, value: String? = null): SurveyPresentation? {
+    fun onEvent(eventName: String, value: String? = null, localStateHolder: LocalStateHolder): SurveyPresentation? {
         Logger.log(LogLevel.DEBUG, "onEvent -> $eventName, value: $value")
-//        localStateHolder.onEvent(eventName)
         // check if we have a survey for this event
-        // check if conditions are met
-        return null
+        localStateHolder.readLocalConfig()?.let {
+            // check if conditions are met
+            return it.surveyPlans.first().surveyPresentation
+        } ?: run {
+            Logger.log(LogLevel.DEBUG, "No survey config found. Ignoring event.")
+            return null
+        }
     }
 
     fun onActivityPaused(activity: Activity) {

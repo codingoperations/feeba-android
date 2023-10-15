@@ -51,7 +51,13 @@ class SurveyFragment : DialogFragment() {
                 domStorageEnabled = true
                 cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
             }
-            this.addJavascriptInterface(JsInterface(requireContext(), this@SurveyFragment), "Mobile")
+            this.addJavascriptInterface(JsInterface(requireContext()) {
+                when (it) {
+                    CallToAction.CLOSE_SURVEY -> {
+                        this@SurveyFragment.dismiss()
+                    }
+                }
+            }, "Mobile")
         }
         binding.webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {

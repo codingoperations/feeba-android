@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
@@ -14,7 +15,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.Animation
+import android.webkit.WebSettings
 import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.Button
 import android.widget.PopupWindow
 import android.widget.RelativeLayout
 import android.widget.RelativeLayout.LayoutParams
@@ -30,12 +34,12 @@ import io.feeba.data.Position.TOP_BANNER
 import io.feeba.data.SurveyPresentation
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
-import io.feeba.lifecycle.WebViewManager
 import io.feeba.ui.AnimationUtils
 import io.feeba.ui.DraggableRelativeLayout
 import io.feeba.ui.DraggableRelativeLayout.Companion.DRAGGABLE_DIRECTION_DOWN
 import io.feeba.ui.DraggableRelativeLayout.Companion.DRAGGABLE_DIRECTION_UP
 import io.feeba.ui.FeebaBounceInterpolator
+import io.feeba.ui.FeebaWebView
 import io.feeba.ui.ViewUtils
 import io.least.ui.dpToPx
 
@@ -65,7 +69,9 @@ private const val IN_APP_BACKGROUND_ANIMATION_DURATION_MS = 400
 private const val ACTIVITY_FINISH_AFTER_DISMISS_DELAY_MS = 600
 private const val ACTIVITY_INIT_DELAY = 200
 
-internal class SurveyViewController(private val webView: WebView, content: SurveyPresentation, private val disableDragDismiss: Boolean) {
+internal class SurveyViewController(
+    private val content: SurveyPresentation, private val disableDragDismiss: Boolean, private var viewLifecycleListener: SurveyViewLifecycleListener
+) {
     private var popupWindow: PopupWindow? = null
 
     internal interface SurveyViewLifecycleListener {
@@ -86,24 +92,19 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
     private var shouldDismissWhenActive = false
     private val DRAG_THRESHOLD_PX_SIZE: Int = dpToPx(4f)
 
-    /**
-     * Simple getter to know when the MessageView is in a dragging state
-     */
-    var isDragging = false
-        private set
+
     private val messageContent: SurveyPresentation
-    private val displayLocation: Position
     private var parentRelativeLayout: RelativeLayout? = null
     private var draggableRelativeLayout: DraggableRelativeLayout? = null
-    private var messageController: SurveyViewLifecycleListener? = null
     private var scheduleDismissRunnable: Runnable? = null
+    private val webView: FeebaWebView
 
     init {
-        displayLocation = content.displayLocation
         pageHeight = content.pageHeight
         pageWidth = ViewGroup.LayoutParams.MATCH_PARENT
         displayDuration = content.displayDuration
-        hasBackground = !displayLocation.isBanner()
+        hasBackground = !content.displayLocation.isBanner()
+        webView = FeebaWebView(Feeba.appContext)
         webView.setBackgroundColor(Color.TRANSPARENT)
         messageContent = content
         setMarginsFromContent(content)
@@ -121,20 +122,11 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
         marginPxSizeRight = if (content.useWidthMargin) dpToPx(24f) else 0
     }
 
-    fun setMessageController(messageController: SurveyViewLifecycleListener?) {
-        this.messageController = messageController
-    }
 
     fun showView(activity: Activity) {
         delayShowUntilAvailable(activity)
     }
 
-    fun checkIfShouldDismiss() {
-        if (shouldDismissWhenActive) {
-            shouldDismissWhenActive = false
-            finishAfterDelay(null)
-        }
-    }
 
     /**
      * This will fired when the device is rotated for example with a new provided height for the WebView
@@ -174,26 +166,88 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
     }
 
     fun showSurvey(currentActivity: Activity) {
-        /* IMPORTANT
-         * The only place where currentActivity should be assigned to InAppMessageView */
-        val webViewLayoutParams = LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            pageHeight
-        )
-        webViewLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT)
-        val relativeLayoutParams = if (hasBackground) createParentRelativeLayoutParams() else null
-        showDraggableView(
-            displayLocation,
-            webViewLayoutParams,
-            relativeLayoutParams,
-            createDraggableLayoutParams(pageHeight, displayLocation, disableDragDismiss, ViewUtils.getWindowHeight(currentActivity)),
-            currentActivity
-        )
+        Logger.log(LogLevel.DEBUG, "SurveyViewController::showSurvey")
+
+
+        Utils.runOnMainUIThread {
+            webView.layoutParams = LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, pageHeight).apply {
+                addRule(RelativeLayout.CENTER_IN_PARENT)
+            }
+
+            val context = Feeba.appContext
+            val localDraggableRef = setUpDraggableLayout(context, ViewUtils.getWindowHeight(currentActivity))
+            this.draggableRelativeLayout = localDraggableRef
+
+            val localParentRef = setUpParentRelativeLayout(context)
+            this.parentRelativeLayout = localParentRef
+
+            this.popupWindow = createPopupWindow(localParentRef, currentActivity)
+
+            animateSurvey(localDraggableRef, localParentRef)
+            startDismissTimerIfNeeded(currentActivity)
+        }
     }
+
+
+    private fun setUpDraggableLayout(context: Context, windowHeight: Int): DraggableRelativeLayout {
+        val relativeLayoutParams = createParentRelativeLayoutParams()
+        val draggableRelativeLayout = DraggableRelativeLayout(context, createDraggableLayoutParams(pageHeight, disableDragDismiss, windowHeight)).apply {
+            setPadding(marginPxSizeLeft, marginPxSizeTop, marginPxSizeRight, marginPxSizeBottom)
+            clipChildren = false
+            clipToPadding = false
+            addView(createCardView(context).apply {
+                tag = IN_APP_MESSAGE_CARD_VIEW_TAG
+                webView.loadUrl("https://dev-dashboard.feeba.io/s/feeba/64f2e4a38c4282406ad01315")
+                addView(createWebViewInstance(context))
+            })
+        }
+        draggableRelativeLayout.layoutParams = relativeLayoutParams
+
+        if (webView.parent != null) (webView.parent as ViewGroup).removeAllViews()
+        return draggableRelativeLayout
+    }
+
+    private fun createDraggableLayoutParams(pageHeight: Int, disableDragging: Boolean, windowHeight: Int): DraggableRelativeLayout.Params {
+        var pageHeight = pageHeight
+        val draggableParams: DraggableRelativeLayout.Params = DraggableRelativeLayout.Params()
+        draggableParams.maxXPos = marginPxSizeRight
+        draggableParams.maxYPos = marginPxSizeTop
+        draggableParams.draggingDisabled = disableDragging
+        draggableParams.messageHeight = pageHeight
+        draggableParams.height = windowHeight
+        when (content.displayLocation) {
+            TOP_BANNER -> draggableParams.dragThresholdY = marginPxSizeTop - DRAG_THRESHOLD_PX_SIZE
+            BOTTOM_BANNER -> {
+                draggableParams.posY = windowHeight - pageHeight
+                draggableParams.dragThresholdY = marginPxSizeBottom + DRAG_THRESHOLD_PX_SIZE
+            }
+
+            FULL_SCREEN -> {
+                run {
+                    pageHeight = windowHeight - (marginPxSizeBottom + marginPxSizeTop)
+                    draggableParams.messageHeight = pageHeight
+                }
+                val y = windowHeight / 2 - pageHeight / 2
+                draggableParams.dragThresholdY = y + DRAG_THRESHOLD_PX_SIZE
+                draggableParams.maxYPos = y
+                draggableParams.posY = y
+            }
+
+            CENTER_MODAL -> {
+                val y = windowHeight / 2 - pageHeight / 2
+                draggableParams.dragThresholdY = y + DRAG_THRESHOLD_PX_SIZE
+                draggableParams.maxYPos = y
+                draggableParams.posY = y
+            }
+        }
+        draggableParams.dragDirection = if (content.displayLocation === TOP_BANNER) DRAGGABLE_DIRECTION_UP else DRAGGABLE_DIRECTION_DOWN
+        return draggableParams
+    }
+
 
     private fun createParentRelativeLayoutParams(): LayoutParams {
         val relativeLayoutParams = LayoutParams(pageWidth, LayoutParams.MATCH_PARENT)
-        when (displayLocation) {
+        when (content.displayLocation) {
             TOP_BANNER -> {
                 relativeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
                 relativeLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL)
@@ -209,158 +263,90 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
         return relativeLayoutParams
     }
 
-    private fun createDraggableLayoutParams(pageHeight: Int, displayLocation: Position, disableDragging: Boolean, windowHeight: Int): DraggableRelativeLayout.Params {
-        var pageHeight = pageHeight
-        val draggableParams: DraggableRelativeLayout.Params = DraggableRelativeLayout.Params()
-        draggableParams.maxXPos = marginPxSizeRight
-        draggableParams.maxYPos = marginPxSizeTop
-        draggableParams.draggingDisabled = disableDragging
-        draggableParams.messageHeight = pageHeight
-        draggableParams.height = windowHeight
-        when (displayLocation) {
-            TOP_BANNER -> draggableParams.dragThresholdY = marginPxSizeTop - DRAG_THRESHOLD_PX_SIZE
-            Position.BOTTOM_BANNER -> {
-                draggableParams.posY = windowHeight - pageHeight
-                draggableParams.dragThresholdY = marginPxSizeBottom + DRAG_THRESHOLD_PX_SIZE
-            }
-
-            Position.FULL_SCREEN -> {
-                run {
-                    pageHeight = windowHeight - (marginPxSizeBottom + marginPxSizeTop)
-                    draggableParams.messageHeight = pageHeight
-                }
-                val y = windowHeight / 2 - pageHeight / 2
-                draggableParams.dragThresholdY = y + DRAG_THRESHOLD_PX_SIZE
-                draggableParams.maxYPos = y
-                draggableParams.posY = y
-            }
-
-            Position.CENTER_MODAL -> {
-                val y = windowHeight / 2 - pageHeight / 2
-                draggableParams.dragThresholdY = y + DRAG_THRESHOLD_PX_SIZE
-                draggableParams.maxYPos = y
-                draggableParams.posY = y
-            }
-        }
-        draggableParams.dragDirection =
-            if (displayLocation === TOP_BANNER) DRAGGABLE_DIRECTION_UP else DRAGGABLE_DIRECTION_DOWN
-        return draggableParams
-    }
-
-    private fun showDraggableView(
-        displayLocation: Position,
-        relativeLayoutParams: LayoutParams,
-        draggableRelativeLayoutParams: LayoutParams?,
-        webViewLayoutParams: DraggableRelativeLayout.Params,
-        currentActivity: Activity
-    ) {
-        Utils.runOnMainUIThread(Runnable {
-//            if (webView == null) return@Runnable
-            webView.layoutParams = relativeLayoutParams
-            val context = Feeba.appContext
-            setUpDraggableLayout(context, draggableRelativeLayoutParams, webViewLayoutParams)
-            setUpParentRelativeLayout(context)
-            parentRelativeLayout?.let { createPopupWindow(it, currentActivity) }
-            if (messageController != null) {
-                val localDraggableRef = draggableRelativeLayout
-                val localParentRef = parentRelativeLayout
-                if (localDraggableRef != null && localParentRef != null) {
-                    animateSurvey(displayLocation, localDraggableRef, localParentRef)
-                }
-            }
-            startDismissTimerIfNeeded(currentActivity)
-        })
-    }
-
     /**
      * Create a new Android PopupWindow that draws over the current Activity
      *
      * @param parentRelativeLayout root layout to attach to the pop up window
      */
-    private fun createPopupWindow(parentRelativeLayout: RelativeLayout, currentActivity: Activity) {
-        val popupWindow = PopupWindow(
+    private fun createPopupWindow(parentRelativeLayout: RelativeLayout, currentActivity: Activity): PopupWindow {
+        return PopupWindow(
             parentRelativeLayout,
             if (hasBackground) WindowManager.LayoutParams.MATCH_PARENT else pageWidth,
             if (hasBackground) WindowManager.LayoutParams.MATCH_PARENT else WindowManager.LayoutParams.WRAP_CONTENT,
             true
-        )
-        this.popupWindow = popupWindow
-        popupWindow.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        popupWindow.isTouchable = true
-        // NOTE: This is required for getting fullscreen under notches working in portrait mode
-        popupWindow.isClippingEnabled = false
-        var gravity = 0
-        if (!hasBackground) {
-            when (displayLocation) {
-                TOP_BANNER -> gravity = Gravity.CENTER_HORIZONTAL or Gravity.TOP
-                BOTTOM_BANNER -> gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
-                CENTER_MODAL, FULL_SCREEN -> gravity = Gravity.CENTER_HORIZONTAL
+        ).apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            isTouchable = true
+            // NOTE: This is required for getting fullscreen under notches working in portrait mode
+            isClippingEnabled = false
+            var gravity = Gravity.CENTER_HORIZONTAL
+            if (!hasBackground) {
+                gravity = when (content.displayLocation) {
+                    TOP_BANNER -> Gravity.CENTER_HORIZONTAL or Gravity.TOP
+                    BOTTOM_BANNER -> Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
+                    CENTER_MODAL, FULL_SCREEN -> Gravity.CENTER_HORIZONTAL
+                }
             }
-        }
+            setOnDismissListener {
+                viewLifecycleListener.onSurveyWillDismiss()
+                viewLifecycleListener.onSurveyWasDismissed()
+            }
+            showAtLocation(currentActivity.window.decorView.rootView, gravity, 0, 0)
 
-        // Using panel for fullbleed IAMs and dialog for non-fullbleed. The attached dialog type
-        // does not allow content to bleed under notches but panel does.
-        val displayType = if (messageContent.isFullBleed) WindowManager.LayoutParams.TYPE_APPLICATION_PANEL else WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
-        PopupWindowCompat.setWindowLayoutType(
-            popupWindow,
-            displayType
-        )
-        popupWindow.showAtLocation(
-            currentActivity.window.decorView.rootView,
-            gravity,
-            0,
-            0
-        )
+
+            // Using panel for fullbleed IAMs and dialog for non-fullbleed. The attached dialog type
+            // does not allow content to bleed under notches but panel does.
+            val displayType = if (messageContent.isFullBleed) WindowManager.LayoutParams.TYPE_APPLICATION_PANEL else WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
+            PopupWindowCompat.setWindowLayoutType(
+                this, displayType
+            )
+        }
     }
 
-    private fun setUpParentRelativeLayout(context: Context) {
+    private fun setUpParentRelativeLayout(context: Context): RelativeLayout {
         val parentRelativeLayout = RelativeLayout(context).apply {
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             clipChildren = false
             clipToPadding = false
             addView(draggableRelativeLayout)
         }
-        this.parentRelativeLayout = parentRelativeLayout
+        return parentRelativeLayout
     }
 
-    private fun setUpDraggableLayout(
-        context: Context,
-        relativeLayoutParams: LayoutParams?,
-        draggableParams: DraggableRelativeLayout.Params
-    ) {
-        draggableRelativeLayout = DraggableRelativeLayout(context).apply {
-            setParams(draggableParams)
-            setListener(object : DraggableRelativeLayout.DraggableListener {
-                override fun onDismiss() {
-                    if (messageController != null) {
-                        messageController!!.onSurveyWillDismiss()
+    private fun createWebViewInstance(context: Context): FeebaWebView {
+        return FeebaWebView(context).apply {
+            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+                addRule(RelativeLayout.CENTER_HORIZONTAL)
+            }
+            loadUrl("https://dev-dashboard.feeba.io/s/feeba/64f2e4a38c4282406ad01315")
+            settings.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                useWideViewPort = true
+                allowFileAccess = true
+
+                domStorageEnabled = true
+                cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+            }
+            addJavascriptInterface(JsInterface(context) {
+                when (it) {
+                    CallToAction.CLOSE_SURVEY -> {
+                        Logger.log(LogLevel.DEBUG, "FeebaWebView::CallToAction.CLOSE_SURVEY")
                     }
-                    finishAfterDelay(null)
+                }
+            }, "Mobile")
+            val webView = this
+            webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                    Logger.log(LogLevel.DEBUG, "WebViewClient::onPageStarted")
                 }
 
-                override fun onDragStart() {
-                    isDragging = true
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    Logger.log(LogLevel.DEBUG, "WebViewClient::onPageFinished")
                 }
-
-                override fun onDragEnd() {
-                    isDragging = false
-                }
-            })
-
-
-            setPadding(marginPxSizeLeft, marginPxSizeTop, marginPxSizeRight, marginPxSizeBottom)
-            clipChildren = false
-            clipToPadding = false
-
-            val cardView: CardView = createCardView(context)
-            cardView.tag = IN_APP_MESSAGE_CARD_VIEW_TAG
-            cardView.addView(webView)
-            addView(cardView)
+            }
         }
-        if (relativeLayoutParams != null) draggableRelativeLayout?.setLayoutParams(relativeLayoutParams)
-
-        if (webView.parent != null) (webView.parent as ViewGroup).removeAllViews()
-
     }
 
     /**
@@ -369,10 +355,9 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
      */
     private fun createCardView(context: Context): CardView {
         val cardView = CardView(context)
-        val height = if (displayLocation === Position.FULL_SCREEN) ViewGroup.LayoutParams.MATCH_PARENT else ViewGroup.LayoutParams.WRAP_CONTENT
+        val height = if (content.displayLocation === FULL_SCREEN) ViewGroup.LayoutParams.MATCH_PARENT else ViewGroup.LayoutParams.WRAP_CONTENT
         val cardViewLayoutParams = LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            height
+            ViewGroup.LayoutParams.MATCH_PARENT, height
         )
         cardViewLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT)
         cardView.layoutParams = cardViewLayoutParams
@@ -396,9 +381,8 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
 
         if (scheduleDismissRunnable == null) {
             val scheduleDismissRunnable = Runnable {
-                messageController?.onSurveyWillDismiss()
+                viewLifecycleListener.onSurveyWillDismiss()
                 if (currentActivity != null) {
-                    dismissAndAwaitNextMessage(null)
                     scheduleDismissRunnable = null
                 } else {
                     // For cases when the app is on background and the dismiss is triggered
@@ -420,29 +404,19 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
     }
 
     /**
-     * Trigger the [.draggableRelativeLayout] dismiss animation
-     */
-    fun dismissAndAwaitNextMessage(callback: WebViewManager.OneSignalGenericCallback?) {
-        if (draggableRelativeLayout == null) {
-            Logger.log(LogLevel.ERROR, "No host presenter to trigger dismiss animation, counting as dismissed already", Throwable())
-            dereferenceViews()
-            callback?.onComplete()
-            return
-        }
-        draggableRelativeLayout?.dismiss()
-        finishAfterDelay(callback)
-    }
-
-    /**
      * Finishing on a timer as continueSettling does not return false
      * when using smoothSlideViewTo on Android 4.4
      */
-    private fun finishAfterDelay(callback: WebViewManager.OneSignalGenericCallback?) {
+    private fun finishAfterDelay() {
         Utils.runOnMainThreadDelayed(Runnable {
-            if (hasBackground && parentRelativeLayout != null) animateAndDismissLayout(parentRelativeLayout!!, callback) else {
-                cleanupViewsAfterDismiss()
-                callback?.onComplete()
-            }
+            parentRelativeLayout?.let {
+                if (hasBackground) {
+                    animateAndDismissLayout(parentRelativeLayout!!)
+                } else {
+                    cleanupViewsAfterDismiss()
+                }
+            } ?: cleanupViewsAfterDismiss()
+
         }, ACTIVITY_FINISH_AFTER_DISMISS_DELAY_MS)
     }
 
@@ -451,7 +425,7 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
      */
     private fun cleanupViewsAfterDismiss() {
         removeAllViews()
-        if (messageController != null) messageController!!.onSurveyWasDismissed()
+        viewLifecycleListener.onSurveyWasDismissed()
     }
 
     /**
@@ -464,8 +438,8 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
             handler.removeCallbacks(scheduleDismissRunnable!!)
             scheduleDismissRunnable = null
         }
-        if (draggableRelativeLayout != null) draggableRelativeLayout?.removeAllViews()
-        if (popupWindow != null) popupWindow?.dismiss()
+        draggableRelativeLayout?.removeAllViews()
+        popupWindow?.dismiss()
         dereferenceViews()
     }
 
@@ -479,10 +453,10 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
 //        webView = null
     }
 
-    private fun animateSurvey(displayLocation: Position, messageView: View, backgroundView: View) {
+    private fun animateSurvey(messageView: View, backgroundView: View) {
         val messageViewCardView: CardView = messageView.findViewWithTag<CardView>(IN_APP_MESSAGE_CARD_VIEW_TAG)
         val cardViewAnimCallback = createAnimationListener(messageViewCardView)
-        when (displayLocation) {
+        when (content.displayLocation) {
             TOP_BANNER -> animateTop(messageViewCardView, webView.height, cardViewAnimCallback)
             BOTTOM_BANNER -> animateBottom(messageViewCardView, webView.height, cardViewAnimCallback)
             CENTER_MODAL, FULL_SCREEN -> animateCenter(messageView, backgroundView, cardViewAnimCallback, null)
@@ -497,9 +471,7 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
                 if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M) {
                     messageViewCardView.cardElevation = dpToPx(5f).toFloat()
                 }
-                if (messageController != null) {
-                    messageController!!.onSurveyWasShown()
-                }
+                viewLifecycleListener.onSurveyWasShown()
             }
 
             override fun onAnimationRepeat(animation: Animation) {}
@@ -509,91 +481,52 @@ internal class SurveyViewController(private val webView: WebView, content: Surve
     private fun animateTop(messageView: View, height: Int, cardViewAnimCallback: Animation.AnimationListener) {
         // Animate the message view from above the screen downward to the top
         AnimationUtils.animateViewByTranslation(
-            messageView,
-            (-height - marginPxSizeTop).toFloat(),
-            0f,
-            IN_APP_BANNER_ANIMATION_DURATION_MS,
-            FeebaBounceInterpolator(0.1, 8.0),
-            cardViewAnimCallback
-        )
-            .start()
+            messageView, (-height - marginPxSizeTop).toFloat(), 0f, IN_APP_BANNER_ANIMATION_DURATION_MS, FeebaBounceInterpolator(0.1, 8.0), cardViewAnimCallback
+        ).start()
     }
 
     private fun animateBottom(messageView: View, height: Int, cardViewAnimCallback: Animation.AnimationListener) {
         // Animate the message view from under the screen upward to the bottom
         AnimationUtils.animateViewByTranslation(
-            messageView,
-            (height + marginPxSizeBottom).toFloat(),
-            0f,
-            IN_APP_BANNER_ANIMATION_DURATION_MS,
-            FeebaBounceInterpolator(0.1, 8.0),
-            cardViewAnimCallback
-        )
-            .start()
+            messageView, (height + marginPxSizeBottom).toFloat(), 0f, IN_APP_BANNER_ANIMATION_DURATION_MS, FeebaBounceInterpolator(0.1, 8.0), cardViewAnimCallback
+        ).start()
     }
 
     private fun animateCenter(messageView: View, backgroundView: View, cardViewAnimCallback: Animation.AnimationListener, backgroundAnimCallback: Animator.AnimatorListener?) {
         // Animate the message view by scale since it settles at the center of the screen
         val messageAnimation: Animation = AnimationUtils.animateViewSmallToLarge(
-            messageView,
-            IN_APP_CENTER_ANIMATION_DURATION_MS,
-            FeebaBounceInterpolator(0.1, 8.0),
-            cardViewAnimCallback
+            messageView, IN_APP_CENTER_ANIMATION_DURATION_MS, FeebaBounceInterpolator(0.1, 8.0), cardViewAnimCallback
         )
 
         // Animate background behind the message so it doesn't just show the dark transparency
         val backgroundAnimation = animateBackgroundColor(
-            backgroundView,
-            IN_APP_BACKGROUND_ANIMATION_DURATION_MS,
-            ACTIVITY_BACKGROUND_COLOR_EMPTY,
-            ACTIVITY_BACKGROUND_COLOR_FULL,
-            backgroundAnimCallback
+            backgroundView, IN_APP_BACKGROUND_ANIMATION_DURATION_MS, ACTIVITY_BACKGROUND_COLOR_EMPTY, ACTIVITY_BACKGROUND_COLOR_FULL, backgroundAnimCallback
         )
         messageAnimation.start()
         backgroundAnimation.start()
     }
 
-    private fun animateAndDismissLayout(backgroundView: View, callback: WebViewManager.OneSignalGenericCallback?) {
+    private fun animateAndDismissLayout(backgroundView: View) {
         val animCallback: Animator.AnimatorListener = object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 cleanupViewsAfterDismiss()
-                callback?.onComplete()
             }
         }
 
         // Animate background behind the message so it hides before being removed from the view
         animateBackgroundColor(
-            backgroundView,
-            IN_APP_BACKGROUND_ANIMATION_DURATION_MS,
-            ACTIVITY_BACKGROUND_COLOR_FULL,
-            ACTIVITY_BACKGROUND_COLOR_EMPTY,
-            animCallback
-        )
-            .start()
+            backgroundView, IN_APP_BACKGROUND_ANIMATION_DURATION_MS, ACTIVITY_BACKGROUND_COLOR_FULL, ACTIVITY_BACKGROUND_COLOR_EMPTY, animCallback
+        ).start()
     }
 
     private fun animateBackgroundColor(backgroundView: View, duration: Int, startColor: Int, endColor: Int, animCallback: Animator.AnimatorListener?): ValueAnimator {
         return AnimationUtils.animateViewColor(
-            backgroundView,
-            duration,
-            startColor,
-            endColor,
-            animCallback
+            backgroundView, duration, startColor, endColor, animCallback
         )
     }
 
     override fun toString(): String {
-        return "InAppMessageView{" +
-                ", pageWidth=" + pageWidth +
-                ", pageHeight=" + pageHeight +
-                ", displayDuration=" + displayDuration +
-                ", hasBackground=" + hasBackground +
-                ", shouldDismissWhenActive=" + shouldDismissWhenActive +
-                ", isDragging=" + isDragging +
-                ", disableDragDismiss=" + disableDragDismiss +
-                ", displayLocation=" + displayLocation +
-                ", webView=" + webView +
-                '}'
+        return "InAppMessageView{" + ", pageWidth=" + pageWidth + ", pageHeight=" + pageHeight + ", displayDuration=" + displayDuration + ", hasBackground=" + hasBackground + ", shouldDismissWhenActive=" + shouldDismissWhenActive + ", disableDragDismiss=" + disableDragDismiss + ", displayLocation=" + content.displayLocation + ", webView=" + webView + '}'
     }
 
 }
