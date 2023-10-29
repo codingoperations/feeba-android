@@ -42,6 +42,15 @@ class HttpClient(private val serverConfig: ServerConfig) {
         return sendHttpRequest(request)
     }
 
+   // ------------------------ Survey ------------------------
+   fun fetchSurvey(surveyId: String) : Response {
+       val request = requestBuilder.url("${serverConfig.hostUrl}/v1/survey/${surveyId}").build()
+       return sendHttpRequest(request)
+   }
+    fun publishSurveyResults(surveyId: String) {
+
+    }
+
     private fun sendHttpRequest(request: Request): Response {
         try {
             val response: String = okHttpClient.newCall(request).execute().use { response ->

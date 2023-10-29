@@ -24,7 +24,6 @@ import io.least.ui.TagCompoundView
 import io.least.ui.dpToPx
 import io.least.viewmodel.RateExperienceState
 import io.least.viewmodel.RateExperienceViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
@@ -168,8 +167,8 @@ class RateExperienceFragment(
             val tag = tagSet[selectedId.id] ?: continue
             val tagView = TagCompoundView(requireContext()).apply {
                 setTagText(tag.text)
-                layoutParams = LinearLayout.LayoutParams(dpToPx(78f, context), dpToPx(120f, context)).apply {
-                    setMargins(0, 0, dpToPx(4f, context), 0)
+                layoutParams = LinearLayout.LayoutParams(dpToPx(78f), dpToPx(120f)).apply {
+                    setMargins(0, 0, dpToPx(4f), 0)
                 }
                 setOnTagSelectedListener {
                     viewModel.onTagSelectionUpdate(tag,  it)
@@ -179,7 +178,7 @@ class RateExperienceFragment(
             tag.staticImageUrl?.let { tagView.setTagImage(it) }
             binding.tagsParent.addView(tagView)
             binding.tagsParent.addView(View(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(dpToPx(6f, requireContext()), MATCH_PARENT)
+                layoutParams = LinearLayout.LayoutParams(dpToPx(6f), MATCH_PARENT)
             })
         }
         for (tag in udated.tags) {
@@ -191,14 +190,14 @@ class RateExperienceFragment(
                     viewModel.onTagSelectionUpdate(tag,  it)
                 }
             }
-            tagView.layoutParams = LinearLayout.LayoutParams(dpToPx(78f, requireContext()), dpToPx(120f, requireContext())).apply {
-                setMargins(0, 0, dpToPx(4f, requireContext()), 0)
+            tagView.layoutParams = LinearLayout.LayoutParams(dpToPx(78f), dpToPx(120f)).apply {
+                setMargins(0, 0, dpToPx(4f), 0)
 
             }
             tag.staticImageUrl?.let { tagView.setTagImage(it) }
             binding.tagsParent.addView(tagView)
             binding.tagsParent.addView(View(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(dpToPx(6f, requireContext()), MATCH_PARENT)
+                layoutParams = LinearLayout.LayoutParams(dpToPx(6f), MATCH_PARENT)
             })
         }
     }

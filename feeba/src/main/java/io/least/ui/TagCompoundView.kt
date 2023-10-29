@@ -39,7 +39,7 @@ class TagCompoundView : LinearLayout {
         gravity = Gravity.CENTER
 
         setBackgroundResource(R.drawable.selector_tag)
-        dpToPx(6f, context).let {
+        dpToPx(6f).let {
             setPadding(it, it, it, it)
         }
     }

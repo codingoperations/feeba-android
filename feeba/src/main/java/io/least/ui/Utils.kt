@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import io.feeba.Feeba
 import io.least.ui.app.RateAppFragment
 
 internal fun RateAppFragment.showKeyboard(view: View) {
@@ -22,10 +23,10 @@ internal fun RateAppFragment.closeKeyboard() {
     }
 }
 
-fun dpToPx(dp: Float, context: Context): Int {
+fun dpToPx(dp: Float): Int {
     return TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP,
         dp,
-        context.resources.displayMetrics
+        Feeba.appContext.resources.displayMetrics
     ).toInt()
 }
