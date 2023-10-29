@@ -60,7 +60,7 @@ internal class ActivityLifecycleListener() : Application.ActivityLifecycleCallba
         Logger.log(LogLevel.DEBUG, "ActivityLifecycleListener::showSurveyDialogOnCurrentActivity")
         curActivity?.let {activity ->
             if (surveyViewController != null) return
-            surveyViewController = SurveyViewController(presentation, false, object : SurveyViewController.SurveyViewLifecycleListener {
+            surveyViewController = SurveyViewController(presentation, object : SurveyViewController.SurveyViewLifecycleListener {
                 override fun onSurveyWasShown() {
                     Logger.log(LogLevel.DEBUG, "SurveyViewController::onSurveyWasShown")
                 }

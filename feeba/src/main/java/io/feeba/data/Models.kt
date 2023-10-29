@@ -1,5 +1,7 @@
 package io.feeba.data
 
+import io.feeba.lifecycle.LogLevel
+import io.feeba.lifecycle.Logger
 import io.least.core.ServerConfig
 import kotlinx.serialization.Serializable
 import java.util.Date
@@ -14,11 +16,11 @@ data class FeebaResponse(
 data class SurveyPlan(
     val id: String,
     val surveyPresentation: SurveyPresentation,
-    val triggers: List<List<Trigger>>,
+    val triggerConditions: List<List<TriggerCondition>>,
 )
 
 @Serializable
-data class Trigger(
+data class TriggerCondition(
     val property: String,
     val operator: String,
     val value: String
@@ -54,15 +56,16 @@ data class FeebaConfig(
 )
 
 @Serializable
-class SurveyPresentation(
-    val contentHtml: String,
+data class SurveyPresentation(
+    val surveyWebAppUrl: String,
     val useHeightMargin: Boolean,
     val useWidthMargin: Boolean,
     val isFullBleed: Boolean,
     // The following properties are populated from Javascript events
     val displayLocation: Position,
     val displayDuration: Double,
-    val pageHeight: Int = 0,
+    val maxWidgetHeightInPercent: Int = 70, // between 0 to 100
+    val maxWidgetWidthInPercent: Int = 90, // between 0 to 100
 )
 
 enum class Position {

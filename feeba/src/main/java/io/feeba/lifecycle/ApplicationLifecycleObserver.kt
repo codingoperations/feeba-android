@@ -21,7 +21,7 @@ class ApplicationLifecycleObserver(
         appVisibility = AppVisibility.Foregrounded
         configUpdateJob = GlobalScope.launch {
             val localState = localStateHolder.readLocalState()
-            val updated: FeebaResponse? = restClient.getSurveyPlans(localState)
+            val updated: String? = restClient.getSurveyPlans(localState)
             updated?.let {
                 localStateHolder.setFeebaConfig(it)
                 // TODO Refresh the schedule of triggers

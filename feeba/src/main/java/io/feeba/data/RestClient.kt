@@ -13,46 +13,51 @@ import java.net.URL
 
 class RestClient(private val requestUrl: String = "https://dev-api.feeba.io/survey-plans") {
 
-    suspend fun getSurveyPlans(state: LocalState): FeebaResponse? {
+    suspend fun getSurveyPlans(state: LocalState): String? {
         return try {
             val response = sendPostRequest(requestUrl, Json.encodeToString(state.userData))
-            Json.decodeFromString<FeebaResponse>(response)
+            if (response == "") {
+               return null
+            }
+            return response
         } catch (t: Throwable) {
             Logger.log(LogLevel.WARN, "getSurveyPlans failed: $t")
 //            null
-            val result  = FeebaResponse(
-                surveyPlans = listOf(
-                    SurveyPlan(
-                        id = "1",
-                        surveyPresentation = SurveyPresentation(
-                            contentHtml = "String",
-                            useHeightMargin = false,
-                            useWidthMargin = false,
-                            isFullBleed = false,
-                            displayLocation = Position.BOTTOM_BANNER,
-                            displayDuration = 10.toDouble(),
-                            pageHeight = 0,
-                        ),
-                        triggers = listOf(
-                            listOf(
-                                Trigger(
-                                    property = "String",
-                                    operator = "String",
-                                    value = "String"
-                                )
-                            ),
-                        ),
-                    )
-                ),
-                sdkConfig = SdkConfig(
-                    refreshIntervalSec = 60 * 1,
-                ),
-            )
+            val result  = """
+                {
+                    "surveyPlans": [
+                        {
+                            "id": "1",
+                            "surveyPresentation": {
+                                "surveyWebAppUrl": "https://dev-dashboard.feeba.io/s/feeba/64f2e4a38c4282406ad01315",
+                                "useHeightMargin": false,
+                                "useWidthMargin": false,
+                                "isFullBleed": false,
+                                "displayLocation": "CENTER_MODAL",
+                                "displayDuration": 10.0,
+                                "maxWidgetHeightInPercent": 70,
+                                "maxWidgetWidthInPercent": 90
+                            },
+                            "triggerConditions": [
+                                [
+                                    {
+                                        "property": "on_ride_end",
+                                        "operator": "ex",
+                                        "value": ""
+                                    }
+                                ]
+                            ]
+                        }
+                    ],
+                    "sdkConfig": {
+                        "refreshIntervalSec": 60
+                    }
+                }
+            """.trimIndent()
             Logger.log(LogLevel.WARN, "SCHEMA: ${Json.encodeToString(result)}")
             result
         }
     }
-
 
     private fun sendPostRequest(urlString: String, jsonInputString: String): String {
         // Create a URL object from the provided URL string

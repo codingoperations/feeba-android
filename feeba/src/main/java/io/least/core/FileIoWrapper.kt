@@ -6,9 +6,7 @@ import java.io.File
 
 fun readLocalFile(context: Context, fileName: String): String {
     val dir = File(context.filesDir, "cache")
-    val file = File(dir, fileName.hashCode().toString())
-
-    return file.readText()
+    return File(dir, fileName).readText()
 }
 
 fun writeToLocalFile(text: String, context: Context, fileName: String) {
@@ -16,12 +14,12 @@ fun writeToLocalFile(text: String, context: Context, fileName: String) {
     if (!dir.exists()) {
         dir.mkdir();
     }
-    val file = File(dir, fileName.hashCode().toString())
+    val file = File(dir, fileName)
 
-    Log.d("writeToLocalFile", "Writing to $file")
+    Log.d("writeToLocalFile", "Writing to ${file.name}")
     runCatching { file.writeText(text) }
-        .onSuccess { Log.d("writeToLocalFile", "Writing to $file was successful") }
-        .onFailure { Log.e("writeToLocalFile", "Writing to $file failed. Error: $it") }
+        .onSuccess { Log.d("writeToLocalFile", "Writing to ${file.name} was successful") }
+        .onFailure { Log.e("writeToLocalFile", "Writing to ${file.name} failed. Error: $it") }
 
 }
 
