@@ -139,7 +139,9 @@ internal class SurveyViewController(
         Logger.log(LogLevel.DEBUG, "SurveyViewController::showSurvey")
         Utils.runOnMainUIThread {
             val localParentRef =  BannerHolderView(currentActivity, content) {
-                popupWindow?.dismiss()
+                Utils.runOnMainUIThread {
+                    popupWindow?.dismiss()
+                }
             }
             this.bannerHolderView = localParentRef
             this.popupWindow = createPopupWindow(localParentRef, currentActivity)
