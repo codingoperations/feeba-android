@@ -16,6 +16,7 @@ class SampleShowCaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ConfigHolder.setEnv(false)
         Feeba.init(
             this.application, ServerConfig(
                 hostUrl = ConfigHolder.hostUrl,

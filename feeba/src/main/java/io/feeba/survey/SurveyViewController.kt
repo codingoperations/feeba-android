@@ -20,6 +20,7 @@ import io.feeba.data.Position.CENTER_MODAL
 import io.feeba.data.Position.FULL_SCREEN
 import io.feeba.data.Position.TOP_BANNER
 import io.feeba.data.SurveyPresentation
+import io.feeba.data.isBanner
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.feeba.ui.AnimationUtils
@@ -69,7 +70,7 @@ internal class SurveyViewController(
     private var marginPxSizeTop: Int = dpToPx(24f)
     private var marginPxSizeBottom: Int = dpToPx(24f)
     private val displayDuration: Double = content.displayDuration
-    private val hasBackground: Boolean = !content.displayLocation.isBanner()
+    private val hasBackground: Boolean = !isBanner(content.displayLocation)
     private var shouldDismissWhenActive = false
 
     private var bannerHolderView: BannerHolderView? = null

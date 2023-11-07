@@ -15,11 +15,12 @@ class LocalStateHolder(private val app: Application) {
     private val surveyConfigFileName = "survey_onfig.json"
     private val localStateFileName = "local_state.json"
     private val eventCountMap = mutableMapOf<String, Int>()
+    private val jsonInstance = Json { ignoreUnknownKeys = true }
 
     fun setFeebaConfig(response: String) {
         Logger.log(LogLevel.DEBUG, "LocalStateHolder:: Storing response: $response")
         // Update local reference
-        this.lastKnownFeebaConfig = Json.decodeFromString(response)
+        this.lastKnownFeebaConfig = jsonInstance.decodeFromString(response)
         // Write to local file
         try {
             writeToLocalFile(response, app.applicationContext, surveyConfigFileName)
@@ -36,7 +37,7 @@ class LocalStateHolder(private val app: Application) {
                     Logger.log(LogLevel.WARN, "No locally cached STATE is found. Falling back to default state. Is it the first run of the app?")
                     return Defaults.localState
                 }
-                return Json.decodeFromString(localValue)
+                return jsonInstance.decodeFromString(localValue)
             } catch (t: Throwable) {
                 Logger.log(LogLevel.WARN, "Failed to read local config. Falling back to default state. Error: $t")
                 return Defaults.localState
@@ -52,7 +53,7 @@ class LocalStateHolder(private val app: Application) {
                     Logger.log(LogLevel.WARN, "No locally cached config is found. Is it the first run of the app?")
                     return null
                 }
-                return Json.decodeFromString(localValue)
+                return jsonInstance.decodeFromString(localValue)
             } catch (t: Throwable) {
                 Logger.log(LogLevel.WARN, "Failed to read local config. Error: $t")
                 return null

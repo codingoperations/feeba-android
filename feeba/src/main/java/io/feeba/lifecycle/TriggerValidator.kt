@@ -37,6 +37,22 @@ class TriggerValidator {
     }
 }
 
+fun validateEvent(triggerCondition: TriggerCondition) {
+    when (triggerCondition.operator){
+        "ex" -> {}
+        "eq" -> {}
+        "neq" -> {}
+        "gt" -> {}
+        "gte" -> {}
+        "lt" -> {}
+        "lte" -> {}
+        else -> {
+            Logger.log(LogLevel.WARN, "Unknown operator: ${triggerCondition.operator}")
+            null
+        }
+    }
+}
+
 fun onActivityPaused(activity: Activity) {
     Logger.log(LogLevel.DEBUG, "onActivityPaused: $activity")
     // TODO remove any callbacks that are waiting to run on this activity
