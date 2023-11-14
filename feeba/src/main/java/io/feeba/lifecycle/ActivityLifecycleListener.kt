@@ -3,7 +3,11 @@ package io.feeba.lifecycle
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import io.feeba.data.RuleType
 import io.feeba.data.SurveyPresentation
+import io.feeba.data.TriggerCondition
 import io.feeba.survey.SurveyViewController
 
 /**
@@ -15,7 +19,8 @@ internal class ActivityLifecycleListener() : Application.ActivityLifecycleCallba
     private var curActivity: Activity? = null
     private val activityNameSet = mutableSetOf<String>()
     private var surveyViewController: SurveyViewController? = null
-
+    private val delayedTasks = mutableMapOf<String, Runnable>()
+    private val handler = Handler(Looper.getMainLooper())
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         Logger.log(LogLevel.DEBUG, "onActivityCreated: $activity")
         activityCount++
@@ -58,7 +63,7 @@ internal class ActivityLifecycleListener() : Application.ActivityLifecycleCallba
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
     fun showSurveyDialogOnCurrentActivity(presentation: SurveyPresentation) {
         Logger.log(LogLevel.DEBUG, "ActivityLifecycleListener::showSurveyDialogOnCurrentActivity")
-        curActivity?.let {activity ->
+        curActivity?.let { activity ->
             if (surveyViewController != null) return
             surveyViewController = SurveyViewController(presentation, object : SurveyViewController.SurveyViewLifecycleListener {
                 override fun onSurveyWasShown() {
@@ -78,6 +83,24 @@ internal class ActivityLifecycleListener() : Application.ActivityLifecycleCallba
             }).also {
                 it.showSurvey(activity)
             }
+        }
+    }
+
+    fun showSurveyWithDelay(pageName: String, presentation: SurveyPresentation, delay: Long) {
+        Logger.log(LogLevel.DEBUG, "ActivityLifecycleListener::showSurveyWithDelay")
+        val task = Runnable {
+            showSurveyDialogOnCurrentActivity(presentation)
+        }
+
+        delayedTasks[pageName] = task
+        handler.postDelayed(task, delay)
+    }
+
+    fun cancelPendingSurveys(pageName: String) {
+        Logger.log(LogLevel.DEBUG, "ActivityLifecycleListener::cancelPendingSurveys")
+        delayedTasks.remove(pageName)?.let {
+            Logger.log(LogLevel.DEBUG, "---> Removing ")
+            handler.removeCallbacks(it)
         }
     }
 }

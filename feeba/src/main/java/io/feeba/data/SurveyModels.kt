@@ -3,7 +3,6 @@ package io.feeba.data
 import io.least.core.ServerConfig
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.util.Date
 
 @Serializable
 data class FeebaResponse(
@@ -41,25 +40,6 @@ data class SdkConfig    (
     val baseServerUrl: String? = null,
 )
 
-
-@Serializable
-data class UserData(
-    val userId: String,
-    val email: String?,
-    val phoneNumber: String?,
-)
-
-@Serializable
-data class LocalState(
-    val numberOfLaunches: Int,
-    val totalSessionDurationSec: Int,
-    val lastSessionDurationSec: Int,
-    val firstSessionDate: Int, // epoch in seconds
-    val userData: UserData,
-    val events: List<String>,
-    val pages: List<String>,
-)
-
 data class FeebaConfig(
     val serviceConfig : ServerConfig,
 )
@@ -90,19 +70,3 @@ fun isBanner(position: Position): Boolean =
         Position.TOP_BANNER, Position.BOTTOM_BANNER -> true
         else -> false
     }
-
-object Defaults {
-    val localState = LocalState(
-        numberOfLaunches = 0,
-        totalSessionDurationSec = 0,
-        lastSessionDurationSec = 0,
-        firstSessionDate = Date().time.toInt() / 100,
-        userData = UserData(
-            userId = "",
-            email = "",
-            phoneNumber = ""
-        ),
-        events = listOf(),
-        pages = listOf()
-    )
-}

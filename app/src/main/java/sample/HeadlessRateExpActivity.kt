@@ -6,17 +6,13 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import io.feeba.Feeba
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
 import io.least.core.createWithFactory
 import io.least.demo.databinding.ActivityRateExpHeadlessBinding
 import io.least.viewmodel.RateExperienceState
 import io.least.viewmodel.RateExperienceViewModel
-import io.least.viewmodel.RateMeViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

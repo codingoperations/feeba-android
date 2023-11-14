@@ -1,31 +1,22 @@
 package sample
 
-import android.app.Activity
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.Button
-import android.widget.PopupWindow
-import android.widget.RelativeLayout
-import androidx.core.widget.PopupWindowCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import io.feeba.Feeba
-import io.feeba.data.Position
 import io.feeba.survey.KEY_SURVEY_URL
 import io.feeba.survey.SurveyFragment
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
+import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import io.least.ui.app.RateAppFragment
 import io.least.ui.app.RateExpActivity
 import io.least.viewmodel.RateAppConfig
-import kotlin.concurrent.fixedRateTimer
+import sample.bugs.ProblematicLoginPage
 
 class ShowCaseFragment : Fragment() {
 
@@ -52,19 +43,7 @@ class ShowCaseFragment : Fragment() {
                 requireActivity(),
                 ServerConfig(ConfigHolder.hostUrl, ConfigHolder.langCode, ConfigHolder.jwtToken),
                 UserSpecificContext("info@feeba.io"),
-                null,
-                //            RateExperienceConfig(
-//                tags = listOf(Tag("id1", "tag1"), Tag("id2", "tag2"), Tag("id3", "tag3")),
-//                numberOfStars = 6,
-//                valueReaction = listOf(
-//                    LabelValue(1, "too bad :("),
-//                    LabelValue(2, "Nice ;)"),
-//                    LabelValue(8, "Great!")
-//                ),
-//                title = "MY TITLE",
-//                postSubmitTitle = "It is post submit Title",
-//                postSubmitText = "It is post submit BODY TEXT",
-//            ),
+                null
             )
         }
         binding.buttonRateExperienceHeadless.setOnClickListener {
@@ -87,11 +66,19 @@ class ShowCaseFragment : Fragment() {
                     "SurveyFragment"
                 )
         }
-        binding.onCloseAction.setOnClickListener {
-            Feeba.onEvent("on_ride_end")
+        binding.onRideEndButton.setOnClickListener {
+            Feeba.triggerEvent("on_ride_end")
         }
+        // BUGs and issue reporting
         binding.reportProblem.setOnClickListener {
-            Feeba.onEvent("report_problem")
+            Feeba.triggerEvent("report_problem")
+        }
+
+        binding.buttonHavingTrouble.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .addToBackStack("login_page")
+                .replace(R.id.fragmentContainer, ProblematicLoginPage())
+                .commit()
         }
 
         binding.switchEnv.setOnCheckedChangeListener { _, isChecked -> ConfigHolder.setEnv(isChecked) }

@@ -6,11 +6,13 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Handler
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.PopupWindow
 import androidx.core.widget.PopupWindowCompat
 import io.feeba.Feeba
@@ -23,6 +25,7 @@ import io.feeba.data.SurveyPresentation
 import io.feeba.data.isBanner
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
+import io.feeba.navigationBarHeight
 import io.feeba.ui.AnimationUtils
 import io.feeba.ui.BannerHolderView
 import io.feeba.ui.ViewUtils
@@ -93,49 +96,6 @@ internal class SurveyViewController(
         marginPxSizeRight = if (content.useWidthMargin) dpToPx(24f) else 0
     }
 
-
-    fun showView(activity: Activity) {
-        delayShowUntilAvailable(activity)
-    }
-
-
-    /**
-     * This will fired when the device is rotated for example with a new provided height for the WebView
-     * Called to shrink or grow the WebView when it receives a JS resize event with a new height.
-     *
-     * @param pageHeight the provided height
-     */
-    fun updateHeight(pageHeight: Int, currentActivity: Activity) {
-//        this.pageHeight = pageHeight
-//        Utils.runOnMainUIThread(Runnable {
-//            val layoutParams = webView.layoutParams
-//            if (layoutParams == null) {
-//                Logger.log(
-//                    LogLevel.WARN,
-//                    "WebView height update skipped because of null layoutParams, new height will be used once it is displayed."
-//                )
-//                return@Runnable
-//            }
-//            layoutParams.height = pageHeight
-//            // We only need to update the WebView size since it's parent layouts are set to
-//            //   WRAP_CONTENT to always match the height of the WebView. (Expect for fullscreen)
-//            webView.layoutParams = layoutParams
-//
-//            // draggableRelativeLayout comes in null here sometimes, this is due to the IAM
-//            //  not being ready to be shown yet
-//            // When preparing the IAM, the correct height will be set and handle this job, so
-//            //  all bases are covered and the draggableRelativeLayout will never have the wrong height
-//            if (draggableRelativeLayout != null) draggableRelativeLayout?.setParams(
-//                createDraggableLayoutParams(
-//                    pageHeight,
-//                    displayLocation,
-//                    disableDragDismiss,
-//                    ViewUtils.getWindowHeight(currentActivity)
-//                )
-//            )
-//        })
-    }
-
     fun showSurvey(currentActivity: Activity) {
         Logger.log(LogLevel.DEBUG, "SurveyViewController::showSurvey")
         Utils.runOnMainUIThread {
@@ -153,41 +113,6 @@ internal class SurveyViewController(
     }
 
 
-//    private fun createDraggableLayoutParams(pageHeight: Int, windowHeight: Int): BannerHolderView.Params {
-//        var pageHeight = pageHeight
-//        val draggableParams = BannerHolderView.Params(
-//            maxXPos = marginPxSizeRight,
-//            maxYPos = marginPxSizeTop,
-//            messageHeight = pageHeight,
-//            height = windowHeight,
-//        )
-//
-//        when (content.displayLocation) {
-//            TOP_BANNER -> draggableParams.dragThresholdY = marginPxSizeTop
-//            BOTTOM_BANNER -> {
-//                draggableParams.posY = windowHeight - pageHeight
-//            }
-//
-//            FULL_SCREEN -> {
-//                run {
-//                    pageHeight = windowHeight - (marginPxSizeBottom + marginPxSizeTop)
-//                    draggableParams.messageHeight = pageHeight
-//                }
-//                val y = windowHeight / 2 - pageHeight / 2
-//                draggableParams.maxYPos = y
-//                draggableParams.posY = y
-//            }
-//
-//            CENTER_MODAL -> {
-//                val y = windowHeight / 2 - pageHeight / 2
-//                draggableParams.maxYPos = y
-//                draggableParams.posY = y
-//            }
-//        }
-//        return draggableParams
-//    }
-
-
 
     /**
      * Create a new Android PopupWindow that draws over the current Activity
@@ -203,6 +128,7 @@ internal class SurveyViewController(
         ).apply {
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             isTouchable = true
+            isFocusable = true
             // NOTE: This is required for getting fullscreen under notches working in portrait mode
             isClippingEnabled = false
             var gravity = Gravity.CENTER_HORIZONTAL
@@ -217,13 +143,13 @@ internal class SurveyViewController(
                 viewLifecycleListener.onSurveyWillDismiss()
                 viewLifecycleListener.onSurveyWasDismissed()
             }
-            showAtLocation(currentActivity.window.decorView.rootView, gravity, 0, 0)
+            showAtLocation(currentActivity.window.decorView.rootView, gravity, 0, currentActivity.navigationBarHeight)
 
             // Using panel for fullbleed IAMs and dialog for non-fullbleed. The attached dialog type
             // does not allow content to bleed under notches but panel does.
             val displayType = if (content.isFullBleed) WindowManager.LayoutParams.TYPE_APPLICATION_PANEL else WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
             PopupWindowCompat.setWindowLayoutType(
-                this, displayType
+                this, WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
             )
         }
     }
@@ -259,30 +185,14 @@ internal class SurveyViewController(
         Handler().postDelayed({ delayShowUntilAvailable(currentActivity) }, ACTIVITY_INIT_DELAY.toLong())
     }
 
-    /**
-     * Finishing on a timer as continueSettling does not return false
-     * when using smoothSlideViewTo on Android 4.4
-     */
-    private fun finishAfterDelay() {
-        Utils.runOnMainThreadDelayed(Runnable {
-            bannerHolderView?.let {
-                if (hasBackground) {
-                    animateAndDismissLayout(it)
-                } else {
-                    cleanupViewsAfterDismiss()
-                }
-            } ?: cleanupViewsAfterDismiss()
 
-        }, ACTIVITY_FINISH_AFTER_DISMISS_DELAY_MS)
-    }
-
-    /**
-     * IAM has been fully dismissed, remove all views and call the onMessageWasDismissed callback
-     */
-    private fun cleanupViewsAfterDismiss() {
-        removeAllViews()
-        viewLifecycleListener.onSurveyWasDismissed()
-    }
+//    /**
+//     * IAM has been fully dismissed, remove all views and call the onMessageWasDismissed callback
+//     */
+//    private fun cleanupViewsAfterDismiss() {
+//        removeAllViews()
+//        viewLifecycleListener.onSurveyWasDismissed()
+//    }
 
     /**
      * Remove all views and dismiss PopupWindow
@@ -360,27 +270,22 @@ internal class SurveyViewController(
 //        backgroundAnimation.start()
 //    }
 
-    private fun animateAndDismissLayout(backgroundView: View) {
-        val animCallback: Animator.AnimatorListener = object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                cleanupViewsAfterDismiss()
-            }
-        }
-
-        // Animate background behind the message so it hides before being removed from the view
-        animateBackgroundColor(
-            backgroundView, IN_APP_BACKGROUND_ANIMATION_DURATION_MS, ACTIVITY_BACKGROUND_COLOR_FULL, ACTIVITY_BACKGROUND_COLOR_EMPTY, animCallback
-        ).start()
-    }
-
-    private fun animateBackgroundColor(backgroundView: View, duration: Int, startColor: Int, endColor: Int, animCallback: Animator.AnimatorListener?): ValueAnimator {
-        return AnimationUtils.animateViewColor(
-            backgroundView, duration, startColor, endColor, animCallback
-        )
-    }
-
-    override fun toString(): String {
-        return "InAppMessageView{" + ", displayDuration=" + displayDuration + ", hasBackground=" + hasBackground + ", shouldDismissWhenActive=" + shouldDismissWhenActive + ", displayLocation=" + content.displayLocation
-    }
-
+//    private fun animateAndDismissLayout(backgroundView: View) {
+//        val animCallback: Animator.AnimatorListener = object : AnimatorListenerAdapter() {
+//            override fun onAnimationEnd(animation: Animator) {
+//                cleanupViewsAfterDismiss()
+//            }
+//        }
+//
+//        // Animate background behind the message so it hides before being removed from the view
+//        animateBackgroundColor(
+//            backgroundView, IN_APP_BACKGROUND_ANIMATION_DURATION_MS, ACTIVITY_BACKGROUND_COLOR_FULL, ACTIVITY_BACKGROUND_COLOR_EMPTY, animCallback
+//        ).start()
+//    }
+//
+//    private fun animateBackgroundColor(backgroundView: View, duration: Int, startColor: Int, endColor: Int, animCallback: Animator.AnimatorListener?): ValueAnimator {
+//        return AnimationUtils.animateViewColor(
+//            backgroundView, duration, startColor, endColor, animCallback
+//        )
+//    }
 }

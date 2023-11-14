@@ -32,6 +32,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.graphics.Point
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
@@ -41,6 +42,8 @@ import android.os.Looper
 import android.telephony.TelephonyManager
 import android.text.TextUtils
 import android.view.View
+import android.view.WindowInsets
+import android.view.WindowManager
 import androidx.annotation.Keep
 import androidx.core.app.JobIntentService
 import androidx.core.app.NotificationManagerCompat
@@ -72,17 +75,6 @@ object Utils {
         }
     }
 
-    private fun supportsADM(): Boolean {
-        return try {
-            // Class only available on the FireOS and only when the following is in the AndroidManifest.xml.
-            // <amazon:enable-feature android:name="com.amazon.device.messaging" android:required="false"/>
-            Class.forName("com.amazon.device.messaging.ADM")
-            true
-        } catch (e: ClassNotFoundException) {
-            false
-        }
-    }
-
 
     val netType: Int?
         get() {
@@ -106,11 +98,6 @@ object Utils {
             null
         }
 
-    val NO_RETRY_NETWROK_REQUEST_STATUS_CODES = intArrayOf(401, 402, 403, 404, 410)
-    fun shouldRetryNetworkRequest(statusCode: Int): Boolean {
-        for (code in NO_RETRY_NETWROK_REQUEST_STATUS_CODES) if (statusCode == code) return false
-        return true
-    }
 
     // Interim method that works around Proguard's overly aggressive assumenosideeffects which
     // ignores keep rules.
@@ -387,3 +374,39 @@ object Utils {
         return getRootCauseThrowable(throwable).message
     }
 }
+val Context.navigationBarHeight: Int
+    get() {
+        val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+
+        return if (Build.VERSION.SDK_INT >= 30) {
+            windowManager
+                .currentWindowMetrics
+                .windowInsets
+                .getInsets(WindowInsets.Type.navigationBars())
+                .bottom
+
+        } else {
+            val currentDisplay = try {
+                display
+            } catch (e: NoSuchMethodError) {
+                windowManager.defaultDisplay
+            }
+
+            val appUsableSize = Point()
+            val realScreenSize = Point()
+            currentDisplay?.apply {
+                getSize(appUsableSize)
+                getRealSize(realScreenSize)
+            }
+
+            // navigation bar on the side
+            if (appUsableSize.x < realScreenSize.x) {
+                return realScreenSize.x - appUsableSize.x
+            }
+
+            // navigation bar at the bottom
+            return if (appUsableSize.y < realScreenSize.y) {
+                realScreenSize.y - appUsableSize.y
+            } else 0
+        }
+    }

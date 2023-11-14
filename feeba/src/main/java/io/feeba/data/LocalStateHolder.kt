@@ -1,62 +1,50 @@
 package io.feeba.data
 
-import android.app.Application
+import io.feeba.data.state.AppHistoryState
+import io.feeba.data.state.Defaults
+import io.feeba.data.state.StateStorageInterface
+import io.feeba.data.state.UserData
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
-import io.least.core.readLocalFile
-import io.least.core.writeToLocalFile
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-class LocalStateHolder(private val app: Application) {
-    @Volatile var lastKnownFeebaConfig: FeebaResponse? = null
-    private val lastKnownLocalState: LocalState? = null
-    private val surveyConfigFileName = "survey_onfig.json"
-    private val localStateFileName = "local_state.json"
+class LocalStateHolder(private val stateStorage: StateStorageInterface) {
+    @Volatile
+    var lastKnownFeebaConfig: FeebaResponse? = null
+    private val lastKnownAppHistoryState: AppHistoryState? = null
+
     private val eventCountMap = mutableMapOf<String, Int>()
     private val jsonInstance = Json { ignoreUnknownKeys = true }
 
     fun setFeebaConfig(response: String) {
         Logger.log(LogLevel.DEBUG, "LocalStateHolder:: Storing response: $response")
         // Update local reference
-        this.lastKnownFeebaConfig = jsonInstance.decodeFromString(response)
-        // Write to local file
         try {
-            writeToLocalFile(response, app.applicationContext, surveyConfigFileName)
+            jsonInstance.decodeFromString<FeebaResponse>(response).also {
+                this.lastKnownFeebaConfig = it
+                stateStorage.feebaResponse = it
+            }
         } catch (t: Throwable) {
-            Logger.log(LogLevel.WARN, "LocalStateHolder:: Failed to write local config. Error: $t")
+            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to parse response. Error: $t")
         }
     }
 
-    fun readLocalState(): LocalState {
-        return lastKnownLocalState ?: run {
+
+    fun readLocalConfig(): FeebaResponse {
+        return lastKnownFeebaConfig ?: run {
+            stateStorage.feebaResponse
+        }
+    }
+
+
+    fun readLocalState(): AppHistoryState {
+        return lastKnownAppHistoryState ?: run {
             try {
-                val localValue = readLocalFile(app.applicationContext, localStateFileName)
-                if (localValue.isEmpty()) {
-                    Logger.log(LogLevel.WARN, "No locally cached STATE is found. Falling back to default state. Is it the first run of the app?")
-                    return Defaults.localState
-                }
-                return jsonInstance.decodeFromString(localValue)
+                stateStorage.state
             } catch (t: Throwable) {
                 Logger.log(LogLevel.WARN, "Failed to read local config. Falling back to default state. Error: $t")
-                return Defaults.localState
-            }
-        }
-    }
-
-    fun readLocalConfig(): FeebaResponse? {
-        return lastKnownFeebaConfig ?: run {
-            try {
-                val localValue = readLocalFile(app.applicationContext, surveyConfigFileName)
-                if (localValue.isEmpty()) {
-                    Logger.log(LogLevel.WARN, "No locally cached config is found. Is it the first run of the app?")
-                    return null
-                }
-                return jsonInstance.decodeFromString(localValue)
-            } catch (t: Throwable) {
-                Logger.log(LogLevel.WARN, "Failed to read local config. Error: $t")
-                return null
+                return Defaults.appHistoryState
             }
         }
     }
@@ -70,7 +58,23 @@ class LocalStateHolder(private val app: Application) {
     }
 
     fun onEvent(eventName: String) {
-        // TODO("Not yet implemented")
         eventCountMap[eventName] = (eventCountMap[eventName] ?: 0) + 1
+    }
+
+    fun pageOpened(pageName: String) {
+//        TODO("Not yet implemented")
+    }
+
+    fun pageClosed(pageName: String) {
+//        TODO("Not yet implemented")
+    }
+
+    fun updateUserData(
+        phoneNumber: String? = null,
+        email: String? = null,
+        language: String? = null,
+        tags: Map<String, String>? = null,
+    ) {
+        TODO("Not yet implemented")
     }
 }

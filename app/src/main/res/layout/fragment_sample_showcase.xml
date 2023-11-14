@@ -8,6 +8,31 @@
     tools:context="sample.SampleShowCaseActivity">
 
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@id/surveyDialog"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+        <Button
+            android:layout_gravity="center"
+            android:id="@+id/reportProblem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="Report a Bug"/>
+        <Button
+            android:layout_gravity="center"
+            android:id="@+id/buttonHavingTrouble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="Problematic Logic"/>
+    </LinearLayout>
+
+
+
     <Button
         android:id="@+id/surveyDialog"
         android:layout_width="wrap_content"
@@ -15,27 +40,18 @@
         android:layout_margin="8dp"
         android:text="Survey Dialog"
         app:layout_constraintBottom_toTopOf="@id/buttonRateApp"
-        app:layout_constraintEnd_toStartOf="@id/onCloseAction"
+        app:layout_constraintEnd_toStartOf="@id/onRideEndButton"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/onCloseAction"
+        android:id="@+id/onRideEndButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:text="on_ride_end"
         app:layout_constraintBottom_toTopOf="@id/buttonRateApp"
-        app:layout_constraintEnd_toStartOf="@id/reportProblem"
-        app:layout_constraintStart_toEndOf="@id/surveyDialog" />
-    <Button
-        android:id="@+id/reportProblem"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="Bug"
-        app:layout_constraintBottom_toTopOf="@id/buttonRateApp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/onCloseAction" />
+        app:layout_constraintStart_toEndOf="@id/surveyDialog" />
 
     <Button
         android:id="@+id/buttonRateApp"
@@ -85,8 +101,8 @@
         android:id="@+id/editTextLangCode"
         android:layout_width="65dp"
         android:layout_height="wrap_content"
-        android:ems="10"
         android:layout_marginEnd="16dp"
+        android:ems="10"
         android:inputType="textPersonName"
         android:text="ru"
         app:layout_constraintEnd_toEndOf="parent"

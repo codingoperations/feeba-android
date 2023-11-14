@@ -2,9 +2,11 @@ package io.feeba.lifecycle
 
 import android.app.Activity
 import io.feeba.data.LocalStateHolder
+import io.feeba.data.RuleType
 import io.feeba.data.SurveyPresentation
 import io.feeba.data.TriggerCondition
 import io.feeba.data.isEvent
+import io.feeba.data.isPageTrigger
 
 class TriggerValidator {
 
@@ -12,33 +14,61 @@ class TriggerValidator {
     fun onEvent(eventName: String, value: String? = null, localStateHolder: LocalStateHolder): SurveyPresentation? {
         Logger.log(LogLevel.DEBUG, "TriggerValidator:: onEvent -> $eventName, value: $value")
         // check if we have a survey for this event
-        localStateHolder.readLocalConfig()?.let {
-            // check if we have a survey for this event
-            Logger.log(LogLevel.DEBUG, "TriggerValidator:: surveyPlans -> ${it.surveyPlans}")
-            for (surveyPlan in it.surveyPlans) {
-                for (andTrigger in surveyPlan.triggerConditions) {
-                    // if all conditions are met, return the survey
-                    var allConditionsMet = false
-                    for (triggerCondition: TriggerCondition in andTrigger) {
-                        if (isEvent(triggerCondition) && triggerCondition.property == eventName) {
-                            allConditionsMet = true
-                        }
-                    }
-                    if (allConditionsMet) {
-                        return surveyPlan.surveyPresentation
+        val config = localStateHolder.readLocalConfig()
+        // check if we have a survey for this event
+        Logger.log(LogLevel.DEBUG, "TriggerValidator:: surveyPlans -> ${config.surveyPlans}")
+        for (surveyPlan in config.surveyPlans) {
+            for (andTrigger in surveyPlan.triggerConditions) {
+                // if all conditions are met, return the survey
+                var allConditionsMet = false
+                for (triggerCondition: TriggerCondition in andTrigger) {
+                    if (isEvent(triggerCondition) && triggerCondition.property == eventName) {
+                        allConditionsMet = true
                     }
                 }
+                if (allConditionsMet) {
+                    return surveyPlan.surveyPresentation
+                }
             }
-            return null
-        } ?: run {
-            Logger.log(LogLevel.DEBUG, "No survey config found. Ignoring event.")
-            return null
         }
+        return null
+
+    }
+
+    fun pageOpened(pageName: String, localStateHolder: LocalStateHolder): Pair<SurveyPresentation, Long>? {
+        Logger.log(LogLevel.DEBUG, "TriggerValidator:: pageOpened -> $pageName")
+        // check if we have a survey for this event
+        val config = localStateHolder.readLocalConfig()
+        // check if we have a survey for this event
+        Logger.log(LogLevel.DEBUG, "TriggerValidator:: surveyPlans -> ${config.surveyPlans}")
+        for (surveyPlan in config.surveyPlans) {
+            for (andTrigger in surveyPlan.triggerConditions) {
+                // if all conditions are met, return the survey
+                var allConditionsMet = false
+                if (isPageTrigger(andTrigger)) {
+                    allConditionsMet = true
+                }
+                if (allConditionsMet) {
+                    if (andTrigger.none { it.property == pageName }) {
+                        // page name is not in the trigger conditions, we pass the condition block
+                        continue
+                    }
+                    val surveyOpenDelaySec = try {
+                        andTrigger.filter { it.type == RuleType.SESSION_DURATION }.getOrNull(0)?.value?.toLongOrNull() ?: 0
+                    } catch (throwable: Throwable) {
+                        Logger.log(LogLevel.ERROR, "Failed to parse page timing condition value: $throwable")
+                        0
+                    }
+                    return Pair(surveyPlan.surveyPresentation, surveyOpenDelaySec * 1000)
+                }
+            }
+        }
+        return null
     }
 }
 
 fun validateEvent(triggerCondition: TriggerCondition) {
-    when (triggerCondition.operator){
+    when (triggerCondition.operator) {
         "ex" -> {}
         "eq" -> {}
         "neq" -> {}

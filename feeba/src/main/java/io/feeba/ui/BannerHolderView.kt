@@ -1,5 +1,6 @@
 package io.feeba.ui
 
+import CircleVew
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
@@ -149,11 +150,11 @@ private fun createWebViewInstance(context: Context, presentation: SurveyPresenta
         }, "Mobile")
         webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                Logger.log(LogLevel.DEBUG, "WebViewClient::onPageStarted")
+                Logger.log(LogLevel.DEBUG, "WebViewClient::onPageStarted, url: $url")
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
-                Logger.log(LogLevel.DEBUG, "WebViewClient::onPageFinished")
+                Logger.log(LogLevel.DEBUG, "WebViewClient::onPageFinished, url: $url")
             }
         }
         loadUrl(presentation.surveyWebAppUrl)
