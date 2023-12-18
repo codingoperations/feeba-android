@@ -1,6 +1,7 @@
 package sample
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,13 +10,11 @@ import androidx.fragment.app.Fragment
 import io.feeba.Feeba
 import io.feeba.survey.KEY_SURVEY_URL
 import io.feeba.survey.SurveyFragment
+import io.feeba.ui.FloatingView
 import io.least.core.ServerConfig
 import io.least.core.collector.UserSpecificContext
 import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
-import io.least.ui.app.RateAppFragment
-import io.least.ui.app.RateExpActivity
-import io.least.viewmodel.RateAppConfig
 import sample.bugs.ProblematicLoginPage
 
 class ShowCaseFragment : Fragment() {
@@ -31,41 +30,35 @@ class ShowCaseFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSampleShowcaseBinding.inflate(inflater, container, false)
-        binding.buttonRateApp.setOnClickListener {
-            RateAppFragment.show(
-                parentFragmentManager,
-                requireActivity().classLoader,
-                RateAppConfig(minPositiveRate = 3.0f)
-            )
-        }
-        binding.buttonRateExperienceDefaultUi.setOnClickListener {
-            RateExpActivity.startActivity(
-                requireActivity(),
-                ServerConfig(ConfigHolder.hostUrl, ConfigHolder.langCode, ConfigHolder.jwtToken),
-                UserSpecificContext("info@feeba.io"),
-                null
-            )
-        }
-        binding.buttonRateExperienceHeadless.setOnClickListener {
-            HeadlessRateExpActivity.startActivity(requireActivity())
-        }
 
         // Survey
         binding.surveyDialog.setOnClickListener {
-            SurveyFragment()
-                .apply {
-                    arguments = Bundle().apply {
-                        putString(
-                            KEY_SURVEY_URL,
-                            "http://dev-dashboard.feeba.io/s/feeba/6504ee57ba0d101292e066a8"
-                        )
-                    }
-                }
-                .show(
-                    parentFragmentManager,
-                    "SurveyFragment"
-                )
+//            val floatingView = FloatingView(
+//                context = requireActivity().applicationContext,
+//                focusable = true,
+//                rootView = requireActivity().window.decorView.rootView as ViewGroup
+//            ) {
+//
+//                Log.d("FloatingView", "onKnob Clicked")
+//            }
+//
+//            floatingView.show()
+
+//            SurveyFragment()
+//                .apply {
+//                    arguments = Bundle().apply {
+//                        putString(
+//                            KEY_SURVEY_URL,
+//                            "http://dev-dashboard.feeba.io/s/feeba/6504ee57ba0d101292e066a8"
+//                        )
+//                    }
+//                }
+//                .show(
+//                    parentFragmentManager,
+//                    "SurveyFragment"
+//                )
         }
+
         binding.onRideEndButton.setOnClickListener {
             Feeba.triggerEvent("on_ride_end")
         }

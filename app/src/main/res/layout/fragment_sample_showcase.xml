@@ -31,15 +31,13 @@
             android:text="Problematic Logic"/>
     </LinearLayout>
 
-
-
     <Button
         android:id="@+id/surveyDialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:text="Survey Dialog"
-        app:layout_constraintBottom_toTopOf="@id/buttonRateApp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/onRideEndButton"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -49,39 +47,9 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:text="on_ride_end"
-        app:layout_constraintBottom_toTopOf="@id/buttonRateApp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/surveyDialog" />
-
-    <Button
-        android:id="@+id/buttonRateApp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="Rate App"
-        app:layout_constraintBottom_toTopOf="@id/buttonRateExperienceDefaultUi"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/buttonRateExperienceDefaultUi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="Rate Exp Default"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/buttonRateExperienceHeadless"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/buttonRateExperienceHeadless"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="Rate Exp Headless"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/buttonRateExperienceDefaultUi" />
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switchEnv"
@@ -92,7 +60,6 @@
         android:text="Keep it on to use Prod or Off for Dev environemnt"
         android:textOff="DEV"
         android:textOn="PROD"
-        app:layout_constraintBottom_toTopOf="@+id/divider0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

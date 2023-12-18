@@ -14,7 +14,7 @@ data class FeebaResponse(
 data class SurveyPlan(
     val id: String,
     val surveyPresentation: SurveyPresentation,
-    val triggerConditions: List<List<TriggerCondition>>,
+    val ruleSetList: List<RuleSet>,
 )
 
 @Serializable
@@ -27,10 +27,16 @@ enum class RuleType () {
 }
 
 @Serializable
+data class RuleSet (
+    val triggers: List<TriggerCondition>,
+    val startWithKnob: HelperKnob?
+)
+
+@Serializable
 data class TriggerCondition(
     val type: RuleType,
-    val property: String,
-    val operator: String,
+    val eventName: String,
+    val conditional: String,
     val value: String
 )
 
@@ -55,8 +61,13 @@ data class SurveyPresentation(
     val displayDuration: Double,
     val maxWidgetHeightInPercent: Int = 70, // between 0 to 100
     val maxWidgetWidthInPercent: Int = 90, // between 0 to 100
+    val helperKnob : HelperKnob? = null,
 )
 
+@Serializable
+data class HelperKnob(
+    val hintText: String? = null,
+)
 @Serializable
 enum class Position() {
     @SerialName("top_banner") TOP_BANNER,

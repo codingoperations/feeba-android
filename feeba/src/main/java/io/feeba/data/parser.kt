@@ -1,7 +1,5 @@
 package io.feeba.data
 
-import io.feeba.lifecycle.LogLevel
-import io.feeba.lifecycle.Logger
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -10,11 +8,11 @@ fun decodeFeebaResponse(json: String): FeebaResponse {
 }
 
 fun isEvent(triggerCondition: TriggerCondition): Boolean {
-    return triggerCondition.type != RuleType.EVENT
+    return triggerCondition.type == RuleType.EVENT
 }
 
-fun isPageTrigger(triggerBlock: List<TriggerCondition>) : Boolean {
-    for (triggerCondition in triggerBlock) {
+fun isPageTrigger(ruleSet: RuleSet) : Boolean {
+    for (triggerCondition in ruleSet.triggers) {
         if (triggerCondition.type == RuleType.SCREEN) {
             return true
         }

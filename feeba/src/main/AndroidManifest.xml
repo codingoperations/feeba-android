@@ -3,9 +3,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
-        <activity
-            android:name="io.least.ui.app.RateExpActivity"
-            android:label="RateExp"
-            android:theme="@style/Theme.RateMe"/>
+
     </application>
 </manifest>

@@ -6,12 +6,9 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import io.feeba.Feeba
 import io.least.demo.databinding.DialogProblematicLogicBinding
-import io.least.viewmodel.RateAppConfig
 
 
 class ProblematicLoginPage() : Fragment() {

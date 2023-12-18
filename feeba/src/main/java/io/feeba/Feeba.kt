@@ -45,7 +45,7 @@ object Feeba {
         // check if we have a survey for this event
         val surveyPresentation = triggerValidator.onEvent(eventName, value, localStateHolder)
         surveyPresentation?.let {
-            activityListener.showSurveyDialogOnCurrentActivity(it)
+            activityListener.startSurveyRendering(it)
         }
     }
 

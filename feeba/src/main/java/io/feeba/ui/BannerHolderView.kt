@@ -1,20 +1,28 @@
 package io.feeba.ui
 
-import CircleVew
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.http.SslError
 import android.os.Build
+import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.webkit.ConsoleMessage
+import android.webkit.SslErrorHandler
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
+import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import io.feeba.data.Position.BOTTOM_BANNER
 import io.feeba.data.Position.CENTER_MODAL
@@ -25,7 +33,6 @@ import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.feeba.survey.CallToAction
 import io.feeba.survey.JsInterface
-import io.least.ui.dpToPx
 
 
 private const val IN_APP_MESSAGE_CARD_VIEW_TAG = "IN_APP_MESSAGE_CARD_VIEW_TAG"
@@ -115,8 +122,8 @@ private fun createCardView(activity: Activity, content: SurveyPresentation): Car
 
     // Set the initial elevation of the CardView to 0dp if using Android 6 API 23
     //  Fixes bug when animating a elevated CardView class
-    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M) cardView.cardElevation = 0f else cardView.cardElevation = dpToPx(5f).toFloat()
-    cardView.radius = dpToPx(8f).toFloat()
+    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M) cardView.cardElevation = 0f else cardView.cardElevation = ViewUtils.dpToPx(5).toFloat()
+    cardView.radius = ViewUtils.dpToPx(8).toFloat()
     cardView.clipChildren = false
     cardView.clipToPadding = false
     cardView.preventCornerOverlap = false
@@ -126,6 +133,7 @@ private fun createCardView(activity: Activity, content: SurveyPresentation): Car
 
 private fun createWebViewInstance(context: Context, presentation: SurveyPresentation, onOutsideTouch: (() -> Unit)?): FeebaWebView {
     return FeebaWebView(context).apply {
+//        WebView.setWebContentsDebuggingEnabled(true);
         layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT).apply {
             addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
             addRule(RelativeLayout.CENTER_HORIZONTAL)
@@ -138,7 +146,8 @@ private fun createWebViewInstance(context: Context, presentation: SurveyPresenta
             allowFileAccess = true
 
             domStorageEnabled = true
-            cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+            // Below is trying to fetch a JS bundle that is outdated. Requires deeper investigation
+//            cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
         }
         addJavascriptInterface(JsInterface(context) {
             when (it) {
@@ -156,6 +165,42 @@ private fun createWebViewInstance(context: Context, presentation: SurveyPresenta
             override fun onPageFinished(view: WebView?, url: String?) {
                 Logger.log(LogLevel.DEBUG, "WebViewClient::onPageFinished, url: $url")
             }
+
+            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError) {
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedError, error: $error")
+                // Log WebView errors here
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    // Log error details on API level 23 and above
+                    Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedError, description: ${error.description}")
+                } else {
+                    // Log error details on API level below 23
+                    Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedError, description: ${error}")
+                }
+            }
+
+            @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+            override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
+                super.onReceivedHttpError(view, request, errorResponse)
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, errorResponse: $errorResponse")
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, statusCode: ${errorResponse.statusCode}")
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, reasonPhrase: ${errorResponse.reasonPhrase}")
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, headers: ${errorResponse.responseHeaders}")
+//                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, data: ${errorResponse.data.use { it.reader().readText() } }}")
+            }
+
+            override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+                super.onReceivedSslError(view, handler, error)
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedSslError, error: $error")
+            }
+        }
+        webChromeClient = object : WebChromeClient() {
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
+                Logger.log(LogLevel.DEBUG, "WebChromeClient::onConsoleMessage, message: ${consoleMessage.message()}")
+                Logger.log(LogLevel.DEBUG, "WebChromeClient::onConsoleMessage full: $consoleMessage")
+
+                return true
+            }
+
         }
         loadUrl(presentation.surveyWebAppUrl)
     }

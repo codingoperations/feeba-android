@@ -5,9 +5,7 @@ import android.app.Application
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import io.feeba.data.RuleType
 import io.feeba.data.SurveyPresentation
-import io.feeba.data.TriggerCondition
 import io.feeba.survey.SurveyViewController
 
 /**
@@ -61,7 +59,7 @@ internal class ActivityLifecycleListener() : Application.ActivityLifecycleCallba
     }
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
-    fun showSurveyDialogOnCurrentActivity(presentation: SurveyPresentation) {
+    fun startSurveyRendering(presentation: SurveyPresentation) {
         Logger.log(LogLevel.DEBUG, "ActivityLifecycleListener::showSurveyDialogOnCurrentActivity")
         curActivity?.let { activity ->
             if (surveyViewController != null) return
@@ -81,7 +79,7 @@ internal class ActivityLifecycleListener() : Application.ActivityLifecycleCallba
                 }
 
             }).also {
-                it.showSurvey(activity)
+                it.start(activity)
             }
         }
     }
@@ -89,7 +87,7 @@ internal class ActivityLifecycleListener() : Application.ActivityLifecycleCallba
     fun showSurveyWithDelay(pageName: String, presentation: SurveyPresentation, delay: Long) {
         Logger.log(LogLevel.DEBUG, "ActivityLifecycleListener::showSurveyWithDelay")
         val task = Runnable {
-            showSurveyDialogOnCurrentActivity(presentation)
+            startSurveyRendering(presentation)
         }
 
         delayedTasks[pageName] = task

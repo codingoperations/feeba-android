@@ -2,6 +2,7 @@ package io.feeba.ui
 
 import android.annotation.TargetApi
 import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Point
@@ -9,8 +10,10 @@ import android.graphics.Rect
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.View
+import android.view.ViewTreeObserver
 import android.view.Window
-import io.feeba.Feeba
+import android.view.inputmethod.InputMethodManager
+import androidx.fragment.app.Fragment
 import java.lang.ref.WeakReference
 
 internal object ViewUtils {
@@ -132,5 +135,24 @@ internal object ViewUtils {
         val decorView = activity.window.decorView
         val insetsAttached = decorView.rootWindowInsets != null
         return hasToken && insetsAttached
+    }
+    fun removeOnGlobalLayoutListener(view: View, listener: ViewTreeObserver.OnGlobalLayoutListener?) {
+        view.viewTreeObserver.removeOnGlobalLayoutListener(listener)
+    }
+}
+
+internal fun Fragment.showKeyboard(view: View) {
+    val inputMethodManager =
+        context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+    inputMethodManager?.showSoftInput(view, InputMethodManager.SHOW_FORCED)
+}
+
+internal fun Fragment.closeKeyboard() {
+    val inputMethodManager =
+        context?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+    inputMethodManager?.let { im ->
+        activity?.currentFocus?.windowToken?.let { binder ->
+            im.hideSoftInputFromWindow(binder, InputMethodManager.HIDE_IMPLICIT_ONLY, null)
+        }
     }
 }

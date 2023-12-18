@@ -18,11 +18,11 @@ class TriggerValidator {
         // check if we have a survey for this event
         Logger.log(LogLevel.DEBUG, "TriggerValidator:: surveyPlans -> ${config.surveyPlans}")
         for (surveyPlan in config.surveyPlans) {
-            for (andTrigger in surveyPlan.triggerConditions) {
+            for (ruleSet in surveyPlan.ruleSetList) {
                 // if all conditions are met, return the survey
                 var allConditionsMet = false
-                for (triggerCondition: TriggerCondition in andTrigger) {
-                    if (isEvent(triggerCondition) && triggerCondition.property == eventName) {
+                for (triggerCondition: TriggerCondition in ruleSet.triggers) {
+                    if (isEvent(triggerCondition) && triggerCondition.eventName == eventName) {
                         allConditionsMet = true
                     }
                 }
@@ -42,19 +42,19 @@ class TriggerValidator {
         // check if we have a survey for this event
         Logger.log(LogLevel.DEBUG, "TriggerValidator:: surveyPlans -> ${config.surveyPlans}")
         for (surveyPlan in config.surveyPlans) {
-            for (andTrigger in surveyPlan.triggerConditions) {
+            for (ruleSet in surveyPlan.ruleSetList) {
                 // if all conditions are met, return the survey
                 var allConditionsMet = false
-                if (isPageTrigger(andTrigger)) {
+                if (isPageTrigger(ruleSet)) {
                     allConditionsMet = true
                 }
                 if (allConditionsMet) {
-                    if (andTrigger.none { it.property == pageName }) {
+                    if (ruleSet.triggers.none { it.eventName == pageName }) {
                         // page name is not in the trigger conditions, we pass the condition block
                         continue
                     }
                     val surveyOpenDelaySec = try {
-                        andTrigger.filter { it.type == RuleType.SESSION_DURATION }.getOrNull(0)?.value?.toLongOrNull() ?: 0
+                        ruleSet.triggers.filter { it.type == RuleType.SESSION_DURATION }.getOrNull(0)?.value?.toLongOrNull() ?: 0
                     } catch (throwable: Throwable) {
                         Logger.log(LogLevel.ERROR, "Failed to parse page timing condition value: $throwable")
                         0
@@ -68,7 +68,7 @@ class TriggerValidator {
 }
 
 fun validateEvent(triggerCondition: TriggerCondition) {
-    when (triggerCondition.operator) {
+    when (triggerCondition.conditional) {
         "ex" -> {}
         "eq" -> {}
         "neq" -> {}
@@ -77,7 +77,7 @@ fun validateEvent(triggerCondition: TriggerCondition) {
         "lt" -> {}
         "lte" -> {}
         else -> {
-            Logger.log(LogLevel.WARN, "Unknown operator: ${triggerCondition.operator}")
+            Logger.log(LogLevel.WARN, "Unknown operator: ${triggerCondition.conditional}")
             null
         }
     }

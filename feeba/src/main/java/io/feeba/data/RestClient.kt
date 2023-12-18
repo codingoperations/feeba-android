@@ -18,7 +18,7 @@ class RestClient() {
     suspend fun getSurveyPlans(state: AppHistoryState): String? {
         Logger.log(LogLevel.DEBUG, "RestClient::fetchSurveyPlans....")
         return try {
-            val response = sendPostRequest("/v1/survey/sdk/list1", Json.encodeToString(state.userData))
+            val response = sendPostRequest("/v1/survey/sdk/list", Json.encodeToString(state.userData))
             if (response == "") {
                 return null
             }
@@ -27,44 +27,6 @@ class RestClient() {
         } catch (t: Throwable) {
             Logger.log(LogLevel.WARN, "RestClient::getSurveyPlans failed: $t")
             null
-            val result = """
-                {
-                    "surveyPlans": [
-                        {
-                            "id": "654c3aa0baed16a7ac841b39",
-                            "triggerConditions": [
-                                [
-                                    {
-                                        "type": "screen",
-                                        "property": "login_page",
-                                        "operator": "ex",
-                                        "value": "1"
-                                    },
-                                    {
-                                        "type": "session_duration",
-                                        "property": "",
-                                        "operator": "gt",
-                                        "value": "5"
-                                    }
-                                ]
-                            ],
-                            "surveyPresentation": {
-                                "initiateWithQuestionButton": true,
-                                "surveyWebAppUrl": "https://dev-dashboard.feeba.io/s/feeba/654c3aa0baed16a7ac841b39",
-                                "useHeightMargin": true,
-                                "useWidthMargin": true,
-                                "isFullBleed": false,
-                                "displaylocation": "bottom_banner",
-                                "displayDuration": -1,
-                                "maxWidgetHeightInPercent": 70,
-                                "maxWidgetWidthInPercent": 90
-                            }
-                        }
-                    ]
-                }
-            """.trimIndent()
-            Logger.log(LogLevel.WARN, "SCHEMA: ${Json.encodeToString(result)}")
-            result
         }
     }
 

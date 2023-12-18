@@ -1,21 +1,14 @@
 package io.feeba.survey
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ValueAnimator
 import android.app.Activity
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Handler
 import android.view.Gravity
-import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.PopupWindow
 import androidx.core.widget.PopupWindowCompat
-import io.feeba.Feeba
 import io.feeba.Utils
 import io.feeba.data.Position.BOTTOM_BANNER
 import io.feeba.data.Position.CENTER_MODAL
@@ -26,40 +19,18 @@ import io.feeba.data.isBanner
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.feeba.navigationBarHeight
-import io.feeba.ui.AnimationUtils
 import io.feeba.ui.BannerHolderView
+import io.feeba.ui.FloatingView
 import io.feeba.ui.ViewUtils
-import io.least.ui.dpToPx
 
-/**
- * Layout Documentation
- * ### Modals & Banners ###
- * - WebView
- * - width  = MATCH_PARENT
- * - height = PX height provided via a JS event for the content
- * - Parent Layouts
- * - width  = MATCH_PARENT
- * - height = WRAP_CONTENT - Since the WebView is providing the height.
- * ### Fullscreen ###
- * - WebView
- * - width  = MATCH_PARENT
- * - height = MATCH_PARENT
- * - Parent Layouts
- * - width  = MATCH_PARENT
- * - height = MATCH_PARENT
- */
-private val ACTIVITY_BACKGROUND_COLOR_EMPTY = Color.parseColor("#00000000")
-private val ACTIVITY_BACKGROUND_COLOR_FULL = Color.parseColor("#BB000000")
-private const val IN_APP_BANNER_ANIMATION_DURATION_MS = 1000
-private const val IN_APP_CENTER_ANIMATION_DURATION_MS = 1000
-private const val IN_APP_BACKGROUND_ANIMATION_DURATION_MS = 400
-private const val ACTIVITY_FINISH_AFTER_DISMISS_DELAY_MS = 600
+
 private const val ACTIVITY_INIT_DELAY = 200
 
 internal class SurveyViewController(
     private val content: SurveyPresentation, private var viewLifecycleListener: SurveyViewLifecycleListener
 ) {
     private var popupWindow: PopupWindow? = null
+    private var floatingView: FloatingView? = null
 
     internal interface SurveyViewLifecycleListener {
         fun onSurveyWasShown()
@@ -68,10 +39,10 @@ internal class SurveyViewController(
     }
 
     private val handler = Handler()
-    private var marginPxSizeLeft: Int = dpToPx(24f)
-    private var marginPxSizeRight: Int = dpToPx(24f)
-    private var marginPxSizeTop: Int = dpToPx(24f)
-    private var marginPxSizeBottom: Int = dpToPx(24f)
+    private var marginPxSizeLeft: Int = ViewUtils.dpToPx(24)
+    private var marginPxSizeRight: Int = ViewUtils.dpToPx(24)
+    private var marginPxSizeTop: Int = ViewUtils.dpToPx(24)
+    private var marginPxSizeBottom: Int = ViewUtils.dpToPx(24)
     private val displayDuration: Double = content.displayDuration
     private val hasBackground: Boolean = !isBanner(content.displayLocation)
     private var shouldDismissWhenActive = false
@@ -90,29 +61,43 @@ internal class SurveyViewController(
      * @param content in app message content and style
      */
     private fun setMarginsFromContent(content: SurveyPresentation) {
-        marginPxSizeTop = if (content.useHeightMargin) dpToPx(24f) else 0
-        marginPxSizeBottom = if (content.useHeightMargin) dpToPx(24f) else 0
-        marginPxSizeLeft = if (content.useWidthMargin) dpToPx(24f) else 0
-        marginPxSizeRight = if (content.useWidthMargin) dpToPx(24f) else 0
+        marginPxSizeTop = if (content.useHeightMargin) ViewUtils.dpToPx(24) else 0
+        marginPxSizeBottom = if (content.useHeightMargin) ViewUtils.dpToPx(24) else 0
+        marginPxSizeLeft = if (content.useWidthMargin) ViewUtils.dpToPx(24) else 0
+        marginPxSizeRight = if (content.useWidthMargin) ViewUtils.dpToPx(24) else 0
     }
 
-    fun showSurvey(currentActivity: Activity) {
+    fun start(currentActivity: Activity) {
         Logger.log(LogLevel.DEBUG, "SurveyViewController::showSurvey")
         Utils.runOnMainUIThread {
-            val localParentRef =  BannerHolderView(currentActivity, content) {
-                Utils.runOnMainUIThread {
-                    popupWindow?.dismiss()
+            if (content.helperKnob != null || false) {
+                floatingView = FloatingView(
+                    context = currentActivity.applicationContext,
+                    rootView = currentActivity.window.decorView.rootView as ViewGroup,
+                ) {
+                    floatingView?.dismiss()
+                    showSurveyUi(currentActivity)
                 }
-            }
-            this.bannerHolderView = localParentRef
-            this.popupWindow = createPopupWindow(localParentRef, currentActivity)
 
-//            animateSurvey(localDraggableRef)
-            startDismissTimerIfNeeded(currentActivity)
+                floatingView?.show()
+            } else {
+                showSurveyUi(currentActivity)
+            }
         }
     }
 
+    private fun showSurveyUi(currentActivity: Activity) {
+        val localParentRef = BannerHolderView(currentActivity, content) {
+            Utils.runOnMainUIThread {
+                popupWindow?.dismiss()
+            }
+        }
+        this.bannerHolderView = localParentRef
+        this.popupWindow = createPopupWindow(localParentRef, currentActivity)
 
+//            animateSurvey(localDraggableRef)
+        startDismissTimerIfNeeded(currentActivity)
+    }
 
     /**
      * Create a new Android PopupWindow that draws over the current Activity
@@ -179,7 +164,7 @@ internal class SurveyViewController(
     // Do not add view until activity is ready
     private fun delayShowUntilAvailable(currentActivity: Activity) {
         if (ViewUtils.isActivityFullyReady(currentActivity) && bannerHolderView == null) {
-            showSurvey(currentActivity)
+            start(currentActivity)
             return
         }
         Handler().postDelayed({ delayShowUntilAvailable(currentActivity) }, ACTIVITY_INIT_DELAY.toLong())
