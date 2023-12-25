@@ -13,7 +13,7 @@ import android.webkit.WebViewClient
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
-import io.feeba.Feeba
+import io.feeba.FeebaFacade
 import io.feeba.databinding.LayoutSurveyBinding
 import io.least.core.createWithFactory
 
@@ -30,7 +30,7 @@ class SurveyFragment : DialogFragment() {
         createWithFactory {
             SurveyFragmentViewModel(
                 requireActivity().application,
-                Feeba.config.serviceConfig,
+                FeebaFacade.config.serviceConfig,
                 "http://dev-dashboard.feeba.io/s/feeba/6504ee57ba0d101292e066a8"
             )
         }

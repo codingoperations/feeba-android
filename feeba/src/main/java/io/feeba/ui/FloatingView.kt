@@ -1,7 +1,6 @@
 package io.feeba.ui
 
 import android.content.Context
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -9,37 +8,41 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
+import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import io.feeba.R
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
+import io.feeba.navigationBarHeight
 
-private const val TAG = "FloatingView"
 class FloatingView(
     private val context: Context,
     private val rootView: ViewGroup,
     private val onKnobClick: (() -> Unit)? = null,
 ) {
-    private val mContentLayout: View
+    private var mContentLayout: View? = null
     private var dismissed = false
-
-    init {
-        mContentLayout = createContentView()
-    }
 
     fun show() {
         verifyDismissed()
+        mContentLayout = createContentView()
         rootView.removeView(mContentLayout)
         rootView.addView(mContentLayout)
     }
 
     private fun verifyDismissed() {
-        require(!dismissed) { "Tooltip has been dismissed." }
+        if (!dismissed) {
+            Logger.log(LogLevel.ERROR, "Tooltip has been dismissed.")
+        }
     }
 
     private fun createContentView(): View {
         val linearLayout = LinearLayout(context).apply {
-            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                gravity = Gravity.BOTTOM or Gravity.END
+                setMargins(0, 0, ViewUtils.dpToPx(8), context.navigationBarHeight + ViewUtils.dpToPx(8))
+            }
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
 
@@ -102,6 +105,7 @@ class FloatingView(
                             }
                             false
                         }
+
                         else -> false
                     }
                 }
@@ -115,9 +119,11 @@ class FloatingView(
         if (dismissed) return
         dismissed = true
         rootView.removeView(mContentLayout)
-        mContentLayout.visibility = View.GONE
+        mContentLayout?.visibility = View.GONE
+        mContentLayout = null
     }
 }
+
 fun View.animateFadeIn(
     targetAlpha: Float = 1f,
     setup: ViewPropertyAnimator.() -> ViewPropertyAnimator = { this },

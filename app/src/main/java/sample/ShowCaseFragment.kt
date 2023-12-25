@@ -1,18 +1,12 @@
 package sample
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import io.feeba.Feeba
-import io.feeba.survey.KEY_SURVEY_URL
-import io.feeba.survey.SurveyFragment
-import io.feeba.ui.FloatingView
-import io.least.core.ServerConfig
-import io.least.core.collector.UserSpecificContext
 import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import sample.bugs.ProblematicLoginPage

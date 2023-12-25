@@ -1,10 +1,9 @@
 package io.feeba.data
 
-import io.feeba.Feeba
+import io.feeba.FeebaFacade
 import io.feeba.data.state.AppHistoryState
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.BufferedReader
@@ -32,9 +31,9 @@ class RestClient() {
 
     private fun sendPostRequest(path: String, jsonInputString: String): String {
         // Create a URL object from the provided URL string
-        val requestUrl = "${Feeba.config.serviceConfig.hostUrl}${path}"
+        val requestUrl = "${FeebaFacade.config.serviceConfig.hostUrl}${path}"
         Logger.log(LogLevel.DEBUG, "RestClient::sendPostRequest -> $requestUrl")
-        Logger.log(LogLevel.DEBUG, "RestClient::auth headers -> ${Feeba.config.serviceConfig.apiToken}")
+        Logger.log(LogLevel.DEBUG, "RestClient::auth headers -> ${FeebaFacade.config.serviceConfig.apiToken}")
         val url = URL(requestUrl)
 
         // Open a connection to the URL
@@ -45,7 +44,7 @@ class RestClient() {
 
         // Set request headers (if needed)
         connection.setRequestProperty("Content-Type", "application/json")
-        connection.setRequestProperty("x-api-key", Feeba.config.serviceConfig.apiToken)
+        connection.setRequestProperty("x-api-key", FeebaFacade.config.serviceConfig.apiToken)
 
         // Enable input/output streams
         connection.doOutput = true

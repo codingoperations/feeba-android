@@ -13,4 +13,7 @@ class FeebaWebView(context: Context) : WebView(context) {
 //    ): Boolean {
 //        return false
 //    }
+    init {
+        overScrollMode = OVER_SCROLL_NEVER
+    }
 }

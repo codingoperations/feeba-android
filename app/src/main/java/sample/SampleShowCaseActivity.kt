@@ -3,6 +3,7 @@ package sample
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import io.feeba.Feeba
+import io.feeba.FeebaFacade
 import io.least.core.ServerConfig
 import io.least.demo.R
 import io.least.demo.databinding.ActivitySampleShowcaseBinding

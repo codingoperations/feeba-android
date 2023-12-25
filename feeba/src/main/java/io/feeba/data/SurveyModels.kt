@@ -61,7 +61,6 @@ data class SurveyPresentation(
     val displayDuration: Double,
     val maxWidgetHeightInPercent: Int = 70, // between 0 to 100
     val maxWidgetWidthInPercent: Int = 90, // between 0 to 100
-    val helperKnob : HelperKnob? = null,
 )
 
 @Serializable

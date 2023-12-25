@@ -2,6 +2,7 @@ package io.feeba.lifecycle
 
 import android.app.Activity
 import io.feeba.data.LocalStateHolder
+import io.feeba.data.RuleSet
 import io.feeba.data.RuleType
 import io.feeba.data.SurveyPresentation
 import io.feeba.data.TriggerCondition
@@ -11,7 +12,7 @@ import io.feeba.data.isPageTrigger
 class TriggerValidator {
 
 
-    fun onEvent(eventName: String, value: String? = null, localStateHolder: LocalStateHolder): SurveyPresentation? {
+    fun onEvent(eventName: String, value: String? = null, localStateHolder: LocalStateHolder): ValidatorResult? {
         Logger.log(LogLevel.DEBUG, "TriggerValidator:: onEvent -> $eventName, value: $value")
         // check if we have a survey for this event
         val config = localStateHolder.readLocalConfig()
@@ -27,7 +28,7 @@ class TriggerValidator {
                     }
                 }
                 if (allConditionsMet) {
-                    return surveyPlan.surveyPresentation
+                    return ValidatorResult(surveyPlan.surveyPresentation, 0, ruleSet)
                 }
             }
         }
@@ -35,7 +36,7 @@ class TriggerValidator {
 
     }
 
-    fun pageOpened(pageName: String, localStateHolder: LocalStateHolder): Pair<SurveyPresentation, Long>? {
+    fun pageOpened(pageName: String, localStateHolder: LocalStateHolder): ValidatorResult? {
         Logger.log(LogLevel.DEBUG, "TriggerValidator:: pageOpened -> $pageName")
         // check if we have a survey for this event
         val config = localStateHolder.readLocalConfig()
@@ -59,13 +60,19 @@ class TriggerValidator {
                         Logger.log(LogLevel.ERROR, "Failed to parse page timing condition value: $throwable")
                         0
                     }
-                    return Pair(surveyPlan.surveyPresentation, surveyOpenDelaySec * 1000)
+                    return ValidatorResult(surveyPlan.surveyPresentation, surveyOpenDelaySec * 1000, ruleSet)
                 }
             }
         }
         return null
     }
 }
+
+data class ValidatorResult(
+    val surveyPresentation: SurveyPresentation,
+    val delay: Long,
+    val ruleSet: RuleSet
+)
 
 fun validateEvent(triggerCondition: TriggerCondition) {
     when (triggerCondition.conditional) {
