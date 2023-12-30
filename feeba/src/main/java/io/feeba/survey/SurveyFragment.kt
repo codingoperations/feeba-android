@@ -14,6 +14,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import io.feeba.FeebaFacade
+import io.feeba.data.state.AppHistoryState
+import io.feeba.data.state.Defaults
 import io.feeba.databinding.LayoutSurveyBinding
 import io.least.core.createWithFactory
 
@@ -51,7 +53,7 @@ class SurveyFragment : DialogFragment() {
                 domStorageEnabled = true
                 cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
             }
-            this.addJavascriptInterface(JsInterface(requireContext()) {
+            this.addJavascriptInterface(JsInterface(requireContext(), Defaults.appHistoryState) {
                 when (it) {
                     CallToAction.CLOSE_SURVEY -> {
                         this@SurveyFragment.dismiss()

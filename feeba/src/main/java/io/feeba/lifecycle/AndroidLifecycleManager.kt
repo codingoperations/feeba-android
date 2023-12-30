@@ -9,13 +9,17 @@ class AndroidLifecycleManager(app: Application) : GenericAppLifecycle {
     private var activityCount = 0
     var curActivity: Activity? = null
     private val activityNameSet = mutableSetOf<String>()
+
+    // App State
+    private var appStartEventFired = false
     init {
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onCreate(owner: androidx.lifecycle.LifecycleOwner) {
-                appLifecycleListener?.onLifecycleEvent(AppState.CREATED)
-            }
 
             override fun onStart(owner: androidx.lifecycle.LifecycleOwner) {
+                if (!appStartEventFired) {
+                    appStartEventFired = true
+                    appLifecycleListener?.onLifecycleEvent(AppState.CREATED)
+                }
                 appLifecycleListener?.onLifecycleEvent(AppState.FOREGROUND)
             }
 

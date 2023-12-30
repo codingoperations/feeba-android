@@ -10,13 +10,12 @@ import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import io.feeba.R
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.feeba.navigationBarHeight
 
-class FloatingView(
+internal class FloatingView(
     private val context: Context,
     private val rootView: ViewGroup,
     private val onKnobClick: (() -> Unit)? = null,

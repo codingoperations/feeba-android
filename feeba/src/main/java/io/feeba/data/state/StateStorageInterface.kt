@@ -6,6 +6,7 @@ interface StateStorageInterface {
 
     var state: AppHistoryState
     var feebaResponse: FeebaResponse
+    // Followings are likely to be backed by a database
     fun addPageOpenRecord(pageName: String, value: String)
     fun readPageEvenLogs(pageName: String): List<PageEventLog>
     fun addEventRecord(eventName: String, value: String)

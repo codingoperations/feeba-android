@@ -2,7 +2,6 @@ package io.feeba
 
 import io.feeba.data.FeebaConfig
 import io.feeba.data.LocalStateHolder
-import io.feeba.data.state.UserData
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.feeba.lifecycle.TriggerValidator
@@ -54,12 +53,13 @@ object FeebaFacade {
 
     fun showConditionalSurvey() {
         println("Feeba showConditionalSurvey")
+
     }
 
-    val User = object {
+    object User {
         fun login(userId: String, email: String? = null, phoneNumber: String? = null) {
             Logger.log(LogLevel.DEBUG, "login -> $userId, $email, $phoneNumber")
-            localStateHolder.login(UserData(userId, email, phoneNumber))
+            localStateHolder.login(userId, email, phoneNumber)
         }
 
         fun logout() {
@@ -92,7 +92,7 @@ object FeebaFacade {
 
         fun addTag(tags: Map<String, String>) {
             Logger.log(LogLevel.DEBUG, "addTag -> $tags")
-            localStateHolder.updateUserData(tags = tags)
+            localStateHolder.addTags(tags = tags)
         }
     }
 }

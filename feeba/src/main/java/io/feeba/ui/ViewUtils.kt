@@ -5,15 +5,34 @@ import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
+import android.net.http.SslError
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.Window
 import android.view.inputmethod.InputMethodManager
+import android.webkit.ConsoleMessage
+import android.webkit.SslErrorHandler
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.RelativeLayout
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import io.feeba.data.SurveyPresentation
+import io.feeba.data.state.AppHistoryState
+import io.feeba.lifecycle.LogLevel
+import io.feeba.lifecycle.Logger
+import io.feeba.survey.CallToAction
+import io.feeba.survey.JsInterface
 import java.lang.ref.WeakReference
 
 internal object ViewUtils {
@@ -154,5 +173,84 @@ internal fun Fragment.closeKeyboard() {
         activity?.currentFocus?.windowToken?.let { binder ->
             im.hideSoftInputFromWindow(binder, InputMethodManager.HIDE_IMPLICIT_ONLY, null)
         }
+    }
+}
+
+
+fun createWebViewInstance(context: Context, presentation: SurveyPresentation, appHistoryState: AppHistoryState, onOutsideTouch: (() -> Unit)?): FeebaWebView {
+    return createWebViewInstanceUrl(context, presentation.surveyWebAppUrl, appHistoryState, onOutsideTouch)
+}
+fun createWebViewInstanceUrl(context: Context, url: String, appHistoryState: AppHistoryState, onOutsideTouch: (() -> Unit)? = null): FeebaWebView {
+    return FeebaWebView(context).apply {
+        WebView.setWebContentsDebuggingEnabled(true);
+        layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT).apply {
+            addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+            addRule(RelativeLayout.CENTER_HORIZONTAL)
+        }
+        setBackgroundColor(Color.TRANSPARENT)
+        settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            useWideViewPort = true
+            allowFileAccess = true
+
+            domStorageEnabled = true
+            // Below is trying to fetch a JS bundle that is outdated. Requires deeper investigation
+//            cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+        }
+        addJavascriptInterface(JsInterface(context, appHistoryState) {
+            when (it) {
+                CallToAction.CLOSE_SURVEY -> {
+                    Logger.log(LogLevel.DEBUG, "FeebaWebView::JsInterface::CallToAction.CLOSE_SURVEY")
+                    onOutsideTouch?.invoke()
+                }
+            }
+        }, "Mobile")
+        webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                Logger.log(LogLevel.DEBUG, "WebViewClient::onPageStarted, url: $url")
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                Logger.log(LogLevel.DEBUG, "WebViewClient::onPageFinished, url: $url")
+            }
+
+            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError) {
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedError, error: $error")
+                // Log WebView errors here
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    // Log error details on API level 23 and above
+                    Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedError, description: ${error.description}")
+                } else {
+                    // Log error details on API level below 23
+                    Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedError, description: ${error}")
+                }
+            }
+
+            @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+            override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
+                super.onReceivedHttpError(view, request, errorResponse)
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, errorResponse: $errorResponse")
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, statusCode: ${errorResponse.statusCode}")
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, reasonPhrase: ${errorResponse.reasonPhrase}")
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, headers: ${errorResponse.responseHeaders}")
+//                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, data: ${errorResponse.data.use { it.reader().readText() } }}")
+            }
+
+            override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+                super.onReceivedSslError(view, handler, error)
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedSslError, error: $error")
+            }
+        }
+        webChromeClient = object : WebChromeClient() {
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
+                Logger.log(LogLevel.DEBUG, "WebChromeClient::onConsoleMessage, message: ${consoleMessage.message()}")
+//                Logger.log(LogLevel.DEBUG, "WebChromeClient::onConsoleMessage full: $consoleMessage")
+
+                return true
+            }
+
+        }
+        loadUrl(url)
     }
 }

@@ -12,8 +12,7 @@ import io.least.core.ServerConfig
 object Feeba {
     lateinit var app: Application
     private var isInitialized = false
-    val User
-        get() = FeebaFacade.User
+    val User = FeebaFacade.User
 
     val appContext: Context
         get() = app.applicationContext

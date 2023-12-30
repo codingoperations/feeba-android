@@ -77,9 +77,12 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
             put(Contract.PagesEntry.COL_VALUE, value)
             put(Contract.PagesEntry.COL_CREATED, System.currentTimeMillis())
         }
-
-        // Insert the new row, returning the primary key value of the new row
-        val newRowId = writableDatabase.insert(Contract.PagesEntry.TABLE_NAME, null, values)
+        try {
+            // Insert the new row, returning the primary key value of the new row
+            val newRowId = writableDatabase.insert(Contract.PagesEntry.TABLE_NAME, null, values)
+        } catch (t: Throwable) {
+            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to add page open record. Error: $t")
+        }
     }
 
     override fun readPageEvenLogs(pageName: String): List<PageEventLog> {
@@ -94,24 +97,28 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
         val selectionArgs = arrayOf(pageName)
         val sortOrder = "${Contract.PagesEntry.COL_CREATED} DESC"
 
-        val cursor = readableDatabase.query(
-            Contract.PagesEntry.TABLE_NAME,
-            projection,
-            selection,
-            selectionArgs,
-            null,
-            null,
-            sortOrder
-        )
-
         val items = mutableListOf<PageEventLog>()
-        with(cursor) {
-            while (moveToNext()) {
-                val pageName = getString(getColumnIndexOrThrow(Contract.PagesEntry.COL_PAGE_NAME))
-                val value = getString(getColumnIndexOrThrow(Contract.PagesEntry.COL_VALUE))
-                val createdAt = getLong(getColumnIndexOrThrow(Contract.PagesEntry.COL_CREATED))
-                items.add(PageEventLog(pageName, value, createdAt))
+        try {
+            val cursor = readableDatabase.query(
+                Contract.PagesEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder
+            )
+
+            with(cursor) {
+                while (moveToNext()) {
+                    val pageName = getString(getColumnIndexOrThrow(Contract.PagesEntry.COL_PAGE_NAME))
+                    val value = getString(getColumnIndexOrThrow(Contract.PagesEntry.COL_VALUE))
+                    val createdAt = getLong(getColumnIndexOrThrow(Contract.PagesEntry.COL_CREATED))
+                    items.add(PageEventLog(pageName, value, createdAt))
+                }
             }
+        } catch (t: Throwable) {
+            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to read page logs. Error: $t")
         }
         return items
     }
@@ -123,9 +130,12 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
             put(Contract.EventsEntry.COL_VALUE, value)
             put(Contract.EventsEntry.COL_CREATED, System.currentTimeMillis())
         }
-
-        // Insert the new row, returning the primary key value of the new row
-        val newRowId = writableDatabase.insert(Contract.EventsEntry.TABLE_NAME, null, values)
+        try {
+            // Insert the new row, returning the primary key value of the new row
+            val newRowId = writableDatabase.insert(Contract.EventsEntry.TABLE_NAME, null, values)
+        } catch (t: Throwable) {
+            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to add event record. Error: $t")
+        }
     }
 
     override fun readEventLogs(eventName: String): List<EventLog> {
@@ -140,25 +150,30 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
         val selectionArgs = arrayOf(eventName)
         val sortOrder = "${Contract.EventsEntry.COL_CREATED} DESC"
 
-        val cursor = readableDatabase.query(
-            Contract.EventsEntry.TABLE_NAME,
-            projection,
-            selection,
-            selectionArgs,
-            null,
-            null,
-            sortOrder
-        )
-
         val items = mutableListOf<EventLog>()
-        with(cursor) {
-            while (moveToNext()) {
-                val eventName = getString(getColumnIndexOrThrow(Contract.EventsEntry.COL_EVENT_NAME))
-                val value = getString(getColumnIndexOrThrow(Contract.EventsEntry.COL_VALUE))
-                val createdAt = getLong(getColumnIndexOrThrow(Contract.EventsEntry.COL_CREATED))
-                items.add(EventLog(eventName, value, createdAt))
+        try {
+            val cursor = readableDatabase.query(
+                Contract.EventsEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder
+            )
+
+            with(cursor) {
+                while (moveToNext()) {
+                    val eventName = getString(getColumnIndexOrThrow(Contract.EventsEntry.COL_EVENT_NAME))
+                    val value = getString(getColumnIndexOrThrow(Contract.EventsEntry.COL_VALUE))
+                    val createdAt = getLong(getColumnIndexOrThrow(Contract.EventsEntry.COL_CREATED))
+                    items.add(EventLog(eventName, value, createdAt))
+                }
             }
+        } catch (t: Throwable) {
+            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to read event logs. Error: $t")
         }
+
         return items
     }
 
@@ -167,16 +182,24 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
      * This function trims any logs that have been created earlier than 30 days.
      */
     override fun trimData() {
-        // delete all Page Logs that are older than 30 days
-        val selectionArgs = arrayOf((System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000).toString())
+        try {
+            // delete all Page Logs that are older than 30 days
+            val selectionArgs = arrayOf((System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000).toString())
 
-        writableDatabase.delete(Contract.PagesEntry.TABLE_NAME, "${Contract.PagesEntry.COL_CREATED} < ?", selectionArgs)
-        writableDatabase.delete(Contract.EventsEntry.TABLE_NAME, "${Contract.EventsEntry.COL_CREATED} < ?", selectionArgs)
-        // TODO delete all Event Logs that are older than 30 days
+            writableDatabase.delete(Contract.PagesEntry.TABLE_NAME, "${Contract.PagesEntry.COL_CREATED} < ?", selectionArgs)
+            writableDatabase.delete(Contract.EventsEntry.TABLE_NAME, "${Contract.EventsEntry.COL_CREATED} < ?", selectionArgs)
+            // TODO delete all Event Logs that are older than 30 days
+        } catch (t: Throwable) {
+            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to trim data. Error: $t")
+        }
     }
 
     override fun eraseEventAndPageLogs() {
-        writableDatabase.delete(Contract.PagesEntry.TABLE_NAME, null, null)
-        writableDatabase.delete(Contract.EventsEntry.TABLE_NAME, null, null)
+        try {
+            writableDatabase.delete(Contract.PagesEntry.TABLE_NAME, null, null)
+            writableDatabase.delete(Contract.EventsEntry.TABLE_NAME, null, null)
+        } catch (t: Throwable) {
+            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to erase event and page logs. Error: $t")
+        }
     }
 }

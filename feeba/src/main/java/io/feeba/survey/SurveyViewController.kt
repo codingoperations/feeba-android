@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import io.feeba.Utils
 import io.feeba.data.RuleSet
 import io.feeba.data.SurveyPresentation
+import io.feeba.data.state.AppHistoryState
 import io.feeba.lifecycle.AndroidLifecycleManager
 import io.feeba.lifecycle.GenericAppLifecycle
 import io.feeba.lifecycle.LogLevel
@@ -16,7 +17,8 @@ import io.feeba.ui.ViewUtils
 internal class SurveyViewController(
     private val content: SurveyPresentation,
     private val ruleSet: RuleSet,
-    private var viewLifecycleListener: SurveyViewLifecycleListener
+    private val appState: AppHistoryState,
+    private var viewLifecycleListener: SurveyViewLifecycleListener,
 ) {
     private var floatingView: FloatingView? = null
 
@@ -75,6 +77,7 @@ internal class SurveyViewController(
             activity = currentActivity,
             rootView = currentActivity.window.decorView.rootView as ViewGroup,
             presentation = content,
+            appHistoryState = appState,
             onSurveyClose = {
                 surveyView = null
                 viewLifecycleListener.onSurveyWasDismissed()

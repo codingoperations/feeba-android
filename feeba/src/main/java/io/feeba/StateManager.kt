@@ -25,6 +25,7 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
 
     // State
     private var appVisibility = AppVisibility.Backgrounded
+
     init {
         lifecycle.windowLifecycleListener = object : OnWindowLifecycleListener {
             override fun onWindow(state: WindowState) {
@@ -33,12 +34,15 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
                     WindowState.CREATED -> {
 //                        TODO()
                     }
+
                     WindowState.OPENED -> {
 //                        TODO()
                     }
+
                     WindowState.CLOSED -> {
 //                        TODO()
                     }
+
                     WindowState.DESTROYED -> {
 //                        TODO()
                     }
@@ -51,6 +55,7 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
                 Logger.log(LogLevel.DEBUG, "Application moved to $state")
                 when (state) {
                     AppState.CREATED -> {
+                        Logger.log(LogLevel.DEBUG, "StateManager::AppLifecycleEvent -> CREATED")
                         GlobalScope.launch {
                             val localState = localStateHolder.readLocalState()
                             val updated: String? = restClient.getSurveyPlans(localState)
@@ -60,9 +65,11 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
                         }
                         appVisibility = AppVisibility.Foregrounded
                     }
+
                     AppState.FOREGROUND -> {
                         appVisibility = AppVisibility.Foregrounded
                     }
+
                     AppState.BACKGROUND -> {
                         appVisibility = AppVisibility.Backgrounded
                     }
@@ -81,18 +88,19 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
                 initializeSurveyViewController(presentation, ruleSet)
             }
             delayedTasks[associatedKey] = runnable
-            handler.postDelayed(runnable, surveyDelay*1000)
+            handler.postDelayed(runnable, surveyDelay * 1000)
         } else {
             Logger.log(LogLevel.DEBUG, "StateManager::showSurvey - Showing survey immediately")
             initializeSurveyViewController(presentation, ruleSet)
         }
     }
+
     private fun initializeSurveyViewController(presentation: SurveyPresentation, ruleSet: RuleSet) {
         if (appVisibility == AppVisibility.Backgrounded) {
             Logger.log(LogLevel.WARN, "StateManager::showSurvey - App is in background, skipping")
             return
         }
-        SurveyViewController(presentation, ruleSet, object : SurveyViewController.SurveyViewLifecycleListener {
+        SurveyViewController(presentation, ruleSet, localStateHolder.readLocalState(), object : SurveyViewController.SurveyViewLifecycleListener {
             override fun onSurveyWasShown() {
                 Logger.log(LogLevel.DEBUG, "SurveyViewController::onSurveyWasShown")
             }

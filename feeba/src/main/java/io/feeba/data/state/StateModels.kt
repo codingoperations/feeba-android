@@ -7,17 +7,19 @@ data class UserData(
     val userId: String,
     val email: String?,
     val phoneNumber: String?,
+    val tags: MutableMap<String, String>,
+    val langCode: String?, // ISO 639-1
 )
 
 @Serializable
 data class AppHistoryState(
-    val numberOfLaunches: Int,
-    val totalSessionDurationSec: Long,
+    var numberOfLaunches: Int,
+    var totalSessionDurationSec: Long,
 
-    val lastTimeAppOpened: Long,
-    val lastTimeSurveyTriggered: Map<String, Long>,
+    var lastTimeAppOpened: Long,
+    var lastTimeSurveyTriggered: Map<String, Long>,
 
-    val userData: UserData,
+    var userData: UserData,
 )
 
 object Defaults {
@@ -29,7 +31,9 @@ object Defaults {
         userData = UserData(
             userId = "",
             email = "",
-            phoneNumber = ""
+            phoneNumber = "",
+            tags = mutableMapOf(),
+            langCode = "en",
         ),
     )
 }

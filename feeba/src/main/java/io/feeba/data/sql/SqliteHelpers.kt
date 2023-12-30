@@ -3,6 +3,8 @@ package io.feeba.data.sql
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import io.feeba.lifecycle.LogLevel
+import io.feeba.lifecycle.Logger
 
 object Contract {
     // Table contents are grouped together in an anonymous object.
@@ -19,7 +21,6 @@ object Contract {
         const val COL_VALUE = "value"
         const val COL_CREATED = "created_at"
     }
-
 }
 
 interface BaseColumns {
@@ -33,6 +34,7 @@ interface BaseColumns {
 class FeebaDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
+        Logger.log(LogLevel.DEBUG, "FeebaDbHelper::onCreate")
         val SQL_CREATE_ENTRIES =
             "CREATE TABLE ${Contract.PagesEntry.TABLE_NAME} (" +
                     "${BaseColumns._ID} INTEGER PRIMARY KEY," +

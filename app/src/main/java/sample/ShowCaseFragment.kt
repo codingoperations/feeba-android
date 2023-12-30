@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import io.feeba.Feeba
+import io.feeba.FeebaFacade
 import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import sample.bugs.ProblematicLoginPage
@@ -18,6 +19,11 @@ class ShowCaseFragment : Fragment() {
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Feeba.User.login("test_user_id", "admin@google.com", "+1-123-456-7890")
+        Feeba.User.setLanguage("en")
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -27,33 +33,11 @@ class ShowCaseFragment : Fragment() {
 
         // Survey
         binding.surveyDialog.setOnClickListener {
-//            val floatingView = FloatingView(
-//                context = requireActivity().applicationContext,
-//                focusable = true,
-//                rootView = requireActivity().window.decorView.rootView as ViewGroup
-//            ) {
-//
-//                Log.d("FloatingView", "onKnob Clicked")
-//            }
-//
-//            floatingView.show()
 
-//            SurveyFragment()
-//                .apply {
-//                    arguments = Bundle().apply {
-//                        putString(
-//                            KEY_SURVEY_URL,
-//                            "http://dev-dashboard.feeba.io/s/feeba/6504ee57ba0d101292e066a8"
-//                        )
-//                    }
-//                }
-//                .show(
-//                    parentFragmentManager,
-//                    "SurveyFragment"
-//                )
         }
 
         binding.onRideEndButton.setOnClickListener {
+            Feeba.User.addTag(mapOf("driverId" to "1234", "rideId" to "5678"))
             Feeba.triggerEvent("on_ride_end")
         }
         // BUGs and issue reporting
@@ -76,6 +60,7 @@ class ShowCaseFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        Feeba.User.logout()
         _binding = null
     }
 }
