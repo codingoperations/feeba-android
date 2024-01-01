@@ -4,3 +4,5 @@
 
 
 # Feeba Android SDK
+
+Docs are here: https://feebaio.github.io/feeba-docs/
