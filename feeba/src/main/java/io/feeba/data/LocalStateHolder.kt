@@ -1,5 +1,6 @@
 package io.feeba.data
 
+import io.feeba.ServiceLocator
 import io.feeba.data.state.AppHistoryState
 import io.feeba.data.state.Defaults
 import io.feeba.data.state.StateStorageInterface
@@ -14,7 +15,7 @@ class LocalStateHolder(private val stateStorage: StateStorageInterface) {
     private val lastKnownAppHistoryState: AppHistoryState? = null
 
     private val eventCountMap = mutableMapOf<String, Int>()
-    private val jsonInstance = Json { ignoreUnknownKeys = true }
+    private val jsonInstance = ServiceLocator.jsonInstance
 
     fun setFeebaConfig(response: String) {
         Logger.log(LogLevel.DEBUG, "LocalStateHolder:: Storing response: $response")

@@ -28,16 +28,6 @@ class SurveyFragment : DialogFragment() {
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
-    private val viewModel: SurveyFragmentViewModel by viewModels {
-        createWithFactory {
-            SurveyFragmentViewModel(
-                requireActivity().application,
-                FeebaFacade.config.serviceConfig,
-                "http://dev-dashboard.feeba.io/s/feeba/6504ee57ba0d101292e066a8"
-            )
-        }
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = LayoutSurveyBinding.inflate(inflater, container, false)
         val surveyUrl = arguments?.getString(KEY_SURVEY_URL) ?: throw IllegalArgumentException("Survey URL not provided")
@@ -83,16 +73,4 @@ class SurveyFragment : DialogFragment() {
         _binding = null
     }
 
-}
-
-fun showSurveyFragment(
-    supportFragmentManager: FragmentManager,
-    surveyUrl: String
-) {
-    val fragment = SurveyFragment().apply {
-        arguments = Bundle().apply {
-            putSerializable(KEY_SURVEY_URL, surveyUrl)
-        }
-    }
-//    supportFragmentManager.beginTransaction().replace().commit()
 }

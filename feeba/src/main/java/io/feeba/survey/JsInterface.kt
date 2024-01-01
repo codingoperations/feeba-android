@@ -2,9 +2,11 @@ package io.feeba.survey
 
 import android.content.Context
 import android.webkit.JavascriptInterface
+import io.feeba.ServiceLocator
 import io.feeba.data.state.AppHistoryState
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
+import kotlinx.serialization.encodeToString
 
 enum class CallToAction(val value: String) {
     CLOSE_SURVEY("closeSurvey");
@@ -15,6 +17,7 @@ enum class CallToAction(val value: String) {
 }
 
 class JsInterface(private val mContext: Context, private val appHistoryState: AppHistoryState, private val onSurveyEndCallback: (cta: CallToAction) -> Unit)  {
+    private val jsonInstance = ServiceLocator.jsonInstance
 
     init {
         Logger.log(LogLevel.DEBUG, "JsInterface::init, appHistoryState=$appHistoryState")
@@ -27,8 +30,8 @@ class JsInterface(private val mContext: Context, private val appHistoryState: Ap
     }
 
     @JavascriptInterface
-    fun getCurrentState(): AppHistoryState {
+    fun getCurrentState(): String {
         Logger.log(LogLevel.DEBUG, "JsInterface::getCurrentState, appHistoryState=$appHistoryState")
-        return appHistoryState
+        return jsonInstance.encodeToString(appHistoryState)
     }
 }

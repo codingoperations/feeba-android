@@ -1,6 +1,7 @@
 package io.feeba.data
 
 import io.feeba.FeebaFacade
+import io.feeba.ServiceLocator
 import io.feeba.data.state.AppHistoryState
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
@@ -17,7 +18,7 @@ class RestClient() {
     suspend fun getSurveyPlans(state: AppHistoryState): String? {
         Logger.log(LogLevel.DEBUG, "RestClient::fetchSurveyPlans....")
         return try {
-            val response = sendPostRequest("/v1/survey/sdk/list", Json.encodeToString(state.userData))
+            val response = sendPostRequest("/v1/survey/sdk/list", ServiceLocator.jsonInstance.encodeToString(state.userData))
             if (response == "") {
                 return null
             }
