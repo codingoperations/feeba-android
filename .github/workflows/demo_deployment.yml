@@ -2,7 +2,7 @@ name: Android CI
 
 on:
   pull_request:
-    types: [ closed ]
+    types: [ review_requested, closed ]
   workflow_dispatch:
 
 jobs:
