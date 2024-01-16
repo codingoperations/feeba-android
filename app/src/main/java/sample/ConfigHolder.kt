@@ -7,7 +7,7 @@ private val prodConfig = ServerConfig(
 
 private val devConfig = ServerConfig(
     "https://dev-api.feeba.io",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTAyNDA0NTAsInBheWxvYWQiOnsidXNlcklkIjoiNjM3NWIzYTFiODMyZDE3ZmI2YmE1NTFjIiwicHJvamVjdE5hbWUiOiJ6YWZhci10ZXN0In0sImlhdCI6MTY5MDIzNjg1MH0.zCASu5SXZr5vXp3MsQEUnPQI44mG--XHpATtIOUqWiY" // for tests
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTUwNTg2NjAsInBheWxvYWQiOnsidXNlcklkIjoiNjM3NWIzYTFiODMyZDE3ZmI2YmE1NTFjIiwicHJvamVjdE5hbWUiOiJ6YWZhci10ZXN0In0sImlhdCI6MTY2ODY1ODY2MH0.qpCgz57-rkWfjI3NiAH_8sihpGyfScOixN20XlyDDMc" // for tests
 )
 
 object ConfigHolder {
