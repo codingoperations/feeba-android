@@ -199,7 +199,6 @@ fun createWebViewInstanceUrl(context: Context, url: String, appHistoryState: App
 
             domStorageEnabled = true
             // Below is trying to fetch a JS bundle that is outdated. Requires deeper investigation
-//            cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
         }
         addJavascriptInterface(JsInterface(context, appHistoryState) {
             when (it) {
