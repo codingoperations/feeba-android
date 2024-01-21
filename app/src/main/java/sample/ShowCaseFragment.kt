@@ -7,10 +7,10 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import io.feeba.Feeba
-import io.feeba.FeebaFacade
 import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import sample.bugs.ProblematicLoginPage
+import sample.integrated.InViewIntegratedSurvey
 
 class ShowCaseFragment : Fragment() {
 
@@ -32,8 +32,11 @@ class ShowCaseFragment : Fragment() {
         _binding = FragmentSampleShowcaseBinding.inflate(inflater, container, false)
 
         // Survey
-        binding.surveyDialog.setOnClickListener {
-
+        binding.dialogInView.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .addToBackStack("inview_survey")
+                .replace(R.id.fragmentContainer, InViewIntegratedSurvey())
+                .commit()
         }
 
         binding.onRideEndButton.setOnClickListener {

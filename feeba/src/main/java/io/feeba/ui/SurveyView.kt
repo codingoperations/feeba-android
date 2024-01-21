@@ -2,11 +2,8 @@ package io.feeba.ui
 
 import android.app.Activity
 import android.content.Context
-import android.os.Build
 import android.util.AttributeSet
 import android.widget.FrameLayout
-import androidx.annotation.RequiresApi
-import io.feeba.data.SurveyPresentation
 import io.feeba.data.state.Defaults
 
 //Create a custom view SurveyView that extends FrameLayout
@@ -39,9 +36,18 @@ class SurveyView : FrameLayout {
     //Create a function called init
     private fun init() {
         val appHistoryState = Defaults.appHistoryState
-        val surveyUrl: String = "https://dev-dashboard.feeba.io/s/feeba/65716a0c87713b82c209e522"
+        val surveyUrl: String = "https://dev-dashboard.feeba.io/s/feeba/65a381db081d06ce889dfd09"
         addView(createWebViewInstanceUrl(context as Activity, surveyUrl, appHistoryState))
         isFocusableInTouchMode = true
         requestFocus()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        // trigger data push
+    }
+
+    fun flushResults() {
+        // trigger data push
     }
 }

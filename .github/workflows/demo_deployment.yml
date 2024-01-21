@@ -1,5 +1,4 @@
-name: Android CI
-
+name: Demo deployment
 on:
   pull_request:
     types: [ closed ]

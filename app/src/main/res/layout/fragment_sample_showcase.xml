@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        app:layout_constraintBottom_toTopOf="@id/surveyDialog"
+        app:layout_constraintBottom_toTopOf="@id/dialogInView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
         <Button
@@ -32,11 +32,11 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/surveyDialog"
+        android:id="@+id/dialogInView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:text="Survey Dialog"
+        android:text="InView"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/onRideEndButton"
         app:layout_constraintStart_toStartOf="parent" />
@@ -49,7 +49,7 @@
         android:text="on_ride_end"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/surveyDialog" />
+        app:layout_constraintStart_toEndOf="@id/dialogInView" />
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switchEnv"
