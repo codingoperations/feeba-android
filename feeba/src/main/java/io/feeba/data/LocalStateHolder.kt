@@ -7,7 +7,6 @@ import io.feeba.data.state.StateStorageInterface
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
 class LocalStateHolder(private val stateStorage: StateStorageInterface) {
     @Volatile
@@ -38,7 +37,7 @@ class LocalStateHolder(private val stateStorage: StateStorageInterface) {
     }
 
 
-    fun readLocalState(): AppHistoryState {
+    fun readAppHistoryState(): AppHistoryState {
         return lastKnownAppHistoryState ?: run {
             try {
                 stateStorage.state
@@ -50,7 +49,7 @@ class LocalStateHolder(private val stateStorage: StateStorageInterface) {
     }
 
     fun login(userId: String, email: String?, phoneNumber: String?) {
-        readLocalState().apply {
+        readAppHistoryState().apply {
          this.userData = this.userData.copy(
                 userId = userId,
                 email = email ?: this.userData.email,
@@ -61,7 +60,7 @@ class LocalStateHolder(private val stateStorage: StateStorageInterface) {
     }
 
     fun logout() {
-        readLocalState()
+        readAppHistoryState()
         stateStorage.eraseEventAndPageLogs()
     }
 
@@ -84,7 +83,7 @@ class LocalStateHolder(private val stateStorage: StateStorageInterface) {
         language: String? = null,
         tags: Map<String, String>? = null,
     ) {
-        readLocalState().apply {
+        readAppHistoryState().apply {
             this.userData = this.userData.copy(
                 phoneNumber = phoneNumber ?: this.userData.phoneNumber,
                 email = email ?: this.userData.email,
@@ -96,7 +95,7 @@ class LocalStateHolder(private val stateStorage: StateStorageInterface) {
     }
 
     fun addTags(tags: Map<String, String>) {
-        readLocalState().apply {
+        readAppHistoryState().apply {
             this.userData.tags.putAll(tags)
             stateStorage.state = this
         }

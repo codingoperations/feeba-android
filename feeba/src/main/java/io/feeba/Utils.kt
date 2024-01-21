@@ -29,7 +29,6 @@ package io.feeba
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Point
@@ -40,6 +39,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
+import android.util.Log
 import android.view.View
 import android.view.Window
 import android.view.WindowInsets
@@ -51,7 +51,6 @@ import io.feeba.data.RuleSet
 import io.feeba.data.RuleType
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
-import java.util.Random
 import java.util.regex.Pattern
 
 
@@ -236,76 +235,6 @@ object Utils {
         return if (soundId != 0) Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + packageName + "/" + soundId) else null
     }
 
-//    fun openURLInBrowser(url: String) {
-//        openURLInBrowser(Uri.parse(url.trim { it <= ' ' }))
-//    }
-//
-//    private fun openURLInBrowser(uri: Uri) {
-//        val intent = openURLInBrowserIntent(uri)
-//        FeebaFacade.appContext.startActivity(intent)
-//    }
-
-    fun openURLInBrowserIntent(uri: Uri): Intent {
-        var uri = uri
-        var type = if (uri.scheme != null) SchemaType.fromString(uri.scheme) else null
-        if (type == null) {
-            type = SchemaType.HTTP
-            if (!uri.toString().contains("://")) {
-                uri = Uri.parse("http://$uri")
-            }
-        }
-        val intent: Intent
-        when (type) {
-            SchemaType.DATA -> {
-                intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER)
-                intent.data = uri
-            }
-
-            SchemaType.HTTPS, SchemaType.HTTP -> intent = Intent(Intent.ACTION_VIEW, uri)
-            else -> intent = Intent(Intent.ACTION_VIEW, uri)
-        }
-        intent.addFlags(
-            Intent.FLAG_ACTIVITY_NEW_TASK
-        )
-        return intent
-    }
-
-    fun hasConfigChangeFlag(activity: Activity, configChangeFlag: Int): Boolean {
-        var hasFlag = false
-        try {
-            val configChanges = activity.packageManager.getActivityInfo(activity.componentName, 0).configChanges
-            val flagInt = configChanges and configChangeFlag
-            hasFlag = flagInt != 0
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
-        }
-        return hasFlag
-    }
-
-    fun extractStringsFromCollection(collection: Collection<Any?>?): Collection<String> {
-        val result: MutableCollection<String> = ArrayList()
-        if (collection == null) return result
-        for (value in collection) {
-            if (value is String) result.add(value)
-        }
-        return result
-    }
-
-    fun shouldLogMissingAppIdError(appId: String?): Boolean {
-        if (appId != null) return false
-
-        // Wrapper SDKs can't normally call on Application.onCreate so just count this as informational.
-        Logger.log(
-            LogLevel.DEBUG, "OneSignal was not initialized, " +
-                    "ensure to always initialize OneSignal from the onCreate of your Application class."
-        )
-        return true
-    }
-
-    fun getRandomDelay(minDelay: Int, maxDelay: Int): Int {
-        return Random().nextInt(maxDelay + 1 - minDelay) + minDelay
-    }
-
     fun getRootCauseThrowable(subjectThrowable: Throwable): Throwable {
         var throwable = subjectThrowable
         while (throwable.cause != null && throwable.cause !== throwable) {
@@ -378,4 +307,16 @@ val Activity.statusBarHeight: Int
 
 fun RuleSet.getSurveyDelaySec(): Long {
     return triggers.filter { it.type == RuleType.SESSION_DURATION }.getOrNull(0)?.value?.toLongOrNull() ?: 0
+}
+
+fun appendQueryParameter(url: String, key: String, value: String): String {
+    return try {
+        val uri = Uri.parse(url)
+        val builder = uri.buildUpon()
+        builder.appendQueryParameter(key, value)
+        builder.build().toString()
+    } catch (e: Exception) {
+        Logger.log(LogLevel.ERROR, "Failed to append query parameter to url: $url, ${Log.getStackTraceString(e)}")
+        url
+    }
 }

@@ -11,6 +11,7 @@ import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import sample.bugs.ProblematicLoginPage
 import sample.integrated.InViewIntegratedSurvey
+import sample.utils.PreferenceWrapper
 
 class ShowCaseFragment : Fragment() {
 
@@ -24,12 +25,15 @@ class ShowCaseFragment : Fragment() {
         Feeba.User.login("test_user_id", "admin@google.com", "+1-123-456-7890")
         Feeba.User.setLanguage("en")
     }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSampleShowcaseBinding.inflate(inflater, container, false)
+        binding.switchEnv.isChecked = PreferenceWrapper.isProd
+        binding.editTextLangCode.setText(PreferenceWrapper.langCode)
 
         // Survey
         binding.dialogInView.setOnClickListener {
@@ -54,10 +58,14 @@ class ShowCaseFragment : Fragment() {
                 .replace(R.id.fragmentContainer, ProblematicLoginPage())
                 .commit()
         }
-
-        binding.switchEnv.setOnCheckedChangeListener { _, isChecked -> ConfigHolder.setEnv(isChecked) }
-        ConfigHolder.langCode = binding.editTextLangCode.text.toString()
-        binding.editTextLangCode.addTextChangedListener { text -> ConfigHolder.langCode = text.toString() }
+        binding.switchEnv.setOnCheckedChangeListener { _, isChecked ->
+            ConfigHolder.setEnv(isChecked)
+            PreferenceWrapper.isProd = isChecked
+        }
+        binding.editTextLangCode.addTextChangedListener { text ->
+            Feeba.User.setLanguage(text.toString())
+            PreferenceWrapper.langCode = text.toString()
+        }
         return binding.root
     }
 

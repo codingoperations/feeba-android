@@ -57,7 +57,7 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
                     AppState.CREATED -> {
                         Logger.log(LogLevel.DEBUG, "StateManager::AppLifecycleEvent -> CREATED")
                         GlobalScope.launch {
-                            val localState = localStateHolder.readLocalState()
+                            val localState = localStateHolder.readAppHistoryState()
                             val updated: String? = restClient.getSurveyPlans(localState)
                             updated?.let {
                                 localStateHolder.setFeebaConfig(it)
@@ -100,7 +100,7 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
             Logger.log(LogLevel.WARN, "StateManager::showSurvey - App is in background, skipping")
             return
         }
-        SurveyViewController(presentation, ruleSet, localStateHolder.readLocalState(), object : SurveyViewController.SurveyViewLifecycleListener {
+        SurveyViewController(presentation, ruleSet, localStateHolder.readAppHistoryState(), object : SurveyViewController.SurveyViewLifecycleListener {
             override fun onSurveyWasShown() {
                 Logger.log(LogLevel.DEBUG, "SurveyViewController::onSurveyWasShown")
             }

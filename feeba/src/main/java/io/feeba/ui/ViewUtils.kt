@@ -27,6 +27,7 @@ import android.webkit.WebViewClient
 import android.widget.RelativeLayout
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import io.feeba.appendQueryParameter
 import io.feeba.data.SurveyPresentation
 import io.feeba.data.state.AppHistoryState
 import io.feeba.lifecycle.LogLevel
@@ -155,6 +156,7 @@ internal object ViewUtils {
         val insetsAttached = decorView.rootWindowInsets != null
         return hasToken && insetsAttached
     }
+
     fun removeOnGlobalLayoutListener(view: View, listener: ViewTreeObserver.OnGlobalLayoutListener?) {
         view.viewTreeObserver.removeOnGlobalLayoutListener(listener)
     }
@@ -180,6 +182,7 @@ internal fun Fragment.closeKeyboard() {
 fun createWebViewInstance(context: Context, presentation: SurveyPresentation, appHistoryState: AppHistoryState, onOutsideTouch: (() -> Unit)?): FeebaWebView {
     return createWebViewInstanceUrl(context, presentation.surveyWebAppUrl, appHistoryState, onOutsideTouch)
 }
+
 fun createWebViewInstanceUrl(context: Context, url: String, appHistoryState: AppHistoryState, onOutsideTouch: (() -> Unit)? = null): FeebaWebView {
     return FeebaWebView(context).apply {
         WebView.setWebContentsDebuggingEnabled(true);
@@ -251,6 +254,6 @@ fun createWebViewInstanceUrl(context: Context, url: String, appHistoryState: App
             }
 
         }
-        loadUrl(url)
+        loadUrl(appendQueryParameter(url, "lang", appHistoryState.userData.langCode ?: "en"))
     }
 }

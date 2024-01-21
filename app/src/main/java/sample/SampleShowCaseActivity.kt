@@ -2,9 +2,6 @@ package sample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import io.feeba.Feeba
-import io.feeba.FeebaFacade
-import io.least.core.ServerConfig
 import io.least.demo.R
 import io.least.demo.databinding.ActivitySampleShowcaseBinding
 
@@ -17,14 +14,6 @@ class SampleShowCaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ConfigHolder.setEnv(false)
-        Feeba.init(
-            this.application, ServerConfig(
-                hostUrl = ConfigHolder.hostUrl,
-                langCode = ConfigHolder.langCode,
-                apiToken = ConfigHolder.jwtToken
-            )
-        )
         _binding = ActivitySampleShowcaseBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

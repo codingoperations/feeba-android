@@ -14,9 +14,6 @@ object ConfigHolder {
     private var currentConfig = prodConfig
 
     val hostUrl: String get() = currentConfig.hostUrl
-
-    // Default to EN if not set
-    var langCode: String = "en"
     val jwtToken: String get() = currentConfig.jwtToken
 
     fun setEnv(isProd: Boolean) {
