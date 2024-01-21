@@ -20,9 +20,19 @@ class ShowCaseFragment : Fragment() {
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
+    private val user1 = UserData(
+        userId = "test1-user-id",
+        email = "test1@example.com",
+        phoneNumber = "+1-987-65-43",
+        tags = Tags(
+            rideId = "test1-user-ride-id",
+            driverId = "test1-driver-id"
+        )
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Feeba.User.login("test_user_id", "admin@google.com", "+1-123-456-7890")
+        Feeba.User.login(user1.userId, user1.email, user1.phoneNumber)
         Feeba.User.setLanguage("en")
     }
 
@@ -44,7 +54,7 @@ class ShowCaseFragment : Fragment() {
         }
 
         binding.onRideEndButton.setOnClickListener {
-            Feeba.User.addTag(mapOf("driverId" to "1234", "rideId" to "5678"))
+            Feeba.User.addTag(mapOf("driverId" to user1.tags.driverId, "rideId" to user1.tags.rideId))
             Feeba.triggerEvent("on_ride_end")
         }
         // BUGs and issue reporting
