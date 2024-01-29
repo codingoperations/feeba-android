@@ -8,7 +8,7 @@ import io.feeba.data.state.Defaults
 
 //Create a custom view SurveyView that extends FrameLayout
 class SurveyView : FrameLayout {
-
+    private lateinit var webView: FeebaWebView
     //Create a constructor that takes in a context
     constructor(context: Context) : super(context) {
         //Call the init function
@@ -37,7 +37,7 @@ class SurveyView : FrameLayout {
     private fun init() {
         val appHistoryState = Defaults.appHistoryState
         val surveyUrl: String = "https://dev-dashboard.feeba.io/s/feeba/65a381db081d06ce889dfd09"
-        addView(createWebViewInstanceUrl(context as Activity, surveyUrl, appHistoryState))
+        addView(createWebViewInstanceUrl(context as Activity, surveyUrl, appHistoryState).apply { webView = this })
         isFocusableInTouchMode = true
         requestFocus()
     }
@@ -45,6 +45,7 @@ class SurveyView : FrameLayout {
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         // trigger data push
+        webView.evaluateJavascript("window.onInlineViewClosed();", null)
     }
 
     fun flushResults() {
