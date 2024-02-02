@@ -17,6 +17,7 @@ class InViewIntegratedSurvey() : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = DialogIntegratedSurveyBinding.inflate(inflater, container, false)
+        binding.surveyViewBlitz.loadSurvey("https://dev-dashboard.feeba.io/s/feeba/65a381db081d06ce889dfd09")
         return binding.root
     }
 

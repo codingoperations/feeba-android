@@ -25,8 +25,8 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.RelativeLayout
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import io.feeba.Utils
 import io.feeba.appendQueryParameter
 import io.feeba.data.SurveyPresentation
 import io.feeba.data.state.AppHistoryState
@@ -179,11 +179,23 @@ internal fun Fragment.closeKeyboard() {
 }
 
 
-fun createWebViewInstance(context: Context, presentation: SurveyPresentation, appHistoryState: AppHistoryState, onOutsideTouch: (() -> Unit)?): FeebaWebView {
-    return createWebViewInstanceUrl(context, presentation.surveyWebAppUrl, appHistoryState, onOutsideTouch)
+fun createWebViewInstance(
+    context: Context, presentation: SurveyPresentation, appHistoryState: AppHistoryState,
+    onPageLoaded: (WebView, LoadType) -> Unit,
+    onError: () -> Unit, onOutsideTouch: (() -> Unit)?
+): FeebaWebView {
+    return createWebViewInstance(context, appHistoryState, onError, onPageLoaded, onOutsideTouch).apply {
+        loadUrl(appendQueryParameter(presentation.surveyWebAppUrl, "lang", appHistoryState.userData.langCode ?: "en"))
+    }
 }
 
-fun createWebViewInstanceUrl(context: Context, url: String, appHistoryState: AppHistoryState, onOutsideTouch: (() -> Unit)? = null): FeebaWebView {
+
+fun createWebViewInstance(
+    context: Context, appHistoryState: AppHistoryState,
+    onError: () -> Unit,
+    onPageLoaded: (WebView, LoadType) -> Unit,
+    onOutsideTouch: (() -> Unit)? = null
+): FeebaWebView {
     return FeebaWebView(context).apply {
         WebView.setWebContentsDebuggingEnabled(true);
         layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT).apply {
@@ -200,21 +212,26 @@ fun createWebViewInstanceUrl(context: Context, url: String, appHistoryState: App
             domStorageEnabled = true
             // Below is trying to fetch a JS bundle that is outdated. Requires deeper investigation
         }
-        addJavascriptInterface(JsInterface(context, appHistoryState) {
+        addJavascriptInterface(JsInterface(appHistoryState,
+            onSurveyFullyRendered = {
+                Utils.runOnMainUIThread { onPageLoaded(this, LoadType.SURVEY_RENDERED) }
+            }) {
             when (it) {
                 CallToAction.CLOSE_SURVEY -> {
                     Logger.log(LogLevel.DEBUG, "FeebaWebView::JsInterface::CallToAction.CLOSE_SURVEY")
                     onOutsideTouch?.invoke()
                 }
             }
-        }, "Mobile")
+        }, "Mobile"
+        )
         webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 Logger.log(LogLevel.DEBUG, "WebViewClient::onPageStarted, url: $url")
             }
 
-            override fun onPageFinished(view: WebView?, url: String?) {
+            override fun onPageFinished(view: WebView, url: String?) {
                 Logger.log(LogLevel.DEBUG, "WebViewClient::onPageFinished, url: $url")
+                onPageLoaded(view, LoadType.PAGE_FRAME)
             }
 
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError) {
@@ -229,14 +246,13 @@ fun createWebViewInstanceUrl(context: Context, url: String, appHistoryState: App
                 }
             }
 
-            @RequiresApi(Build.VERSION_CODES.TIRAMISU)
             override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
                 super.onReceivedHttpError(view, request, errorResponse)
-                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, errorResponse: $errorResponse")
+
+                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, request.urlAd: ${request.url}")
                 Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, statusCode: ${errorResponse.statusCode}")
-                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, reasonPhrase: ${errorResponse.reasonPhrase}")
-                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, headers: ${errorResponse.responseHeaders}")
 //                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, data: ${errorResponse.data.use { it.reader().readText() } }}")
+                onError()
             }
 
             override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
@@ -253,6 +269,10 @@ fun createWebViewInstanceUrl(context: Context, url: String, appHistoryState: App
             }
 
         }
-        loadUrl(appendQueryParameter(url, "lang", appHistoryState.userData.langCode ?: "en"))
     }
+}
+
+enum class LoadType {
+    PAGE_FRAME,
+    SURVEY_RENDERED
 }

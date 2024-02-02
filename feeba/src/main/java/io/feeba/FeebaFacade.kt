@@ -10,7 +10,7 @@ import io.least.core.ServerConfig
 object FeebaFacade {
 
     lateinit var config: FeebaConfig
-    private lateinit var localStateHolder: LocalStateHolder
+    lateinit var localStateHolder: LocalStateHolder
     private lateinit var stateManager: StateManager
 
     private lateinit var triggerValidator: TriggerValidator

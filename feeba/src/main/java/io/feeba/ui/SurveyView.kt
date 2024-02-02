@@ -4,11 +4,14 @@ import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
-import io.feeba.data.state.Defaults
+import io.feeba.FeebaFacade
+import io.feeba.appendQueryParameter
 
 //Create a custom view SurveyView that extends FrameLayout
 class SurveyView : FrameLayout {
     private lateinit var webView: FeebaWebView
+    private val appHistoryState = FeebaFacade.localStateHolder.readAppHistoryState()
+
     //Create a constructor that takes in a context
     constructor(context: Context) : super(context) {
         //Call the init function
@@ -35,9 +38,16 @@ class SurveyView : FrameLayout {
 
     //Create a function called init
     private fun init() {
-        val appHistoryState = Defaults.appHistoryState
-        val surveyUrl: String = "https://dev-dashboard.feeba.io/s/feeba/65a381db081d06ce889dfd09"
-        addView(createWebViewInstanceUrl(context as Activity, surveyUrl, appHistoryState).apply { webView = this })
+        webView = createWebViewInstance(context as Activity, appHistoryState,
+            onPageLoaded = { webView, loadType ->
+                removeAllViews()
+                addView(webView)
+            },
+            onError = {
+                // In case of error, remove the view
+                removeAllViews()
+            }
+        )
         isFocusableInTouchMode = true
         requestFocus()
     }
@@ -50,5 +60,10 @@ class SurveyView : FrameLayout {
 
     fun flushResults() {
         // trigger data push
+//        webView.evaluateJavascript("window.onInlineViewClosed();", null)
+    }
+
+    fun loadSurvey(surveyUrl: String) {
+        webView.loadUrl(appendQueryParameter(surveyUrl, "lang", appHistoryState.userData.langCode ?: "en"))
     }
 }

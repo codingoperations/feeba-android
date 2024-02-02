@@ -51,12 +51,8 @@ internal class SurveyWebViewHolder(
             layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
             setPadding(0, activity.statusBarHeight, 0, activity.navigationBarHeight)
 
-            val ll = this
-
             setOnTouchListener(object : View.OnTouchListener {
                 private var touchStartTime: Long = Long.MAX_VALUE
-                private var coordinatesDelta: IntArray? = null
-                private var isDragging = false
 
                 override fun onTouch(v: View, event: MotionEvent): Boolean {
                     val x = event.rawX.toInt()
@@ -71,35 +67,14 @@ internal class SurveyWebViewHolder(
                             val viewLocation = IntArray(2)
                             v.getLocationOnScreen(viewLocation)
                             Logger.log(LogLevel.DEBUG, "View on Screen: x=${viewLocation[0]} y=${viewLocation[1]}")
-                            coordinatesDelta = intArrayOf(x - viewLocation[0], y - viewLocation[1])
-                            coordinatesDelta?.let {
-                                Logger.log(LogLevel.DEBUG, "coordinatesDelta: x=${it[0]} y=${it[1]}")
-                            }
                             // Record the start time of the touch event
                             touchStartTime = System.currentTimeMillis();
 
                             true // Important to return false so the touch event isn't consumed and is passed to children
                         }
 
-                        MotionEvent.ACTION_MOVE -> {
-                            // Calculate new position of the PopupWindow
-                            val newX = event.rawX - (coordinatesDelta?.getOrElse(0) { 0 } ?: 0)
-                            val newY = event.rawY - (coordinatesDelta?.getOrElse(1) { 0 } ?: 0)
-
-                            // Update the position of the PopupWindow
-                            ll.x = newX
-                            ll.y = newY
-                            isDragging = true
-                            true
-                        }
-
                         MotionEvent.ACTION_UP -> {
                             // Add any additional logic for when the drag is released if necessary
-                            coordinatesDelta = null
-                            if (isDragging) {
-                                isDragging = false
-                                return true // terminate the responder chain
-                            }
                             Logger.log(LogLevel.DEBUG, "onTouch: ACTION_UP")
                             if (System.currentTimeMillis() - touchStartTime < ViewConfiguration.getTapTimeout()) {
                                 // Consider as a click event
@@ -114,9 +89,16 @@ internal class SurveyWebViewHolder(
             })
 
             addView(createCardView(activity, presentation).apply {
-                addView(createWebViewInstance(activity, presentation, appHistoryState) {
+                createWebViewInstance(activity, presentation, appHistoryState,
+                    onPageLoaded = { webView, loadType ->
+                        removeAllViews()
+                        addView(webView)
+                    },
+                    onError = {
                     dismiss()
-                })
+                }) {
+                    dismiss()
+                }
             })
             isFocusableInTouchMode = true
             requestFocus()

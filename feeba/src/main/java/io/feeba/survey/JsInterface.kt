@@ -1,6 +1,5 @@
 package io.feeba.survey
 
-import android.content.Context
 import android.webkit.JavascriptInterface
 import io.feeba.ServiceLocator
 import io.feeba.data.state.AppHistoryState
@@ -16,7 +15,9 @@ enum class CallToAction(val value: String) {
     }
 }
 
-class JsInterface(private val mContext: Context, private val appHistoryState: AppHistoryState, private val onSurveyEndCallback: (cta: CallToAction) -> Unit)  {
+class JsInterface(private val appHistoryState: AppHistoryState,
+                  private val onSurveyFullyRendered: () -> Unit ,
+                  private val onSurveyEndCallback: (cta: CallToAction) -> Unit)  {
     private val jsonInstance = ServiceLocator.jsonInstance
 
     init {
@@ -33,5 +34,11 @@ class JsInterface(private val mContext: Context, private val appHistoryState: Ap
     fun getCurrentState(): String {
         Logger.log(LogLevel.DEBUG, "JsInterface::getCurrentState, appHistoryState=$appHistoryState")
         return jsonInstance.encodeToString(appHistoryState)
+    }
+
+    @JavascriptInterface
+    fun surveyFullyRendered() {
+        Logger.log(LogLevel.DEBUG, "JsInterface::onSurveyFullyRendered")
+        onSurveyFullyRendered()
     }
 }
