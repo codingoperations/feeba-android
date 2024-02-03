@@ -178,6 +178,10 @@ internal fun Fragment.closeKeyboard() {
     }
 }
 
+fun isPointInsideView(xToCheck: Int, yToCheck: Int, view: View): Boolean {
+    return xToCheck >= view.x && xToCheck <= view.x + view.width
+            && yToCheck >= view.y && yToCheck <= view.y + view.height
+}
 
 fun createWebViewInstance(
     context: Context, presentation: SurveyPresentation, appHistoryState: AppHistoryState,

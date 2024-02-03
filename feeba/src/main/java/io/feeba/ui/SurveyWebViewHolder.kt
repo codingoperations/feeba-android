@@ -50,56 +50,56 @@ internal class SurveyWebViewHolder(
         return FrameLayout(activity).apply {
             layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
             setPadding(0, activity.statusBarHeight, 0, activity.navigationBarHeight)
+//            setBackgroundColor(Color.BLUE)
 
-            setOnTouchListener(object : View.OnTouchListener {
-                private var touchStartTime: Long = Long.MAX_VALUE
-
-                override fun onTouch(v: View, event: MotionEvent): Boolean {
-                    val x = event.rawX.toInt()
-                    val y = event.rawY.toInt()
-
-                    Logger.log(LogLevel.DEBUG, "onTouch: x=$x, y=$y")
-                    Logger.log(LogLevel.DEBUG, "View size: ${v.width}x${v.height}")
-                    Logger.log(LogLevel.DEBUG, "View name: ${v.javaClass.simpleName}")
-                    return when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            // calculate X and Y coordinates of view relative to screen
-                            val viewLocation = IntArray(2)
-                            v.getLocationOnScreen(viewLocation)
-                            Logger.log(LogLevel.DEBUG, "View on Screen: x=${viewLocation[0]} y=${viewLocation[1]}")
-                            // Record the start time of the touch event
-                            touchStartTime = System.currentTimeMillis();
-
-                            true // Important to return false so the touch event isn't consumed and is passed to children
-                        }
-
-                        MotionEvent.ACTION_UP -> {
-                            // Add any additional logic for when the drag is released if necessary
-                            Logger.log(LogLevel.DEBUG, "onTouch: ACTION_UP")
-                            if (System.currentTimeMillis() - touchStartTime < ViewConfiguration.getTapTimeout()) {
-                                // Consider as a click event
-                                dismiss()
-                            }
-                            false
-                        }
-
-                        else -> false
-                    }
-                }
-            })
-
-            addView(createCardView(activity, presentation).apply {
+            val cardView = createCardView(activity, presentation).apply {
                 createWebViewInstance(activity, presentation, appHistoryState,
                     onPageLoaded = { webView, loadType ->
                         removeAllViews()
                         addView(webView)
                     },
                     onError = {
-                    dismiss()
-                }) {
+                        dismiss()
+                    }) {
                     dismiss()
                 }
-            })
+            }
+            addView(cardView)
+
+            var viewLocation: IntArray? = null
+            setOnTouchListener { v, event ->
+                val x = event.rawX.toInt()
+                val y = event.rawY.toInt()
+
+                Logger.log(LogLevel.DEBUG, "onTouch: x=$x, y=$y")
+                Logger.log(LogLevel.DEBUG, "View size: ${v.width}x${v.height}")
+                Logger.log(LogLevel.DEBUG, "View name: ${v.javaClass.simpleName}")
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        // calculate X and Y coordinates of view relative to screen
+                        viewLocation = IntArray(2)
+                        v.getLocationOnScreen(viewLocation)
+                        viewLocation?.let {
+                            Logger.log(LogLevel.DEBUG, "View on Screen: x=${it[0]} y=${it[1]}")
+                        }
+                        true // Important to return false so the touch event isn't consumed and is passed to children
+                    }
+
+                    MotionEvent.ACTION_UP -> {
+                        // Add any additional logic for when the drag is released if necessary
+                        Logger.log(LogLevel.DEBUG, "onTouch: ACTION_UP")
+                        viewLocation?.let {
+                            if (!isPointInsideView(it[0], it[1], cardView)) {
+                                // Consider as a click event
+                                dismiss()
+                            }
+                        }
+                        false
+                    }
+
+                    else -> false
+                }
+            }
             isFocusableInTouchMode = true
             requestFocus()
             setOnKeyListener { v, keyCode, event ->
