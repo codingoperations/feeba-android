@@ -7,7 +7,6 @@ import android.view.Gravity
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.cardview.widget.CardView
@@ -53,7 +52,7 @@ internal class SurveyWebViewHolder(
 //            setBackgroundColor(Color.BLUE)
 
             val cardView = createCardView(activity, presentation).apply {
-                createWebViewInstance(activity, presentation, appHistoryState,
+                val webView = createWebViewInstance(activity, presentation, appHistoryState,
                     onPageLoaded = { webView, loadType ->
                         removeAllViews()
                         addView(webView)
@@ -62,6 +61,14 @@ internal class SurveyWebViewHolder(
                         dismiss()
                     }) {
                     dismiss()
+                }
+                webView.setOnKeyListener { v, keyCode, event ->
+                    Logger.log(LogLevel.DEBUG, "onKeyListener: keyCode=$keyCode, event=$event")
+                    if (keyCode == KeyEvent.KEYCODE_BACK) {
+                        dismiss()
+                        return@setOnKeyListener true
+                    }
+                    return@setOnKeyListener false
                 }
             }
             addView(cardView)
