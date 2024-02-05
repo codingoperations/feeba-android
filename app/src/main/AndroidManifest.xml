@@ -16,6 +16,7 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name="sample.SampleShowCaseActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="true">
 
             <intent-filter>

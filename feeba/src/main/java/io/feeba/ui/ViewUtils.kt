@@ -24,7 +24,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.RelativeLayout
+import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import io.feeba.Utils
 import io.feeba.appendQueryParameter
@@ -202,10 +202,7 @@ fun createWebViewInstance(
 ): FeebaWebView {
     return FeebaWebView(context).apply {
         WebView.setWebContentsDebuggingEnabled(true);
-        layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT).apply {
-            addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-            addRule(RelativeLayout.CENTER_HORIZONTAL)
-        }
+        layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
         setBackgroundColor(Color.TRANSPARENT)
         settings.apply {
             javaScriptEnabled = true
@@ -216,7 +213,8 @@ fun createWebViewInstance(
             domStorageEnabled = true
             // Below is trying to fetch a JS bundle that is outdated. Requires deeper investigation
         }
-        addJavascriptInterface(JsInterface(appHistoryState,
+        addJavascriptInterface(JsInterface(
+            appHistoryState,
             onSurveyFullyRendered = {
                 Utils.runOnMainUIThread { onPageLoaded(this, LoadType.SURVEY_RENDERED) }
             }) {
@@ -226,8 +224,7 @@ fun createWebViewInstance(
                     onOutsideTouch?.invoke()
                 }
             }
-        }, "Mobile"
-        )
+        }, "Mobile")
         webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 Logger.log(LogLevel.DEBUG, "WebViewClient::onPageStarted, url: $url")

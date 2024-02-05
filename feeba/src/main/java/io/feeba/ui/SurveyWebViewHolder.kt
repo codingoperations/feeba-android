@@ -8,6 +8,7 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.cardview.widget.CardView
 import io.feeba.data.Position
@@ -46,33 +47,46 @@ internal class SurveyWebViewHolder(
     }
 
     private fun createContentView(): View {
-        return FrameLayout(activity).apply {
-            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-            setPadding(0, activity.statusBarHeight, 0, activity.navigationBarHeight)
-//            setBackgroundColor(Color.BLUE)
-
-            val cardView = createCardView(activity, presentation).apply {
-                val webView = createWebViewInstance(activity, presentation, appHistoryState,
-                    onPageLoaded = { webView, loadType ->
-                        removeAllViews()
-                        addView(webView)
-                    },
-                    onError = {
-                        dismiss()
-                    }) {
+        val cardView = createCardView(activity, presentation).apply {
+            val webView = createWebViewInstance(activity, presentation, appHistoryState,
+                onPageLoaded = { webView, loadType ->
+                    removeAllViews()
+                    addView(webView)
+                },
+                onError = {
                     dismiss()
-                }
-                webView.setOnKeyListener { v, keyCode, event ->
-                    Logger.log(LogLevel.DEBUG, "onKeyListener: keyCode=$keyCode, event=$event")
-                    if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        dismiss()
-                        return@setOnKeyListener true
-                    }
-                    return@setOnKeyListener false
-                }
+                }) {
+                dismiss()
             }
-            addView(cardView)
 
+            webView.setOnKeyListener { v, keyCode, event ->
+                Logger.log(LogLevel.DEBUG, "onKeyListener: keyCode=$keyCode, event=$event")
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    dismiss()
+                    return@setOnKeyListener true
+                }
+                return@setOnKeyListener false
+            }
+        }
+
+        return FrameLayout(activity).apply {
+            layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT).apply {
+                gravity = Gravity.BOTTOM
+            }
+            setPadding(0, activity.statusBarHeight, 0, activity.navigationBarHeight)
+
+//            setBackgroundColor(Color.LTGRAY)
+//            addView(EditText(activity).apply {
+//                layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+//                    gravity = Gravity.BOTTOM
+//                    setPadding(0, activity.statusBarHeight, 0, activity.navigationBarHeight)
+//                }
+//                setBackgroundColor(Color.TRANSPARENT)
+//                isFocusable = true
+//                isFocusableInTouchMode = true
+//            })
+
+            addView(cardView)
             var viewLocation: IntArray? = null
             setOnTouchListener { v, event ->
                 val x = event.rawX.toInt()
