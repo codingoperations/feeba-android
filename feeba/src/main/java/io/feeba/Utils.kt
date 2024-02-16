@@ -293,8 +293,7 @@ val Activity.statusBarHeight: Int
                 .currentWindowMetrics
                 .windowInsets
                 .getInsets(WindowInsets.Type.statusBars())
-                .bottom
-
+                .top
         } else {
             val rectangle = Rect()
             window.decorView.getWindowVisibleDisplayFrame(rectangle)

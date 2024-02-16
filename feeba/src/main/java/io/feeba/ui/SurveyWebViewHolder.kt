@@ -73,18 +73,8 @@ internal class SurveyWebViewHolder(
             layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT).apply {
                 gravity = Gravity.BOTTOM
             }
+            Logger.log(LogLevel.DEBUG, "statusBarHeight: ${activity.statusBarHeight}, navigationBarHeight: ${activity.navigationBarHeight}")
             setPadding(0, activity.statusBarHeight, 0, activity.navigationBarHeight)
-
-//            setBackgroundColor(Color.LTGRAY)
-//            addView(EditText(activity).apply {
-//                layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-//                    gravity = Gravity.BOTTOM
-//                    setPadding(0, activity.statusBarHeight, 0, activity.navigationBarHeight)
-//                }
-//                setBackgroundColor(Color.TRANSPARENT)
-//                isFocusable = true
-//                isFocusableInTouchMode = true
-//            })
 
             addView(cardView)
             var viewLocation: IntArray? = null

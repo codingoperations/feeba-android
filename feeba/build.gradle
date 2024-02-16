@@ -1,10 +1,11 @@
 plugins {
     id 'com.android.library'
-    id 'kotlin-android'
-    id 'kotlin-parcelize'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.0'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.parcelize'
     id 'maven-publish'
     id 'com.palantir.git-version' version '3.0.0'
+
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 android {
@@ -71,7 +72,7 @@ dependencies {
     implementation 'com.google.android.play:core-ktx:1.8.1'
 
     //Data
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1"
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0'
 
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.3"))
     // define any required OkHttp artifacts without version
