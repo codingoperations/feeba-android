@@ -57,7 +57,7 @@ data class SurveyPresentation(
     val useWidthMargin: Boolean,
     val isFullBleed: Boolean,
     // The following properties are populated from Javascript events
-    val displayLocation: Position = Position.BOTTOM_BANNER,
+    val displayLocation: Position = Position.TOP_BANNER,
     val displayDuration: Double,
     val maxWidgetHeightInPercent: Int = 70, // between 0 to 100
     val maxWidgetWidthInPercent: Int = 90, // between 0 to 100
@@ -68,7 +68,7 @@ data class HelperKnob(
     val hintText: String? = null,
 )
 @Serializable
-enum class Position() {
+enum class Position {
     @SerialName("top_banner") TOP_BANNER,
     @SerialName("bottom_banner") BOTTOM_BANNER,
     @SerialName("center_modal") CENTER_MODAL,
