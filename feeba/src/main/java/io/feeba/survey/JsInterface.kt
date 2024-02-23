@@ -41,4 +41,14 @@ class JsInterface(private val appHistoryState: AppHistoryState,
         Logger.log(LogLevel.DEBUG, "JsInterface::onSurveyFullyRendered")
         onSurveyFullyRendered()
     }
+
+    /**
+     * Returns unparsed server response back to the webview.
+     */
+    @JavascriptInterface
+    suspend fun getPrefetchedSurveyV1(projectName: String, surveyId: String, lang: String?): String? {
+        Logger.log(LogLevel.DEBUG, "JsInterface::onSurveyFullyRendered")
+        onSurveyFullyRendered()
+        return null
+    }
 }
