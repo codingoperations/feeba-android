@@ -172,7 +172,8 @@ private fun createCardView(activity: Activity, content: SurveyPresentation): Car
 
     // Set the initial elevation of the CardView to 0dp if using Android 6 API 23
     //  Fixes bug when animating a elevated CardView class
-    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M) cardView.cardElevation = 0f else cardView.cardElevation = ViewUtils.dpToPx(5).toFloat()
+//    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M) cardView.cardElevation = 0f else
+        cardView.cardElevation = ViewUtils.dpToPx(5).toFloat()
     cardView.radius = ViewUtils.dpToPx(8).toFloat()
     cardView.clipChildren = false
     cardView.clipToPadding = false
