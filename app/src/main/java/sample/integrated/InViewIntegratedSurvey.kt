@@ -26,17 +26,6 @@ class InViewIntegratedSurvey() : Fragment() {
         _binding = DialogIntegratedSurveyBinding.inflate(inflater, container, false)
         binding.surveyViewBlitz.loadSurvey("https://dev-sv.feeba.io/s/feeba/65a381db081d06ce889dfd09")
 
-//        binding.container.addView(createWebViewInstance(context as Activity, Defaults.appHistoryState, onPageLoaded = { webView, loadType ->
-//            Log.d("InViewIntegratedSurvey", "onPageLoaded")
-//        }, onError = {
-//            // In case of error, remove the view
-//            binding.container.removeAllViews()
-//        }).apply {
-//            Log.d("InViewIntegratedSurvey", "FeebaWebView is created")
-//            layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT).apply { gravity = Gravity.BOTTOM }
-//            this.loadUrl("https://sherzodg1.g1-iad.qualtrics.com/jfe/form/SV_00tzVlOPjSBB3mu")
-//        })
-
         return binding.root
     }
 
