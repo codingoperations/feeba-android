@@ -1,6 +1,5 @@
 package io.feeba.ui
 
-import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
@@ -38,7 +37,7 @@ class SurveyView : FrameLayout {
 
     //Create a function called init
     private fun init() {
-        webView = createWebViewInstance(context as Activity, appHistoryState,
+        webView = createWebViewInstance(context, appHistoryState,
             onPageLoaded = { webView, loadType ->
                 removeAllViews()
                 addView(webView)
