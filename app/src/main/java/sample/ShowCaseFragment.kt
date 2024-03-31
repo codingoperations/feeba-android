@@ -1,5 +1,6 @@
 package sample
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +11,7 @@ import io.feeba.Feeba
 import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import sample.bugs.ProblematicLoginPage
-import sample.integrated.InViewIntegratedSurvey
+import sample.integrated.InlineIntegratedSurvey
 import sample.utils.PreferenceWrapper
 
 class ShowCaseFragment : Fragment() {
@@ -49,7 +50,7 @@ class ShowCaseFragment : Fragment() {
         binding.dialogInView.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .addToBackStack("inview_survey")
-                .replace(R.id.fragmentContainer, InViewIntegratedSurvey())
+                .replace(R.id.fragmentContainer, InlineIntegratedSurvey())
                 .commit()
         }
 
@@ -62,12 +63,19 @@ class ShowCaseFragment : Fragment() {
             Feeba.triggerEvent("report_problem")
         }
 
-        binding.buttonHavingTrouble.setOnClickListener {
+        // Page Triggers
+        binding.buttonPageTriggerFragment.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .addToBackStack("login_page")
                 .replace(R.id.fragmentContainer, ProblematicLoginPage())
                 .commit()
         }
+
+        binding.buttonPageTriggerActivity.setOnClickListener {
+            startActivity(Intent(requireContext(), PageTriggerActivity::class.java))
+        }
+        // End of Page Triggers
+
         binding.switchEnv.setOnCheckedChangeListener { _, isChecked ->
             ConfigHolder.setEnv(isChecked)
             PreferenceWrapper.isProd = isChecked

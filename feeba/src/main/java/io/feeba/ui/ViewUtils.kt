@@ -83,7 +83,8 @@ internal object ViewUtils {
         var rightInset = 0f
         var leftInset = 0f
         val topInset = (frame.top - contentView.top) / Resources.getSystem().displayMetrics.density
-        val bottomInset = (contentView.bottom - frame.bottom) / Resources.getSystem().displayMetrics.density
+        val bottomInset =
+            (contentView.bottom - frame.bottom) / Resources.getSystem().displayMetrics.density
         // API 29 is the only version where the IAM bleeds under cutouts in immersize mode
         // All other versions will not need left and right insets.
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
@@ -93,7 +94,12 @@ internal object ViewUtils {
                 leftInset = cutout.safeInsetLeft / Resources.getSystem().displayMetrics.density
             }
         }
-        return intArrayOf(Math.round(topInset), Math.round(bottomInset), Math.round(rightInset), Math.round(leftInset))
+        return intArrayOf(
+            Math.round(topInset),
+            Math.round(bottomInset),
+            Math.round(rightInset),
+            Math.round(leftInset)
+        )
     }
 
     fun getFullbleedWindowWidth(activity: Activity): Int {
@@ -130,7 +136,9 @@ internal object ViewUtils {
 
     private fun getWindowHeightLollipop(activity: Activity): Int {
         // getDisplaySizeY - works correctly expect for landscape due to a bug.
-        return if (activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) getWindowVisibleDisplayFrame(activity).height() else getDisplaySizeY(
+        return if (activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) getWindowVisibleDisplayFrame(
+            activity
+        ).height() else getDisplaySizeY(
             activity
         )
         //  getWindowVisibleDisplayFrame - Doesn't work for portrait as it subtracts the keyboard height.
@@ -157,7 +165,10 @@ internal object ViewUtils {
         return hasToken && insetsAttached
     }
 
-    fun removeOnGlobalLayoutListener(view: View, listener: ViewTreeObserver.OnGlobalLayoutListener?) {
+    fun removeOnGlobalLayoutListener(
+        view: View,
+        listener: ViewTreeObserver.OnGlobalLayoutListener?
+    ) {
         view.viewTreeObserver.removeOnGlobalLayoutListener(listener)
     }
 }
@@ -188,8 +199,20 @@ fun createWebViewInstance(
     onPageLoaded: (WebView, LoadType) -> Unit,
     onError: () -> Unit, onOutsideTouch: (() -> Unit)?
 ): FeebaWebView {
-    return createWebViewInstance(context, appHistoryState, onError, onPageLoaded, onOutsideTouch).apply {
-        loadUrl(appendQueryParameter(presentation.surveyWebAppUrl, "lang", appHistoryState.userData.langCode ?: "en"))
+    return createWebViewInstance(
+        context,
+        appHistoryState,
+        onError,
+        onPageLoaded,
+        onOutsideTouch
+    ).apply {
+        loadUrl(
+            appendQueryParameter(
+                presentation.surveyWebAppUrl,
+                "lang",
+                appHistoryState.userData.langCode ?: "en"
+            )
+        )
     }
 }
 
@@ -202,8 +225,12 @@ fun createWebViewInstance(
 ): FeebaWebView {
     return FeebaWebView(context).apply {
         WebView.setWebContentsDebuggingEnabled(true);
-        layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+        layoutParams = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
         setBackgroundColor(Color.TRANSPARENT)
+        isNestedScrollingEnabled = true
         settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -213,18 +240,26 @@ fun createWebViewInstance(
             domStorageEnabled = true
             // Below is trying to fetch a JS bundle that is outdated. Requires deeper investigation
         }
-        addJavascriptInterface(JsInterface(
-            appHistoryState,
-            onSurveyFullyRendered = {
-                Utils.runOnMainUIThread { onPageLoaded(this, LoadType.SURVEY_RENDERED) }
-            }) {
-            when (it) {
-                CallToAction.CLOSE_SURVEY -> {
-                    Logger.log(LogLevel.DEBUG, "FeebaWebView::JsInterface::CallToAction.CLOSE_SURVEY")
-                    onOutsideTouch?.invoke()
-                }
-            }
-        }, "Mobile")
+        addJavascriptInterface(
+            JsInterface(
+                appHistoryState,
+                onSurveyFullyRendered = {
+                    Utils.runOnMainUIThread { onPageLoaded(this, SurveyRendered) }
+                },
+                onSurveyEndCallback = {
+                    when (it) {
+                        CallToAction.CLOSE_SURVEY -> {
+                            Logger.log(LogLevel.DEBUG, "FeebaWebView::JsInterface::CallToAction.CLOSE_SURVEY")
+                            onOutsideTouch?.invoke()
+                        }
+                    }
+                },
+                onResize = {
+                    Logger.log(LogLevel.DEBUG, "FeebaWebView::JsInterface::onResize, height=$it")
+                    Utils.runOnMainUIThread { onPageLoaded(this, PageResized(it)) }
+                }),
+            "Mobile"
+        )
         webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 Logger.log(LogLevel.DEBUG, "WebViewClient::onPageStarted, url: $url")
@@ -232,38 +267,65 @@ fun createWebViewInstance(
 
             override fun onPageFinished(view: WebView, url: String?) {
                 Logger.log(LogLevel.DEBUG, "WebViewClient::onPageFinished, url: $url")
-                onPageLoaded(view, LoadType.PAGE_FRAME)
+                onPageLoaded(view, PageFrame)
             }
 
-            override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError) {
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: WebResourceError
+            ) {
                 Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedError, error: $error")
                 // Log WebView errors here
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     // Log error details on API level 23 and above
-                    Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedError, description: ${error.description}")
+                    Logger.log(
+                        LogLevel.ERROR,
+                        "WebViewClient::onReceivedError, description: ${error.description}"
+                    )
                 } else {
                     // Log error details on API level below 23
-                    Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedError, description: ${error}")
+                    Logger.log(
+                        LogLevel.ERROR,
+                        "WebViewClient::onReceivedError, description: ${error}"
+                    )
                 }
             }
 
-            override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
+            override fun onReceivedHttpError(
+                view: WebView,
+                request: WebResourceRequest,
+                errorResponse: WebResourceResponse
+            ) {
                 super.onReceivedHttpError(view, request, errorResponse)
 
-                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, request.urlAd: ${request.url}")
-                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, statusCode: ${errorResponse.statusCode}")
+                Logger.log(
+                    LogLevel.ERROR,
+                    "WebViewClient::onReceivedHttpError, request.urlAd: ${request.url}"
+                )
+                Logger.log(
+                    LogLevel.ERROR,
+                    "WebViewClient::onReceivedHttpError, statusCode: ${errorResponse.statusCode}"
+                )
 //                Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedHttpError, data: ${errorResponse.data.use { it.reader().readText() } }}")
                 onError()
             }
 
-            override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+            override fun onReceivedSslError(
+                view: WebView?,
+                handler: SslErrorHandler?,
+                error: SslError?
+            ) {
                 super.onReceivedSslError(view, handler, error)
                 Logger.log(LogLevel.ERROR, "WebViewClient::onReceivedSslError, error: $error")
             }
         }
         webChromeClient = object : WebChromeClient() {
             override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
-                Logger.log(LogLevel.DEBUG, "WebChromeClient::onConsoleMessage, message: ${consoleMessage.message()}")
+                Logger.log(
+                    LogLevel.DEBUG,
+                    "WebChromeClient::onConsoleMessage, message: ${consoleMessage.message()}"
+                )
 //                Logger.log(LogLevel.DEBUG, "WebChromeClient::onConsoleMessage full: $consoleMessage")
 
                 return true
@@ -273,7 +335,7 @@ fun createWebViewInstance(
     }
 }
 
-enum class LoadType {
-    PAGE_FRAME,
-    SURVEY_RENDERED
-}
+sealed interface LoadType
+data object PageFrame : LoadType;
+data object SurveyRendered : LoadType;
+class PageResized(val heightSize: Int) : LoadType;

@@ -3,60 +3,137 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
+    android:padding="16dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="sample.SampleShowCaseActivity">
 
-
     <LinearLayout
+        android:id="@+id/pageTriggers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        app:layout_constraintBottom_toTopOf="@id/dialogInView"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/eventTriggers"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
-        <Button
-            android:layout_gravity="center"
-            android:id="@+id/reportProblem"
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:background="@android:color/black" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="Report a Bug"/>
-        <Button
-            android:layout_gravity="center"
-            android:id="@+id/buttonHavingTrouble"
-            android:layout_width="wrap_content"
+            android:text="Page Triggers" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="Problematic Logic"/>
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/buttonPageTriggerFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Fragment" />
+            <Space
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+            <Button
+                android:id="@+id/buttonPageTriggerActivity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Activity" />
+        </LinearLayout>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/dialogInView"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/eventTriggers"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="InView"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/onRideEndButton"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/inline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-    <Button
-        android:id="@+id/onRideEndButton"
-        android:layout_width="wrap_content"
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event Triggers" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/reportProblem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Report a Bug" />
+
+            <Space
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
+            <Button
+                android:id="@+id/onRideEndButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="on_ride_end" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/inline"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="on_ride_end"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/dialogInView" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="1dp"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Inline" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+
+            <Button
+                android:id="@+id/dialogInView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Inline" />
+        </LinearLayout>
+    </LinearLayout>
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switchEnv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:checked="true"
-        android:padding="16dp"
         android:text="Keep it on to use Prod or Off for Dev environemnt"
         android:textOff="DEV"
         android:textOn="PROD"
@@ -68,7 +145,6 @@
         android:id="@+id/editTextLangCode"
         android:layout_width="65dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:ems="10"
         android:inputType="textPersonName"
         android:text="ru"
@@ -79,7 +155,6 @@
         android:id="@+id/textView2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
         android:text="Set the language. Ensure you have a config for this language code"
         app:layout_constraintBottom_toBottomOf="@+id/editTextLangCode"
         app:layout_constraintEnd_toStartOf="@+id/editTextLangCode"
