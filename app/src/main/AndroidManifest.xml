@@ -5,9 +5,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name="sample.DemoApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:name="sample.DemoApplication"
         android:label="@string/rate_app_name"
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -16,8 +16,8 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name="sample.SampleShowCaseActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,6 +25,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="sample.PageTriggerActivity"
+            android:label="Page Trigger Activity" />
     </application>
 
 </manifest>

@@ -15,14 +15,18 @@ enum class CallToAction(val value: String) {
     }
 }
 
-class JsInterface(private val appHistoryState: AppHistoryState,
-                  private val onSurveyFullyRendered: () -> Unit ,
-                  private val onSurveyEndCallback: (cta: CallToAction) -> Unit)  {
+class JsInterface(
+    private val appHistoryState: AppHistoryState,
+    private val onSurveyFullyRendered: () -> Unit,
+    private val onSurveyEndCallback: (cta: CallToAction) -> Unit,
+    private val onResize: (height: Int) -> Unit
+) {
     private val jsonInstance = ServiceLocator.jsonInstance
 
     init {
         Logger.log(LogLevel.DEBUG, "JsInterface::init, appHistoryState=$appHistoryState")
     }
+
     /** Show a toast from the web page  */
     @JavascriptInterface
     fun endOfSurvey(callToAction: String) {
@@ -46,9 +50,19 @@ class JsInterface(private val appHistoryState: AppHistoryState,
      * Returns unparsed server response back to the webview.
      */
     @JavascriptInterface
-    suspend fun getPrefetchedSurveyV1(projectName: String, surveyId: String, lang: String?): String? {
+    suspend fun getPrefetchedSurveyV1(
+        projectName: String,
+        surveyId: String,
+        lang: String?
+    ): String? {
         Logger.log(LogLevel.DEBUG, "JsInterface::onSurveyFullyRendered")
         onSurveyFullyRendered()
         return null
+    }
+
+    @JavascriptInterface
+    fun resize(height: Int) {
+        Logger.log(LogLevel.DEBUG, "JsInterface::resize, height=$height")
+        onResize(height)
     }
 }
