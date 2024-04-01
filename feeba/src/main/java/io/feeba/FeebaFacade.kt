@@ -53,7 +53,6 @@ object FeebaFacade {
 
     fun showConditionalSurvey() {
         println("Feeba showConditionalSurvey")
-
     }
 
     object User {
