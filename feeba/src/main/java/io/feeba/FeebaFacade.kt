@@ -30,7 +30,7 @@ object FeebaFacade {
         // check if we have a survey for this event
         val validatorResult = triggerValidator.onEvent(eventName, value, localStateHolder)
         validatorResult?.let {
-            stateManager.showSurvey(it.surveyPresentation, it.ruleSet, "OnEvent:$eventName")
+            stateManager.showEventSurvey(it.surveyPresentation, it.ruleSet, eventName)
         }
     }
 
@@ -40,7 +40,7 @@ object FeebaFacade {
         // check if we have a survey for this event
         val validationResult = triggerValidator.pageOpened(pageName, localStateHolder)
         validationResult?.let {
-            stateManager.showSurvey(it.surveyPresentation, it.ruleSet, "OnPage:$pageName")
+            stateManager.showPageSurvey(it.surveyPresentation, it.ruleSet, pageName)
         }
     }
 

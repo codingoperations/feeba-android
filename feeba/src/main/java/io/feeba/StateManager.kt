@@ -5,6 +5,7 @@ import android.os.Looper
 import io.feeba.data.LocalStateHolder
 import io.feeba.data.RestClient
 import io.feeba.data.RuleSet
+import io.feeba.data.RuleType
 import io.feeba.data.SurveyPresentation
 import io.feeba.lifecycle.AppLifecycleListener
 import io.feeba.lifecycle.AppState
@@ -17,6 +18,8 @@ import io.feeba.survey.SurveyViewController
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+const val PREFIX_DELAYED_TASK_PAGE = "OnPage:"
+const val PREFIX_DELAYED_TASK_EVENT = "OnEvent:"
 class StateManager(private val lifecycle: GenericAppLifecycle, private val localStateHolder: LocalStateHolder) {
     private var surveyController: SurveyViewController? = null
     private val delayedTasks = mutableMapOf<String, Runnable>()
@@ -78,8 +81,16 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
         }
     }
 
-    fun showSurvey(presentation: SurveyPresentation, ruleSet: RuleSet, associatedKey: String) {
-        Logger.log(LogLevel.DEBUG, "StateManager::showSurvey")
+    fun showEventSurvey(presentation: SurveyPresentation, ruleSet: RuleSet, associatedKey: String) {
+        Logger.log(LogLevel.DEBUG, "StateManager::showEventSurvey")
+        internalShowSurvey(presentation, ruleSet, "$PREFIX_DELAYED_TASK_EVENT$associatedKey")
+    }
+
+    fun showPageSurvey(presentation: SurveyPresentation, ruleSet: RuleSet, associatedKey: String) {
+        Logger.log(LogLevel.DEBUG, "StateManager::showPageSurvey")
+        internalShowSurvey(presentation, ruleSet, "$PREFIX_DELAYED_TASK_PAGE$associatedKey")
+    }
+    private fun internalShowSurvey(presentation: SurveyPresentation, ruleSet: RuleSet, associatedKey: String) {
         val surveyDelay = ruleSet.getSurveyDelaySec()
         if (surveyDelay > 0) {
             Logger.log(LogLevel.DEBUG, "StateManager::showSurvey - Scheduling survey for $surveyDelay Sec")
@@ -118,7 +129,7 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
 
     fun pageClosed(pageName: String) {
         Logger.log(LogLevel.DEBUG, "StateManager::pageClosed -> $pageName")
-        cancelPendingSurveys(pageName)
+        cancelPendingSurveys(pageName, RuleType.SCREEN)
         surveyController?.destroy(false)
         surveyController = null
     }
@@ -127,9 +138,10 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
         Logger.log(LogLevel.DEBUG, "StateManager::cancelEventRelatedSurveys -> $eventName")
     }
 
-    private fun cancelPendingSurveys(pageName: String) {
-        Logger.log(LogLevel.DEBUG, "ActivityLifecycleListener::cancelPendingSurveys")
-        delayedTasks.remove(pageName)?.let {
+    private fun cancelPendingSurveys(pageName: String, ruleTypeToCancel: RuleType) {
+        Logger.log(LogLevel.DEBUG, "ActivityLifecycleListener::cancelPendingSurveys:: delayedTasks -> $delayedTasks")
+        val key : String = if (ruleTypeToCancel == RuleType.SCREEN) "$PREFIX_DELAYED_TASK_PAGE$pageName" else "$PREFIX_DELAYED_TASK_EVENT$pageName"
+        delayedTasks.remove(key)?.let {
             Logger.log(LogLevel.DEBUG, "---> Removing ")
             handler.removeCallbacks(it)
         }
