@@ -26,7 +26,7 @@ object Feeba {
         this.app = app
         val localStateHolder = LocalStateHolder(AndroidStateStorage(appContext))
         FeebaFacade.init(
-            serverConfig,
+            serverConfig.copy(hostUrl = serverConfig.hostUrl ?: "https://api.feeba.io"),
             localStateHolder,
             StateManager(AndroidLifecycleManager(app), localStateHolder)
         )
@@ -44,7 +44,7 @@ object Feeba {
         FeebaFacade.pageClosed(pageName)
     }
 
-    fun fetchFeebaConfig() : FeebaResponse? {
+    fun fetchFeebaConfig(): FeebaResponse? {
         return FeebaFacade.feebaResponse()
     }
 }

@@ -5,13 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.feeba.Feeba
-import io.least.core.ServerConfig
 import kotlinx.coroutines.launch
 import sample.ConfigHolder
-import sample.DemoApplication
 import sample.Environment
-import sample.data.LoginResponse
 import sample.data.RestClient
 import sample.utils.PreferenceWrapper
 
@@ -20,17 +16,17 @@ class LoginViewModel : ViewModel() {
     val loginStatus: LiveData<LoginStatus> get() = _loginStatus
 
     init {
-        setEnvironment(if (PreferenceWrapper.isProd) Environment.PRODUCTION else Environment.DEVELOPMENT)
+        val env = if (PreferenceWrapper.isProd) Environment.PRODUCTION else Environment.DEVELOPMENT
         val jwtToken = PreferenceWrapper.jwtToken
         if (jwtToken.isNotEmpty()) {
+            // We found user jwt token, let's try to login
+            RestClient.initLoggedUser(PreferenceWrapper.jwtToken, env)
             updateTokenAndProceedWithLogin(PreferenceWrapper.jwtToken)
         }
     }
 
-    fun setEnvironment(env: Environment) {
-        PreferenceWrapper.isProd = env == Environment.PRODUCTION
-        ConfigHolder.setEnv(env)
-        RestClient.updateEnvironment()
+    fun changeEnvironment(env: Environment) {
+        RestClient.switchEnvironment(env)
     }
 
     fun login(email: String, password: String) {
@@ -47,15 +43,7 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun updateTokenAndProceedWithLogin(jwt: String) {
-        ConfigHolder.jwtToken = jwt
-        // This is how Feeba is initialized
-        Feeba.init(
-            DemoApplication.instance, ServerConfig(
-                hostUrl = ConfigHolder.hostUrl,
-                langCode = "en", // Whatever your default language is
-                apiToken = ConfigHolder.jwtToken
-            )
-        )
+        PreferenceWrapper.jwtToken = jwt
         _loginStatus.value = LoginStatus.SUCCESS
     }
 }

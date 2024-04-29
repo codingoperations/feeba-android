@@ -9,15 +9,10 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import io.least.demo.R
 import io.least.demo.databinding.FragmentLoginBinding
-import sample.ConfigHolder
 import sample.Environment
 import sample.utils.PreferenceWrapper
 
 class LoginFragment : Fragment() {
-    companion object {
-        fun newInstance() = LoginFragment()
-    }
-
     private var _binding: FragmentLoginBinding? = null
 
     // This property is only valid between onCreateView and onDestroyView.
@@ -38,7 +33,7 @@ class LoginFragment : Fragment() {
             )
         }
         binding.switchEnv.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.setEnvironment(if (isChecked) Environment.PRODUCTION else Environment.DEVELOPMENT)
+            viewModel.changeEnvironment(if (isChecked) Environment.PRODUCTION else Environment.DEVELOPMENT)
         }
         return binding.root
     }

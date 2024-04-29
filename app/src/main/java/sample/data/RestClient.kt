@@ -1,6 +1,5 @@
 package sample.data
 
-import android.util.Log
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -12,27 +11,35 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import sample.ConfigHolder
 import sample.Environment
-import java.util.Date
+
+val prodBaseUrl = "https://api.feeba.io"
+val devBaseUrl = "https://dev-api.feeba.io"
 
 object RestClient {
     private lateinit var service: FeebaService
-    private lateinit var jwt: String
-    val networkJson = Json { ignoreUnknownKeys = true }
+    lateinit var jwt: String
+    lateinit var baseUrl: String
+    private val networkJson = Json { ignoreUnknownKeys = true }
 
-    fun updateEnvironment() {
-        val baseUrl = ConfigHolder.hostUrl
+    fun initLoggedUser(jwt: String, env: Environment) {
+        switchEnvironment(env)
+        // ensure desired jwt is set since switchEnvironment resets jwt to empty string
+        this.jwt = jwt
+    }
+
+    fun switchEnvironment(env: Environment) {
+        this.baseUrl = if (env == Environment.PRODUCTION) prodBaseUrl else devBaseUrl
         val retrofit = Retrofit.Builder().baseUrl(baseUrl)
             .addConverterFactory(
                 networkJson.asConverterFactory("application/json".toMediaType())
             )
             .build()
-
         service = retrofit.create(FeebaService::class.java)
+        this.jwt = ""
     }
 
     suspend fun login(username: String, password: String): LoginResponse {
         val response = service.login(LoginRequest(password, username))
-        jwt = response.jwt
         return response
     }
 
@@ -67,7 +74,7 @@ data class Project(
     val tokens: List<Token>,
     val created: String,
     val updated: String
-)
+) : java.io.Serializable
 
 @Serializable
 data class Token(

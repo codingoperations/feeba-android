@@ -6,7 +6,6 @@ import io.feeba.data.state.AppHistoryState
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
