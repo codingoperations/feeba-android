@@ -15,7 +15,7 @@
         android:theme="@style/Theme.FeebaTestApp"
         android:usesCleartextTraffic="true">
         <activity
-            android:name="sample.project.SampleShowCaseActivity"
+            android:name="sample.SampleShowCaseActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>

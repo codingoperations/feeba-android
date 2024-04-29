@@ -1,10 +1,10 @@
-package sample.project
+package sample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import io.least.demo.R
 import io.least.demo.databinding.ActivitySampleShowcaseBinding
-import sample.project.project_list.ShowCaseFragment
+import sample.project.NavHostFragment
 
 class SampleShowCaseActivity : AppCompatActivity() {
     private var _binding: ActivitySampleShowcaseBinding? = null

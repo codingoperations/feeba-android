@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:startDestination="@id/fragmentProjectList"
-    android:id="@+id/nav">
+    app:startDestination="@id/fragmentLogin"
+    android:id="@+id/nav_graph">
     <fragment
         android:id="@+id/fragmentLogin"
         android:name="sample.auth.LoginFragment">

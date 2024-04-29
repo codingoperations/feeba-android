@@ -6,18 +6,12 @@ import io.least.core.ServerConfig
 import sample.utils.PreferenceWrapper
 
 class DemoApplication: Application() {
+    companion object {
+        lateinit var instance: DemoApplication
+    }
     override fun onCreate() {
         super.onCreate()
+        instance = this
         PreferenceWrapper.init(this)
-        ConfigHolder.setEnv(PreferenceWrapper.isProd)
-
-        // This is how Feeba is initialized
-        Feeba.init(
-            this, ServerConfig(
-                hostUrl = ConfigHolder.hostUrl,
-                langCode = "en", // Whatever your default language is
-                apiToken = ConfigHolder.jwtToken
-            )
-        )
     }
 }

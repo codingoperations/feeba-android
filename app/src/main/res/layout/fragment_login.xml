@@ -8,34 +8,46 @@
     tools:context="sample.auth.LoginFragment">
 
     <EditText
-        android:id="@+id/editTextLogin"
-        android:layout_width="wrap_content"
+        android:id="@+id/edit_text_email"
+        android:layout_width="256dp"
         android:layout_height="wrap_content"
         android:hint="Email"
-        app:layout_constraintBottom_toTopOf="@+id/editTextPassword"
+        android:singleLine="true"
+        android:inputType="textEmailAddress"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/editTextPassword"
-        android:layout_width="wrap_content"
+        android:layout_width="256dp"
         android:layout_height="wrap_content"
+        android:singleLine="true"
         android:hint="Password"
-        app:constrainttop_toBottomOf="@+id/editTextLogin"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextLogin" />
+        app:layout_constraintTop_toBottomOf="@+id/edit_text_email" />
 
     <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
+        android:id="@+id/buttonLogin"
+        android:layout_width="256dp"
         android:layout_height="wrap_content"
         android:text="Button"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextPassword" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switchEnv"
+        android:layout_width="256dp"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Keep it on to use Prod or Off for Dev environemnt"
+        android:textOff="DEV"
+        android:textOn="PROD"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonLogin" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

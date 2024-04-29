@@ -15,8 +15,8 @@ import io.feeba.lifecycle.Logger
 import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import sample.ConfigHolder
-import sample.Tags
-import sample.UserData
+import sample.data.Tags
+import sample.data.UserData
 import sample.project.page.PageTriggerActivity
 import sample.project.page.bugs.ProblematicLoginPage
 import sample.project.events.EventsAdapter
@@ -53,7 +53,6 @@ class ShowCaseFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSampleShowcaseBinding.inflate(inflater, container, false)
-        binding.switchEnv.isChecked = PreferenceWrapper.isProd
         binding.editTextLangCode.setText(PreferenceWrapper.langCode)
 
         // Survey
@@ -76,11 +75,6 @@ class ShowCaseFragment : Fragment() {
             startActivity(Intent(requireContext(), PageTriggerActivity::class.java))
         }
         // End of Page Triggers
-
-        binding.switchEnv.setOnCheckedChangeListener { _, isChecked ->
-            ConfigHolder.setEnv(isChecked)
-            PreferenceWrapper.isProd = isChecked
-        }
         binding.editTextLangCode.addTextChangedListener { text ->
             Feeba.User.setLanguage(text.toString())
             PreferenceWrapper.langCode = text.toString()
