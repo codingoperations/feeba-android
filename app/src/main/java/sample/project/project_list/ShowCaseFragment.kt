@@ -1,17 +1,27 @@
-package sample
+package sample.project.project_list
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import io.feeba.Feeba
+import io.feeba.lifecycle.LogLevel
+import io.feeba.lifecycle.Logger
 import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
-import sample.bugs.ProblematicLoginPage
-import sample.integrated.InlineIntegratedSurvey
+import sample.ConfigHolder
+import sample.Tags
+import sample.UserData
+import sample.project.page.PageTriggerActivity
+import sample.project.page.bugs.ProblematicLoginPage
+import sample.project.events.EventsAdapter
+import sample.project.extractEvents
+import sample.project.integrated.InlineIntegratedSurvey
 import sample.utils.PreferenceWrapper
 
 class ShowCaseFragment : Fragment() {
@@ -54,15 +64,6 @@ class ShowCaseFragment : Fragment() {
                 .commit()
         }
 
-        binding.onRideEndButton.setOnClickListener {
-            Feeba.User.addTag(mapOf("driverId" to user1.tags.driverId, "rideId" to user1.tags.rideId))
-            Feeba.triggerEvent("on_ride_end")
-        }
-        // BUGs and issue reporting
-        binding.reportProblem.setOnClickListener {
-            Feeba.triggerEvent("report_problem")
-        }
-
         // Page Triggers
         binding.buttonPageTriggerFragment.setOnClickListener {
             parentFragmentManager.beginTransaction()
@@ -84,6 +85,16 @@ class ShowCaseFragment : Fragment() {
             Feeba.User.setLanguage(text.toString())
             PreferenceWrapper.langCode = text.toString()
         }
+
+        Handler().postDelayed({
+            Feeba.fetchFeebaConfig()?.let {
+                val adapterData = extractEvents(it)
+                Logger.log(LogLevel.DEBUG, "FeebaConfig: $adapterData")
+                binding.recyclerViewEventTriggers.layoutManager = LinearLayoutManager(context)
+                binding.recyclerViewEventTriggers.adapter = EventsAdapter(adapterData)
+            }
+        }, 1000)
+
         return binding.root
     }
 

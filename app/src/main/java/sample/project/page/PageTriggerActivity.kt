@@ -1,4 +1,4 @@
-package sample
+package sample.project.page
 
 import android.os.Bundle
 import android.os.Handler

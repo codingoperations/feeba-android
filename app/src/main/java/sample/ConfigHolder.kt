@@ -2,7 +2,7 @@ package sample
 
 private val prodConfig = ServerConfig(
     "https://api.feeba.io",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjIxMzMyNjEsInBheWxvYWQiOnsidXNlcklkIjoiNjNlMTY1NmI1YzQ2NWM4Y2U1NGE1NjY2IiwicHJvamVjdE5hbWUiOiJmZWViYSJ9LCJpYXQiOjE2NzU3MzMyNjF9.u1QKFr15wJQcEgyVjaLd0aU5A-XZoOaFGqFnGOSIXhE"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjMzNDk4NjUsInBheWxvYWQiOnsidXNlcklkIjoiNjNmNDM5NGYzZDhmOTg3NjI1M2RhODU2IiwicHJvamVjdE5hbWUiOiJteS10YXhpIn0sImlhdCI6MTY3Njk0OTg2NX0.1LHodPBVt-sCB1A9xATkEidW7tQBBVOKzYoXR9NDx8Y"
 )
 
 private val devConfig = ServerConfig(

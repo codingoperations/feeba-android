@@ -1,6 +1,7 @@
 package io.feeba
 
 import io.feeba.data.FeebaConfig
+import io.feeba.data.FeebaResponse
 import io.feeba.data.LocalStateHolder
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
@@ -14,7 +15,6 @@ object FeebaFacade {
     private lateinit var stateManager: StateManager
 
     private lateinit var triggerValidator: TriggerValidator
-//    private lateinit var activityListener: ActivityLifecycleListener
 
     fun init(serverConfig: ServerConfig, localStateHolder: LocalStateHolder,  stateManager: StateManager) {
         Logger.log(LogLevel.DEBUG, "Initialization....")
@@ -53,6 +53,10 @@ object FeebaFacade {
 
     fun showConditionalSurvey() {
         println("Feeba showConditionalSurvey")
+    }
+
+    fun feebaResponse(): FeebaResponse? {
+        return localStateHolder.lastKnownFeebaConfig
     }
 
     object User {

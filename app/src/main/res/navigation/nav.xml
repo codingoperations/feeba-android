@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/fragmentProjectList"
+    android:id="@+id/nav">
+    <fragment
+        android:id="@+id/fragmentLogin"
+        android:name="sample.auth.LoginFragment">
+        <action
+            android:id="@+id/action_open_project_list"
+            app:destination="@id/fragmentProjectList" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentProjectList"
+        android:name="sample.project.project_list.list.ProjectListFragment">
+        <action
+            android:id="@+id/action_open_showcase"
+            app:destination="@id/fragmentTriggers" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentTriggers"
+        android:name="sample.project.project_list.ShowCaseFragment">
+        <action
+            android:id="@+id/action_fragmentTriggers_to_fragmentIntegratedSurvey"
+            app:destination="@id/fragmentIntegratedSurvey" />
+        <action
+            android:id="@+id/action_open_delayed_survey"
+            app:destination="@id/fragmentDelayedTrigger" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentIntegratedSurvey"
+        android:name="sample.project.integrated.InlineIntegratedSurvey">
+        <action
+            android:id="@+id/action_back_to_triggers"
+            app:popUpTo="@id/fragmentTriggers"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentDelayedTrigger"
+        android:name="sample.project.page.bugs.ProblematicLoginPage">
+        <action
+            android:id="@+id/action_back_to_triggers"
+            app:popUpTo="@id/fragmentTriggers"
+            app:popUpToInclusive="true" />
+    </fragment>
+</navigation>

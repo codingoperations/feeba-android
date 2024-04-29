@@ -2,6 +2,7 @@ package io.feeba
 
 import android.app.Application
 import android.content.Context
+import io.feeba.data.FeebaResponse
 import io.feeba.data.LocalStateHolder
 import io.feeba.data.sql.AndroidStateStorage
 import io.feeba.lifecycle.AndroidLifecycleManager
@@ -41,5 +42,9 @@ object Feeba {
 
     fun pageClosed(pageName: String) {
         FeebaFacade.pageClosed(pageName)
+    }
+
+    fun fetchFeebaConfig() : FeebaResponse? {
+        return FeebaFacade.feebaResponse()
     }
 }

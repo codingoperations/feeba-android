@@ -15,10 +15,9 @@
         android:theme="@style/Theme.FeebaTestApp"
         android:usesCleartextTraffic="true">
         <activity
-            android:name="sample.SampleShowCaseActivity"
+            android:name="sample.project.SampleShowCaseActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustPan">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,7 +25,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="sample.PageTriggerActivity"
+            android:name="sample.project.page.PageTriggerActivity"
             android:label="Page Trigger Activity" />
     </application>
 
