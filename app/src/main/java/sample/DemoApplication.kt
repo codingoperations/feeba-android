@@ -13,5 +13,6 @@ class DemoApplication: Application() {
         super.onCreate()
         instance = this
         PreferenceWrapper.init(this)
+        Feeba.init(this, ServerConfig("en", "YOU_API_TOKEN"))
     }
 }

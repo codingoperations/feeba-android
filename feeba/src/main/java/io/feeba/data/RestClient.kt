@@ -17,14 +17,17 @@ class RestClient() {
     suspend fun getSurveyPlans(state: AppHistoryState): String? {
         Logger.log(LogLevel.DEBUG, "RestClient::fetchSurveyPlans....")
         return try {
-            val response = sendPostRequest("/v1/survey/sdk/list", ServiceLocator.jsonInstance.encodeToString(state.userData))
+            val response = sendPostRequest(
+                "/v1/survey/sdk/list",
+                ServiceLocator.jsonInstance.encodeToString(state.userData)
+            )
             if (response == "") {
                 return null
             }
             Logger.log(LogLevel.DEBUG, "RestClient::plans -> $response")
             return response
         } catch (t: Throwable) {
-            Logger.log(LogLevel.WARN, "RestClient::getSurveyPlans failed: $t")
+            Logger.log(LogLevel.ERROR, "RestClient::getSurveyPlans failed: $t")
             null
         }
     }
@@ -33,7 +36,10 @@ class RestClient() {
         // Create a URL object from the provided URL string
         val requestUrl = "${FeebaFacade.config.serviceConfig.hostUrl}${path}"
         Logger.log(LogLevel.DEBUG, "RestClient::sendPostRequest -> $requestUrl")
-        Logger.log(LogLevel.DEBUG, "RestClient::auth headers -> ${FeebaFacade.config.serviceConfig.apiToken}")
+        Logger.log(
+            LogLevel.DEBUG,
+            "RestClient::auth headers -> ${FeebaFacade.config.serviceConfig.apiToken}"
+        )
         val url = URL(requestUrl)
 
         // Open a connection to the URL

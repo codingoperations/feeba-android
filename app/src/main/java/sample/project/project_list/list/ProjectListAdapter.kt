@@ -18,9 +18,6 @@ class ProjectListAdapter(
 ) :
     RecyclerView.Adapter<ViewHolder>() {
 
-    init {
-        Logger.log(LogLevel.DEBUG, "EventsAdapter::init: ${dataSet.size}")
-    }
 
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -42,10 +39,7 @@ class ProjectListAdapter(
     }
 
     // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount(): Int {
-        Logger.log(LogLevel.DEBUG, "EventsAdapter::getItemCount: ${dataSet.size}")
-        return dataSet.size
-    }
+    override fun getItemCount(): Int = dataSet.size
 }
 
 /**

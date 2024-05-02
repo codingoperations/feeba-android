@@ -3,11 +3,13 @@ package sample.project.project_list
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.feeba.Feeba
 import io.feeba.lifecycle.LogLevel
@@ -55,6 +57,12 @@ class ShowCaseFragment : Fragment() {
         _binding = FragmentSampleShowcaseBinding.inflate(inflater, container, false)
         binding.editTextLangCode.setText(PreferenceWrapper.langCode)
 
+        binding.logout.setOnClickListener {
+            Feeba.User.logout()
+            PreferenceWrapper.jwtToken = ""
+            // pop back to the upmost fragment
+            findNavController().popBackStack(R.id.fragmentLogin, false)
+        }
         // Survey
         binding.dialogInView.setOnClickListener {
             parentFragmentManager.beginTransaction()
@@ -79,17 +87,23 @@ class ShowCaseFragment : Fragment() {
             Feeba.User.setLanguage(text.toString())
             PreferenceWrapper.langCode = text.toString()
         }
+        return binding.root
+    }
 
-        Handler().postDelayed({
-            Feeba.fetchFeebaConfig()?.let {
+    override fun onResume() {
+        super.onResume()
+        Feeba.onConfigUpdate {
+            Handler(Looper.getMainLooper()).post {
                 val adapterData = extractEvents(it)
-                Logger.log(LogLevel.DEBUG, "FeebaConfig: $adapterData")
                 binding.recyclerViewEventTriggers.layoutManager = LinearLayoutManager(context)
                 binding.recyclerViewEventTriggers.adapter = EventsAdapter(adapterData)
             }
-        }, 1000)
+        }
+    }
 
-        return binding.root
+    override fun onPause() {
+        super.onPause()
+        Feeba.onConfigUpdate { null }
     }
 
     override fun onDestroyView() {

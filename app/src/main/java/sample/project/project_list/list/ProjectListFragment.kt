@@ -10,12 +10,13 @@ import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.feeba.Feeba
+import io.feeba.lifecycle.LogLevel
+import io.feeba.lifecycle.Logger
 import io.least.core.ServerConfig
 import io.least.demo.R
 import io.least.demo.databinding.FragmentProjectListBinding
 import sample.ConfigHolder
 import sample.DemoApplication
-import sample.data.RestClient
 
 class ProjectListFragment : Fragment() {
 
@@ -55,11 +56,12 @@ class ProjectListFragment : Fragment() {
                     binding.projectList.layoutManager = LinearLayoutManager(requireContext())
                     binding.projectList.adapter = ProjectListAdapter(status.projects) {
                         // This is how Feeba is initialized
-                        Feeba.init(
-                            DemoApplication.instance, ServerConfig(
+                        Logger.log(LogLevel.DEBUG, "ProjectListFragment::initiating Feeba...")
+                        Feeba.updateServerConfig(
+                            ServerConfig(
                                 langCode = "en",
                                 apiToken = it.tokens.first().jwtToken, // Whatever your default language is
-                                hostUrl = RestClient.jwt
+                                hostUrl = ConfigHolder.baseUrl
                             )
                         )
                         findNavController().navigate(R.id.action_open_showcase, Bundle().apply {

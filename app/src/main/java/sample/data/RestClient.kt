@@ -36,6 +36,8 @@ object RestClient {
             .build()
         service = retrofit.create(FeebaService::class.java)
         this.jwt = ""
+
+        ConfigHolder.baseUrl = baseUrl
     }
 
     suspend fun login(username: String, password: String): LoginResponse {

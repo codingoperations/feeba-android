@@ -15,7 +15,12 @@
         android:name="sample.project.project_list.list.ProjectListFragment">
         <action
             android:id="@+id/action_open_showcase"
-            app:destination="@id/fragmentTriggers" />
+            app:destination="@id/fragmentTriggers"
+            app:popUpTo="@+id/a"
+            app:popUpToInclusive="true"
+            app:restoreState="true"
+            app:popUpToSaveState="true"
+        />
     </fragment>
 
     <fragment

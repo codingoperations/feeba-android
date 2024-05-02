@@ -14,6 +14,9 @@ class ProjectListViewModel : ViewModel() {
     private val _projectList = MutableLiveData<ProjectListStatus>(ProjectListStatus.Initialized)
     val projectList: LiveData<ProjectListStatus> get() = _projectList
 
+    init {
+        Log.d("ProjectListFragment::", "onCreateView")
+    }
     fun fetchProjects() {
         viewModelScope.launch {
             try {

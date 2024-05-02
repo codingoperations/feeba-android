@@ -5,27 +5,37 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
     tools:context="sample.SampleShowCaseActivity">
 
-
-    <EditText
-        android:id="@+id/editTextLangCode"
-        android:layout_width="65dp"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="ru"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:background="?attr/colorPrimary"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="Feeba"
+        app:titleTextColor="@color/white">
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Set the language. Ensure you have a config for this language code"
-        app:layout_constraintBottom_toBottomOf="@+id/editTextLangCode"
-        app:layout_constraintEnd_toStartOf="@+id/editTextLangCode"
-        app:layout_constraintStart_toStartOf="parent" />
+        <ImageView
+            android:id="@+id/logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:padding="16dp"
+            android:src="@mipmap/logout" />
+
+        <EditText
+            android:id="@+id/editTextLangCode"
+            android:layout_width="65dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="ru"
+            android:textColor="@color/white" />
+    </androidx.appcompat.widget.Toolbar>
 
     <LinearLayout
         android:id="@+id/eventTriggers"
@@ -35,7 +45,7 @@
         app:layout_constraintBottom_toTopOf="@id/pageTriggers"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2">
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
         <View
             android:layout_width="wrap_content"

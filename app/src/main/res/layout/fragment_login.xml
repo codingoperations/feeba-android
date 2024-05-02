@@ -7,6 +7,15 @@
     android:layout_height="match_parent"
     tools:context="sample.auth.LoginFragment">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:background="?attr/colorPrimary"
+        app:title="Authentication"
+        app:layout_constraintTop_toTopOf="parent"
+        app:titleTextColor="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <EditText
         android:id="@+id/edit_text_email"
         android:layout_width="256dp"

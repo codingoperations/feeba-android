@@ -4,9 +4,7 @@ enum class Environment {
     PRODUCTION, DEVELOPMENT
 }
 object ConfigHolder {
-    var jwtToken = ""
+    var appToken = ""
+    var baseUrl = ""
+    var projectJwt = ""
 }
-
-private data class ServerConfig(
-    val jwtToken: String,
-)
