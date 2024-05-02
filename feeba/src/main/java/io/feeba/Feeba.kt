@@ -2,7 +2,10 @@ package io.feeba
 
 import android.app.Application
 import android.content.Context
+import io.feeba.data.FeebaConfig
+import io.feeba.data.FeebaResponse
 import io.feeba.data.LocalStateHolder
+import io.feeba.data.RestClient
 import io.feeba.data.sql.AndroidStateStorage
 import io.feeba.lifecycle.AndroidLifecycleManager
 import io.feeba.lifecycle.LogLevel
@@ -18,17 +21,23 @@ object Feeba {
         get() = app.applicationContext
 
     fun init(app: Application, serverConfig: ServerConfig) {
+        Logger.log(LogLevel.DEBUG, "Feeba::init")
         if (isInitialized) {
             Logger.log(LogLevel.WARN, "Feeba already initialized. Ignoring init call.")
             return
         }
         this.app = app
-        val localStateHolder = LocalStateHolder(AndroidStateStorage(appContext))
+        val localStateHolder = LocalStateHolder(AndroidStateStorage(appContext), RestClient())
         FeebaFacade.init(
-            serverConfig,
+            serverConfig.copy(hostUrl = serverConfig.hostUrl ?: "https://api.feeba.io"),
             localStateHolder,
             StateManager(AndroidLifecycleManager(app), localStateHolder)
         )
+        isInitialized = true
+    }
+
+    fun updateServerConfig(serverConfig: ServerConfig) {
+        FeebaFacade.updateServerConfig(serverConfig)
     }
 
     fun triggerEvent(eventName: String, value: String? = null) {
@@ -41,5 +50,9 @@ object Feeba {
 
     fun pageClosed(pageName: String) {
         FeebaFacade.pageClosed(pageName)
+    }
+
+    fun onConfigUpdate(callback: ((updatedResponse: FeebaResponse) -> Unit)?) {
+        FeebaFacade.onConfigUpdate(callback)
     }
 }

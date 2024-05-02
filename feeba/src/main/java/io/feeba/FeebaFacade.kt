@@ -1,29 +1,49 @@
 package io.feeba
 
 import io.feeba.data.FeebaConfig
+import io.feeba.data.FeebaResponse
 import io.feeba.data.LocalStateHolder
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.feeba.lifecycle.TriggerValidator
 import io.least.core.ServerConfig
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlin.concurrent.Volatile
 
 object FeebaFacade {
 
+    // Bookiping referenced directly from internal classes
     lateinit var config: FeebaConfig
     lateinit var localStateHolder: LocalStateHolder
     private lateinit var stateManager: StateManager
 
     private lateinit var triggerValidator: TriggerValidator
-//    private lateinit var activityListener: ActivityLifecycleListener
 
-    fun init(serverConfig: ServerConfig, localStateHolder: LocalStateHolder,  stateManager: StateManager) {
+    fun init(serverConfig: ServerConfig, localStateHolder: LocalStateHolder, stateManager: StateManager) {
         Logger.log(LogLevel.DEBUG, "Initialization....")
         this.stateManager = stateManager
         this.localStateHolder = localStateHolder
         triggerValidator = TriggerValidator()
         config = FeebaConfig(serverConfig)
+
+        // We force refresh the Feeba config
+        @OptIn(DelicateCoroutinesApi::class)
+        GlobalScope.launch {
+            localStateHolder.forceRefreshFeebaConfig()
+        }
     }
 
+    fun updateServerConfig(serverConfig: ServerConfig) {
+        Logger.log(LogLevel.DEBUG, "updateServerConfig -> $serverConfig")
+        config = FeebaConfig(serverConfig)
+        // We force refresh the Feeba config
+        @OptIn(DelicateCoroutinesApi::class)
+        GlobalScope.launch {
+            localStateHolder.forceRefreshFeebaConfig()
+        }
+    }
     fun triggerEvent(eventName: String, value: String? = null) {
         Logger.log(LogLevel.DEBUG, "onEvent -> $eventName, value: $value")
         localStateHolder.onEvent(eventName)
@@ -51,8 +71,8 @@ object FeebaFacade {
         stateManager.pageClosed(pageName)
     }
 
-    fun showConditionalSurvey() {
-        println("Feeba showConditionalSurvey")
+    fun onConfigUpdate(callback: ((updatedResponse: FeebaResponse) -> Unit)?) {
+        localStateHolder.onConfigUpdate = callback
     }
 
     object User {

@@ -8,13 +8,32 @@ import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import kotlinx.serialization.decodeFromString
 
-class LocalStateHolder(private val stateStorage: StateStorageInterface) {
+class LocalStateHolder(private val stateStorage: StateStorageInterface, private val restClient: RestClient) {
     @Volatile
     var lastKnownFeebaConfig: FeebaResponse? = null
+        set(value) {
+            field = value
+            value?.let { onConfigUpdate?.invoke(it) }
+        }
+    // callback to notify the listeners about the updated config
+    var onConfigUpdate: ((updatedResponse: FeebaResponse) -> Unit)? = null
+        set(value) {
+            field = value
+            // Notify the listener about the last known config
+            lastKnownFeebaConfig?.let { value?.invoke(it) }
+        }
     private val lastKnownAppHistoryState: AppHistoryState? = null
 
     private val eventCountMap = mutableMapOf<String, Int>()
     private val jsonInstance = ServiceLocator.jsonInstance
+
+    suspend fun forceRefreshFeebaConfig() {
+        Logger.log(LogLevel.DEBUG, "LocalStateHolder::forceRefreshFeebaConfig")
+        restClient.getSurveyPlans(readAppHistoryState())?.let {
+            Logger.log(LogLevel.DEBUG, "LocalStateHolder:: Survey plans fetched: $it")
+            setFeebaConfig(it)
+        }
+    }
 
     fun setFeebaConfig(response: String) {
         Logger.log(LogLevel.DEBUG, "LocalStateHolder:: Storing response: $response")

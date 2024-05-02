@@ -1,4 +1,4 @@
-package sample.bugs
+package sample.project.page.bugs
 
 import android.os.Bundle
 import android.os.Handler

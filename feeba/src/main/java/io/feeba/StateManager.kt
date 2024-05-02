@@ -20,19 +20,30 @@ import kotlinx.coroutines.launch
 
 const val PREFIX_DELAYED_TASK_PAGE = "OnPage:"
 const val PREFIX_DELAYED_TASK_EVENT = "OnEvent:"
-class StateManager(private val lifecycle: GenericAppLifecycle, private val localStateHolder: LocalStateHolder) {
+
+class StateManager(
+    private val lifecycle: GenericAppLifecycle,
+    private val localStateHolder: LocalStateHolder
+) {
     private var surveyController: SurveyViewController? = null
     private val delayedTasks = mutableMapOf<String, Runnable>()
     private val handler = Handler(Looper.getMainLooper())
-    private val restClient = RestClient()
 
     // State
     private var appVisibility = AppVisibility.Backgrounded
+        set(value) {
+            field = value
+            Logger.log(LogLevel.DEBUG, "StateManager::appVisibility::set::$value")
+        }
+        get() {
+            Logger.log(LogLevel.DEBUG, "StateManager::appVisibility::get::$field")
+            return field
+        }
 
     init {
         lifecycle.windowLifecycleListener = object : OnWindowLifecycleListener {
             override fun onWindow(state: WindowState) {
-                Logger.log(LogLevel.DEBUG, "Window moved to $state")
+                Logger.log(LogLevel.DEBUG, "StateManager::windowLifecycleListener::$state")
                 when (state) {
                     WindowState.CREATED -> {
 //                        TODO()
@@ -55,16 +66,11 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
 
         lifecycle.appLifecycleListener = object : AppLifecycleListener {
             override fun onLifecycleEvent(state: AppState) {
-                Logger.log(LogLevel.DEBUG, "Application moved to $state")
+                Logger.log(LogLevel.DEBUG, "StateManager::appLifecycleListener::$state")
                 when (state) {
                     AppState.CREATED -> {
-                        Logger.log(LogLevel.DEBUG, "StateManager::AppLifecycleEvent -> CREATED")
                         GlobalScope.launch {
-                            val localState = localStateHolder.readAppHistoryState()
-                            val updated: String? = restClient.getSurveyPlans(localState)
-                            updated?.let {
-                                localStateHolder.setFeebaConfig(it)
-                            }
+                            localStateHolder.forceRefreshFeebaConfig()
                         }
                         appVisibility = AppVisibility.Foregrounded
                     }
@@ -90,10 +96,18 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
         Logger.log(LogLevel.DEBUG, "StateManager::showPageSurvey")
         internalShowSurvey(presentation, ruleSet, "$PREFIX_DELAYED_TASK_PAGE$associatedKey")
     }
-    private fun internalShowSurvey(presentation: SurveyPresentation, ruleSet: RuleSet, associatedKey: String) {
+
+    private fun internalShowSurvey(
+        presentation: SurveyPresentation,
+        ruleSet: RuleSet,
+        associatedKey: String
+    ) {
         val surveyDelay = ruleSet.getSurveyDelaySec()
         if (surveyDelay > 0) {
-            Logger.log(LogLevel.DEBUG, "StateManager::showSurvey - Scheduling survey for $surveyDelay Sec")
+            Logger.log(
+                LogLevel.DEBUG,
+                "StateManager::showSurvey - Scheduling survey for $surveyDelay Sec"
+            )
             val runnable = Runnable {
                 Logger.log(LogLevel.DEBUG, "StateManager::showSurvey - Executing scheduled survey")
                 initializeSurveyViewController(presentation, ruleSet)
@@ -108,20 +122,24 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
 
     private fun initializeSurveyViewController(presentation: SurveyPresentation, ruleSet: RuleSet) {
         if (appVisibility == AppVisibility.Backgrounded) {
-            Logger.log(LogLevel.WARN, "StateManager::showSurvey - App is in background, skipping")
+            Logger.log(LogLevel.WARN, "StateManager::initializeSurveyViewController::showSurvey - App is in background, skipping")
             return
         }
-        SurveyViewController(presentation, ruleSet, localStateHolder.readAppHistoryState(), object : SurveyViewController.SurveyViewLifecycleListener {
-            override fun onSurveyWasShown() {
-                Logger.log(LogLevel.DEBUG, "SurveyViewController::onSurveyWasShown")
-            }
+        SurveyViewController(
+            presentation,
+            ruleSet,
+            localStateHolder.readAppHistoryState(),
+            object : SurveyViewController.SurveyViewLifecycleListener {
+                override fun onSurveyWasShown() {
+                    Logger.log(LogLevel.DEBUG, "SurveyViewController::onSurveyWasShown")
+                }
 
-            override fun onSurveyWasDismissed() {
-                Logger.log(LogLevel.DEBUG, "SurveyViewController::onSurveyWasDismissed")
-                surveyController = null
-            }
+                override fun onSurveyWasDismissed() {
+                    Logger.log(LogLevel.DEBUG, "SurveyViewController::onSurveyWasDismissed")
+                    surveyController = null
+                }
 
-        }).also {
+            }).also {
             surveyController = it
             it.start(lifecycle)
         }
@@ -139,8 +157,12 @@ class StateManager(private val lifecycle: GenericAppLifecycle, private val local
     }
 
     private fun cancelPendingSurveys(pageName: String, ruleTypeToCancel: RuleType) {
-        Logger.log(LogLevel.DEBUG, "ActivityLifecycleListener::cancelPendingSurveys:: delayedTasks -> $delayedTasks")
-        val key : String = if (ruleTypeToCancel == RuleType.SCREEN) "$PREFIX_DELAYED_TASK_PAGE$pageName" else "$PREFIX_DELAYED_TASK_EVENT$pageName"
+        Logger.log(
+            LogLevel.DEBUG,
+            "ActivityLifecycleListener::cancelPendingSurveys:: delayedTasks -> $delayedTasks"
+        )
+        val key: String =
+            if (ruleTypeToCancel == RuleType.SCREEN) "$PREFIX_DELAYED_TASK_PAGE$pageName" else "$PREFIX_DELAYED_TASK_EVENT$pageName"
         delayedTasks.remove(key)?.let {
             Logger.log(LogLevel.DEBUG, "---> Removing ")
             handler.removeCallbacks(it)

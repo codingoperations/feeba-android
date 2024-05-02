@@ -1,4 +1,4 @@
-package sample
+package sample.data
 
 data class UserData(
     val userId: String,

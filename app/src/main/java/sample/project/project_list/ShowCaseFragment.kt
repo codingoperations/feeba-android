@@ -1,17 +1,29 @@
-package sample
+package sample.project.project_list
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import io.feeba.Feeba
+import io.feeba.lifecycle.LogLevel
+import io.feeba.lifecycle.Logger
 import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
-import sample.bugs.ProblematicLoginPage
-import sample.integrated.InlineIntegratedSurvey
+import sample.ConfigHolder
+import sample.data.Tags
+import sample.data.UserData
+import sample.project.page.PageTriggerActivity
+import sample.project.page.bugs.ProblematicLoginPage
+import sample.project.events.EventsAdapter
+import sample.project.extractEvents
+import sample.project.integrated.InlineIntegratedSurvey
 import sample.utils.PreferenceWrapper
 
 class ShowCaseFragment : Fragment() {
@@ -43,24 +55,20 @@ class ShowCaseFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSampleShowcaseBinding.inflate(inflater, container, false)
-        binding.switchEnv.isChecked = PreferenceWrapper.isProd
         binding.editTextLangCode.setText(PreferenceWrapper.langCode)
 
+        binding.logout.setOnClickListener {
+            Feeba.User.logout()
+            PreferenceWrapper.jwtToken = ""
+            // pop back to the upmost fragment
+            findNavController().popBackStack(R.id.fragmentLogin, false)
+        }
         // Survey
         binding.dialogInView.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .addToBackStack("inview_survey")
                 .replace(R.id.fragmentContainer, InlineIntegratedSurvey())
                 .commit()
-        }
-
-        binding.onRideEndButton.setOnClickListener {
-            Feeba.User.addTag(mapOf("driverId" to user1.tags.driverId, "rideId" to user1.tags.rideId))
-            Feeba.triggerEvent("on_ride_end")
-        }
-        // BUGs and issue reporting
-        binding.reportProblem.setOnClickListener {
-            Feeba.triggerEvent("report_problem")
         }
 
         // Page Triggers
@@ -75,16 +83,27 @@ class ShowCaseFragment : Fragment() {
             startActivity(Intent(requireContext(), PageTriggerActivity::class.java))
         }
         // End of Page Triggers
-
-        binding.switchEnv.setOnCheckedChangeListener { _, isChecked ->
-            ConfigHolder.setEnv(isChecked)
-            PreferenceWrapper.isProd = isChecked
-        }
         binding.editTextLangCode.addTextChangedListener { text ->
             Feeba.User.setLanguage(text.toString())
             PreferenceWrapper.langCode = text.toString()
         }
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Feeba.onConfigUpdate {
+            Handler(Looper.getMainLooper()).post {
+                val adapterData = extractEvents(it)
+                binding.recyclerViewEventTriggers.layoutManager = LinearLayoutManager(context)
+                binding.recyclerViewEventTriggers.adapter = EventsAdapter(adapterData)
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Feeba.onConfigUpdate { null }
     }
 
     override fun onDestroyView() {
