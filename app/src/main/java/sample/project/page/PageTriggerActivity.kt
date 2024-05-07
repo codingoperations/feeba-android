@@ -32,11 +32,11 @@ class PageTriggerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         handler.post(runnable)
-        Feeba.pageOpened("login_page")
+        intent.getStringExtra("page_name")?.let { Feeba.pageOpened(it) }
     }
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(runnable)
-        Feeba.pageClosed("login_page")
+        intent.getStringExtra("page_name")?.let { Feeba.pageClosed(it) }
     }
 }
