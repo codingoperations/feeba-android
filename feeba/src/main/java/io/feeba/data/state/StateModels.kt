@@ -19,7 +19,7 @@ data class AppHistoryState(
     var lastTimeAppOpened: Long,
     var lastTimeSurveyTriggered: Map<String, Long>,
 
-    var userData: UserData,
+    var userData: UserData?,
 )
 
 object Defaults {
