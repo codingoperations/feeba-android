@@ -17,6 +17,7 @@ import io.least.demo.R
 import io.least.demo.databinding.FragmentProjectListBinding
 import sample.ConfigHolder
 import sample.DemoApplication
+import sample.project.prepareLogoutButton
 
 class ProjectListFragment : Fragment() {
 
@@ -32,6 +33,7 @@ class ProjectListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentProjectListBinding.inflate(inflater, container, false)
+        prepareLogoutButton(binding.logout, this)
         return binding.root
     }
 

@@ -61,7 +61,6 @@
             android:id="@+id/recyclerViewEventTriggers"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-
             />
     </LinearLayout>
 
@@ -85,30 +84,11 @@
             android:layout_height="wrap_content"
             android:text="Page Triggers" />
 
-        <LinearLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewPageTriggers"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
-
-            <Button
-                android:id="@+id/buttonPageTriggerFragment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Fragment" />
-
-            <Space
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/buttonPageTriggerActivity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Activity" />
-        </LinearLayout>
+            android:layout_height="match_parent"
+            />
     </LinearLayout>
 
     <LinearLayout

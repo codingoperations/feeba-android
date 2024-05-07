@@ -83,4 +83,4 @@ data class Token(
     val userId: String,
     val jwtToken: String,
     val created: String,
-)
+): java.io.Serializable

@@ -33,6 +33,7 @@ class LoginViewModel : ViewModel() {
 
     fun changeEnvironment(env: Environment) {
         RestClient.switchEnvironment(env)
+        PreferenceWrapper.isProd = (env == Environment.PRODUCTION)
     }
 
     fun login(email: String, password: String) {
