@@ -4,17 +4,22 @@ import io.feeba.ServiceLocator
 import io.feeba.data.state.AppHistoryState
 import io.feeba.data.state.Defaults
 import io.feeba.data.state.StateStorageInterface
+import io.feeba.data.state.UserData
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import kotlinx.serialization.decodeFromString
 
-class LocalStateHolder(private val stateStorage: StateStorageInterface, private val restClient: RestClient) {
+class LocalStateHolder(
+    private val stateStorage: StateStorageInterface,
+    private val restClient: RestClient
+) {
     @Volatile
     var lastKnownFeebaConfig: FeebaResponse? = null
         set(value) {
             field = value
             value?.let { onConfigUpdate?.invoke(it) }
         }
+
     // callback to notify the listeners about the updated config
     var onConfigUpdate: ((updatedResponse: FeebaResponse) -> Unit)? = null
         set(value) {
@@ -61,7 +66,10 @@ class LocalStateHolder(private val stateStorage: StateStorageInterface, private 
             try {
                 stateStorage.state
             } catch (t: Throwable) {
-                Logger.log(LogLevel.WARN, "Failed to read local config. Falling back to default state. Error: $t")
+                Logger.log(
+                    LogLevel.WARN,
+                    "Failed to read local config. Falling back to default state. Error: $t"
+                )
                 return Defaults.appHistoryState
             }
         }
@@ -69,10 +77,12 @@ class LocalStateHolder(private val stateStorage: StateStorageInterface, private 
 
     fun login(userId: String, email: String?, phoneNumber: String?) {
         readAppHistoryState().apply {
-         this.userData = this.userData.copy(
+            this.userData = UserData(
                 userId = userId,
-                email = email ?: this.userData.email,
-                phoneNumber = phoneNumber ?: this.userData.phoneNumber
+                email = email,
+                phoneNumber = phoneNumber,
+                langCode = null,
+                tags = mutableMapOf()
             )
             stateStorage.state = this
         }
@@ -103,20 +113,27 @@ class LocalStateHolder(private val stateStorage: StateStorageInterface, private 
         tags: Map<String, String>? = null,
     ) {
         readAppHistoryState().apply {
-            this.userData = this.userData.copy(
-                phoneNumber = phoneNumber ?: this.userData.phoneNumber,
-                email = email ?: this.userData.email,
-                langCode = language ?: this.userData.langCode,
-                tags = tags?.toMutableMap() ?: this.userData.tags
+            val updatedUserData: UserData = userData?.copy(
+                phoneNumber = phoneNumber ?: userData?.phoneNumber,
+                email = email ?: userData?.email,
+                langCode = language ?: userData?.langCode,
+                tags = (userData?.tags ?: mutableMapOf()).apply { putAll(tags ?: mutableMapOf()) }
+            ) ?: UserData(
+                userId = "empty",
+                phoneNumber = phoneNumber,
+                email = email,
+                langCode = language,
+                tags = tags?.toMutableMap() ?: mutableMapOf(),
             )
+
+            this.userData = updatedUserData
             stateStorage.state = this
         }
     }
 
     fun addTags(tags: Map<String, String>) {
         readAppHistoryState().apply {
-            this.userData.tags.putAll(tags)
-            stateStorage.state = this
+            this.userData?.tags?.putAll(tags)
         }
     }
 }

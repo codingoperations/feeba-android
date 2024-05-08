@@ -97,7 +97,7 @@ class SurveyView : FrameLayout {
             appendQueryParameter(
                 surveyUrl,
                 "lang",
-                appHistoryState.userData.langCode ?: "en"
+                appHistoryState.userData?.langCode ?: "en"
             )
         )
     }
