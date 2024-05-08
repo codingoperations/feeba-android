@@ -210,7 +210,7 @@ fun createWebViewInstance(
             appendQueryParameter(
                 presentation.surveyWebAppUrl,
                 "lang",
-                appHistoryState.userData.langCode ?: "en"
+                appHistoryState.userData?.langCode ?: "en"
             )
         )
     }
