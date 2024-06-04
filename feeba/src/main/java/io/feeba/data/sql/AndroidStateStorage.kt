@@ -41,7 +41,7 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
             try {
                 Logger.e("AndroidStateStorage:: Writing local state...")
                 val stringState = jsonInstance.encodeToString(value)
-                writeToLocalFile(stringState, context.applicationContext, surveyConfigFileName)
+                writeToLocalFile(stringState, context.applicationContext, localStateFileName)
             } catch (t: Throwable) {
                 Logger.e("AndroidStateStorage:: Failed to write local config. Error: $t")
             }

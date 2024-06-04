@@ -9,6 +9,7 @@ import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import kotlinx.serialization.decodeFromString
 
+const val TAG = "LocalStateHolder::"
 class LocalStateHolder(
     private val stateStorage: StateStorageInterface,
     private val restClient: RestClient
@@ -33,15 +34,15 @@ class LocalStateHolder(
     private val jsonInstance = ServiceLocator.jsonInstance
 
     suspend fun forceRefreshFeebaConfig() {
-        Logger.log(LogLevel.DEBUG, "LocalStateHolder::forceRefreshFeebaConfig")
+        Logger.log(LogLevel.DEBUG, "${TAG}forceRefreshFeebaConfig")
         restClient.getSurveyPlans(readAppHistoryState())?.let {
-            Logger.log(LogLevel.DEBUG, "LocalStateHolder:: Survey plans fetched: $it")
+            Logger.log(LogLevel.DEBUG, "${TAG} Survey plans fetched: $it")
             setFeebaConfig(it)
         }
     }
 
     fun setFeebaConfig(response: String) {
-        Logger.log(LogLevel.DEBUG, "LocalStateHolder:: Storing response: $response")
+        Logger.log(LogLevel.DEBUG, "${TAG} Storing response: $response")
         // Update local reference
         try {
             jsonInstance.decodeFromString<FeebaResponse>(response).also {
@@ -49,7 +50,7 @@ class LocalStateHolder(
                 stateStorage.feebaResponse = it
             }
         } catch (t: Throwable) {
-            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to parse response. Error: $t")
+            Logger.log(LogLevel.ERROR, "${TAG} Failed to parse response. Error: $t")
         }
     }
 
@@ -66,7 +67,7 @@ class LocalStateHolder(
             try {
                 stateStorage.state
             } catch (t: Throwable) {
-                Logger.e("Failed to read local config. Falling back to default state. Error: $t")
+                Logger.e("${TAG} Failed to read local config. Falling back to default state. Error: $t")
                 return Defaults.appHistoryState
             }
         }
@@ -124,6 +125,7 @@ class LocalStateHolder(
                 tags = tags?.toMutableMap() ?: mutableMapOf(),
             )
 
+            Logger.d("${TAG}updateUserData: $updatedUserData")
             this.userData = updatedUserData
             stateStorage.state = this
         }
@@ -132,6 +134,8 @@ class LocalStateHolder(
     fun addTags(tags: Map<String, String>) {
         readAppHistoryState().apply {
             this.userData?.tags?.putAll(tags)
+            // Ensure that new additions are persisted
+            stateStorage.state = this
         }
     }
 }
