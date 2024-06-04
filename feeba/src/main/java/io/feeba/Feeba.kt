@@ -12,6 +12,7 @@ import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.least.core.ServerConfig
 
+const val TAG = "Feeba::"
 object Feeba {
     lateinit var app: Application
     private var isInitialized = false
@@ -21,9 +22,9 @@ object Feeba {
         get() = app.applicationContext
 
     fun init(app: Application, serverConfig: ServerConfig) {
-        Logger.log(LogLevel.DEBUG, "Feeba::init")
+        Logger.log(LogLevel.DEBUG, "$TAG init")
         if (isInitialized) {
-            Logger.log(LogLevel.WARN, "Feeba already initialized. Ignoring init call.")
+            Logger.log(LogLevel.WARN, "$TAG Feeba already initialized. Ignoring init call.")
             return
         }
         this.app = app

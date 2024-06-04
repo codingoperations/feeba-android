@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 data class FeebaResponse(
     val surveyPlans: List<SurveyPlan>,
     val sdkConfig: SdkConfig? = null,
+    val inlineSurveys: List<InlineSurvey>? = null
 )
 
 @Serializable
@@ -80,3 +81,10 @@ fun isBanner(position: Position): Boolean =
         Position.TOP_BANNER, Position.BOTTOM_BANNER -> true
         else -> false
     }
+
+@Serializable
+data class InlineSurvey(
+    val id: String,
+    val surveyName: String,
+    val webPageUrl: String,
+)

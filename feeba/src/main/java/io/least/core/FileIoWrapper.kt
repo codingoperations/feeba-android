@@ -2,6 +2,7 @@ package io.least.core
 
 import android.content.Context
 import android.util.Log
+import io.feeba.lifecycle.Logger
 import java.io.File
 
 fun readLocalFile(context: Context, fileName: String): String {
@@ -16,10 +17,10 @@ fun writeToLocalFile(text: String, context: Context, fileName: String) {
     }
     val file = File(dir, fileName)
 
-    Log.d("writeToLocalFile", "Writing to ${file.name}")
+    Logger.d("FileIoWrapper::Writing to ${file.name}")
     runCatching { file.writeText(text) }
-        .onSuccess { Log.d("writeToLocalFile", "Writing to ${file.name} was successful") }
-        .onFailure { Log.e("writeToLocalFile", "Writing to ${file.name} failed. Error: $it") }
+        .onSuccess { Logger.d("FileIoWrapper::Writing to ${file.name} was successful") }
+        .onFailure { Logger.e("FileIoWrapper::Writing to ${file.name} failed. Error: $it") }
 
 }
 

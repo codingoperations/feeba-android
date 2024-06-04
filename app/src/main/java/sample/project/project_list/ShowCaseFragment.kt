@@ -13,13 +13,13 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.feeba.Feeba
+import io.feeba.ui.SurveyView
 import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import sample.data.UserData
 import sample.project.events.EventsAdapter
 import sample.project.extractEvents
 import sample.project.extractPageTriggers
-import sample.project.integrated.InlineIntegratedSurvey
 import sample.project.page.PageTriggerAdapter
 import sample.project.page.PageType
 import sample.project.prepareLogoutButton
@@ -45,7 +45,7 @@ class ShowCaseFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Feeba.User.login(user1.userId, user1.email, user1.phoneNumber)
-        Feeba.User.setLanguage("en")
+        Feeba.User.setLanguage(PreferenceWrapper.langCode)
     }
 
     override fun onCreateView(
@@ -56,14 +56,6 @@ class ShowCaseFragment : Fragment() {
         _binding = FragmentSampleShowcaseBinding.inflate(inflater, container, false)
         binding.editTextLangCode.setText(PreferenceWrapper.langCode)
         prepareLogoutButton(binding.logout, this)
-
-        // Survey
-        binding.dialogInView.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .addToBackStack("inview_survey")
-                .replace(R.id.fragmentContainer, InlineIntegratedSurvey())
-                .commit()
-        }
 
         // End of Page Triggers
         binding.editTextLangCode.addTextChangedListener { text ->
@@ -92,6 +84,19 @@ class ShowCaseFragment : Fragment() {
                         PageType.FRAGMENT -> findNavController().navigate(R.id.action_open_delayed_survey_fragment, bundle)
                     }
                 }
+                // Inline Surveys
+                it.inlineSurveys?.forEach {
+                    binding.llSurveys.addView(SurveyView(requireContext()).apply {
+                        loadSurvey(it.webPageUrl)
+                    })
+                    binding.llSurveys.addView(View(requireContext()).apply {
+                        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 20)
+                        setBackgroundColor(resources.getColor(R.color.black))
+                    })
+                }
+                binding.llSurveys.addView(SurveyView(requireContext()).apply {
+                    loadSurvey("https://sv.feeba.io/s/my-taxi/660a87e5a0416b54325c9a35")
+                })
             }
         }
     }

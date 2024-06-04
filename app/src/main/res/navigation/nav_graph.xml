@@ -24,9 +24,6 @@
         android:id="@+id/fragmentTriggers"
         android:name="sample.project.project_list.ShowCaseFragment">
         <action
-            android:id="@+id/action_fragmentTriggers_to_fragmentIntegratedSurvey"
-            app:destination="@id/fragmentIntegratedSurvey" />
-        <action
             android:id="@+id/action_open_delayed_survey_fragment"
             app:destination="@id/fragmentPageTrigger"
             app:popUpTo="@+id/fragmentTriggers"
@@ -43,15 +40,6 @@
 <!--        app:popUpTo="@id/fragmentTriggers"-->
 <!--        app:popUpToSaveState="true"-->
 <!--        app:popUpToInclusive="false"-->
-    </fragment>
-
-    <fragment
-        android:id="@+id/fragmentIntegratedSurvey"
-        android:name="sample.project.integrated.InlineIntegratedSurvey">
-<!--        <action-->
-<!--            android:id="@+id/action_back_to_triggers"-->
-<!--            app:popUpTo="@id/fragmentTriggers"-->
-<!--            app:popUpToInclusive="true" />-->
     </fragment>
 
     <fragment
