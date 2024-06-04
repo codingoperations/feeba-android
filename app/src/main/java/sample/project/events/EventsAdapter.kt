@@ -15,7 +15,7 @@ class EventsAdapter(private val dataSet: List<EventTriggerUiModel>) :
     RecyclerView.Adapter<ViewHolder>() {
 
         init {
-            Logger.log(LogLevel.DEBUG, "EventsAdapter::init: ${dataSet.size}")
+//            Logger.log(LogLevel.DEBUG, "EventsAdapter::init: ${dataSet.size}")
         }
     // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
@@ -30,18 +30,18 @@ class EventsAdapter(private val dataSet: List<EventTriggerUiModel>) :
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        Logger.log(LogLevel.DEBUG, "EventsAdapter::onBindViewHolder: ${dataSet[position].event}")
+//        Logger.log(LogLevel.DEBUG, "EventsAdapter::onBindViewHolder: ${dataSet[position].event}")
         viewHolder.textViewEvent.text = dataSet[position].event
         viewHolder.textViewExtras.text = dataSet[position].description
         viewHolder.triggerButton.setOnClickListener {
-            Logger.log(LogLevel.DEBUG, "EventsAdapter::onBindViewHolder: ${dataSet[position].event} clicked")
+//            Logger.log(LogLevel.DEBUG, "EventsAdapter::onBindViewHolder: ${dataSet[position].event} clicked")
             Feeba.triggerEvent(dataSet[position].event)
         }
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
-        Logger.log(LogLevel.DEBUG, "EventsAdapter::getItemCount: ${dataSet.size}")
+//        Logger.log(LogLevel.DEBUG, "EventsAdapter::getItemCount: ${dataSet.size}")
         return dataSet.size
     }
 }

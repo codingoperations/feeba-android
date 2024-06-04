@@ -32,17 +32,18 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
                 val localValue = readLocalFile(context.applicationContext, localStateFileName)
                 jsonInstance.decodeFromString<AppHistoryState>(localValue)
             } catch (t: Throwable) {
-                Logger.log(LogLevel.WARN, "LocalStateHolder:: Failed to read local config. Error: $t")
+                Logger.e("AndroidStateStorage:: Failed to read local config. Error: $t")
                 Defaults.appHistoryState
             }
         }
         set(value) {
             //        // Write to local file
             try {
+                Logger.e("AndroidStateStorage:: Writing local state...")
                 val stringState = jsonInstance.encodeToString(value)
                 writeToLocalFile(stringState, context.applicationContext, surveyConfigFileName)
             } catch (t: Throwable) {
-//                Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to write local config. Error: $t")
+                Logger.e("AndroidStateStorage:: Failed to write local config. Error: $t")
             }
         }
 
@@ -51,13 +52,13 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
             return try {
                 val localValue = readLocalFile(context.applicationContext, surveyConfigFileName)
                 if (localValue.isEmpty()) {
-                    Logger.log(LogLevel.WARN, "No locally cached config is found. Is it the first run of the app?")
-                    FeebaResponse(listOf())
+                    Logger.w("AndroidStateStorage::No locally cached config is found. Is it the first run of the app?")
+                    FeebaResponse(listOf(), null, listOf())
                 }
                 jsonInstance.decodeFromString<FeebaResponse>(localValue)
             } catch (t: Throwable) {
-                Logger.log(LogLevel.WARN, "LocalStateHolder:: Failed to read local config. Error: $t")
-                FeebaResponse(listOf())
+                Logger.e("AndroidStateStorage:: Failed to read local config. Error: $t")
+                FeebaResponse(listOf(), null, listOf())
             }
         }
         set(value) {
@@ -66,7 +67,7 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
                 val stringState = jsonInstance.encodeToString(value)
                 writeToLocalFile(stringState, context.applicationContext, surveyConfigFileName)
             } catch (t: Throwable) {
-//                Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to write local config. Error: $t")
+                Logger.e("AndroidStateStorage:: Failed to write local config. Error: $t")
             }
         }
 
@@ -81,7 +82,7 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
             // Insert the new row, returning the primary key value of the new row
             val newRowId = writableDatabase.insert(Contract.PagesEntry.TABLE_NAME, null, values)
         } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to add page open record. Error: $t")
+//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to add page open record. Error: $t")
         }
     }
 
@@ -111,14 +112,15 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
 
             with(cursor) {
                 while (moveToNext()) {
-                    val pageName = getString(getColumnIndexOrThrow(Contract.PagesEntry.COL_PAGE_NAME))
+                    val pageName =
+                        getString(getColumnIndexOrThrow(Contract.PagesEntry.COL_PAGE_NAME))
                     val value = getString(getColumnIndexOrThrow(Contract.PagesEntry.COL_VALUE))
                     val createdAt = getLong(getColumnIndexOrThrow(Contract.PagesEntry.COL_CREATED))
                     items.add(PageEventLog(pageName, value, createdAt))
                 }
             }
         } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to read page logs. Error: $t")
+//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to read page logs. Error: $t")
         }
         return items
     }
@@ -134,7 +136,7 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
             // Insert the new row, returning the primary key value of the new row
             val newRowId = writableDatabase.insert(Contract.EventsEntry.TABLE_NAME, null, values)
         } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to add event record. Error: $t")
+//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to add event record. Error: $t")
         }
     }
 
@@ -164,14 +166,15 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
 
             with(cursor) {
                 while (moveToNext()) {
-                    val eventName = getString(getColumnIndexOrThrow(Contract.EventsEntry.COL_EVENT_NAME))
+                    val eventName =
+                        getString(getColumnIndexOrThrow(Contract.EventsEntry.COL_EVENT_NAME))
                     val value = getString(getColumnIndexOrThrow(Contract.EventsEntry.COL_VALUE))
                     val createdAt = getLong(getColumnIndexOrThrow(Contract.EventsEntry.COL_CREATED))
                     items.add(EventLog(eventName, value, createdAt))
                 }
             }
         } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to read event logs. Error: $t")
+//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to read event logs. Error: $t")
         }
 
         return items
@@ -184,13 +187,22 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
     override fun trimData() {
         try {
             // delete all Page Logs that are older than 30 days
-            val selectionArgs = arrayOf((System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000).toString())
+            val selectionArgs =
+                arrayOf((System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000).toString())
 
-            writableDatabase.delete(Contract.PagesEntry.TABLE_NAME, "${Contract.PagesEntry.COL_CREATED} < ?", selectionArgs)
-            writableDatabase.delete(Contract.EventsEntry.TABLE_NAME, "${Contract.EventsEntry.COL_CREATED} < ?", selectionArgs)
+            writableDatabase.delete(
+                Contract.PagesEntry.TABLE_NAME,
+                "${Contract.PagesEntry.COL_CREATED} < ?",
+                selectionArgs
+            )
+            writableDatabase.delete(
+                Contract.EventsEntry.TABLE_NAME,
+                "${Contract.EventsEntry.COL_CREATED} < ?",
+                selectionArgs
+            )
             // TODO delete all Event Logs that are older than 30 days
         } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to trim data. Error: $t")
+//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to trim data. Error: $t")
         }
     }
 
@@ -199,7 +211,7 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
             writableDatabase.delete(Contract.PagesEntry.TABLE_NAME, null, null)
             writableDatabase.delete(Contract.EventsEntry.TABLE_NAME, null, null)
         } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "LocalStateHolder:: Failed to erase event and page logs. Error: $t")
+//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to erase event and page logs. Error: $t")
         }
     }
 }

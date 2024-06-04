@@ -66,23 +66,21 @@ class LocalStateHolder(
             try {
                 stateStorage.state
             } catch (t: Throwable) {
-                Logger.log(
-                    LogLevel.WARN,
-                    "Failed to read local config. Falling back to default state. Error: $t"
-                )
+                Logger.e("Failed to read local config. Falling back to default state. Error: $t")
                 return Defaults.appHistoryState
             }
         }
     }
 
     fun login(userId: String, email: String?, phoneNumber: String?) {
+        // Try to use the existing state. There can be cases where the app start the Feeba and sets languages at the start and login may or may not happen later on.
         readAppHistoryState().apply {
             this.userData = UserData(
                 userId = userId,
                 email = email,
                 phoneNumber = phoneNumber,
-                langCode = null,
-                tags = mutableMapOf()
+                langCode = this.userData?.langCode,
+                tags = this.userData?.tags ?: mutableMapOf()
             )
             stateStorage.state = this
         }
