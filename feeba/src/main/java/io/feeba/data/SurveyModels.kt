@@ -3,6 +3,7 @@ package io.feeba.data
 import io.least.core.ServerConfig
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.util.Date
 
 @Serializable
 data class FeebaResponse(
@@ -16,6 +17,7 @@ data class SurveyPlan(
     val id: String,
     val surveyPresentation: SurveyPresentation,
     val ruleSetList: List<RuleSet>,
+    val distribution: DistributionModel
 )
 
 @Serializable
@@ -87,4 +89,46 @@ data class InlineSurvey(
     val id: String,
     val surveyName: String,
     val webPageUrl: String,
+)
+
+// Distribution plan
+@Serializable
+data class DistributionModel(
+    val scheduleConfig: ScheduleConfig,
+)
+
+@Serializable
+data class ScheduleConfig(
+    val showConfig: ShowConfig,
+    val stopConfig: StopConfig,
+    val repeat: RepeatConfig,
+)
+
+@Serializable
+data class ShowConfig(
+    @Serializable(with = DateSerializer::class)
+    val time: Date,
+)
+
+@Serializable
+enum class StopShowingType {
+    @SerialName("show_forever") SHOW_FOREVER,
+    @SerialName("show_until") STOP_AFTER_TIME, // stop after a certain time
+}
+@Serializable
+data class StopConfig(
+    val selection: StopShowingType,
+    @Serializable(with = DateSerializer::class)
+    val time: Date? = null,
+)
+
+@Serializable
+enum class RepeatType {
+    @SerialName("once") ONCE, // show only once
+    @SerialName("always") ALWAYS, // show every time when the condition is met
+    @SerialName("many_times") MANY_TIMES, // show many times
+}
+@Serializable
+data class RepeatConfig(
+    val selection: RepeatType,
 )

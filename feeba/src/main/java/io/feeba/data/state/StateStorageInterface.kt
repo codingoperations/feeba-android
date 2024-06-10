@@ -7,14 +7,12 @@ interface StateStorageInterface {
     var state: AppHistoryState
     var feebaResponse: FeebaResponse
     // Followings are likely to be backed by a database
-    fun addPageOpenRecord(pageName: String, value: String)
-    fun readPageEvenLogs(pageName: String): List<PageEventLog>
-    fun addEventRecord(eventName: String, value: String)
-    fun readEventLogs(eventName: String): List<EventLog>
+    fun addPageOpenRecord(pageName: String, value: String, triggeredSurveyId: String)
+    fun readPageEvenLogs(surveyId: String): List<SurveyExecutionLogs>
+    fun addEventRecord(eventName: String, value: String, triggeredSurveyId: String)
+     fun readEventLogs(surveyId: String): List<SurveyExecutionLogs>
     fun trimData()
     fun eraseEventAndPageLogs()
 }
 
-data class PageEventLog(val pageName: String, val value: String, val createdAt: Long)
-
-data class EventLog(val eventName: String, val value: String, val createdAt: Long)
+data class SurveyExecutionLogs(val triggerName: String, val payload: String, val surveyId: String, val type: String,  val createdAt: Long)

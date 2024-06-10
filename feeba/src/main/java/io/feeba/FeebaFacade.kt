@@ -10,7 +10,6 @@ import io.least.core.ServerConfig
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlin.concurrent.Volatile
 
 object FeebaFacade {
 
@@ -21,7 +20,11 @@ object FeebaFacade {
 
     private lateinit var triggerValidator: TriggerValidator
 
-    fun init(serverConfig: ServerConfig, localStateHolder: LocalStateHolder, stateManager: StateManager) {
+    fun init(
+        serverConfig: ServerConfig,
+        localStateHolder: LocalStateHolder,
+        stateManager: StateManager
+    ) {
         Logger.log(LogLevel.DEBUG, "Initialization....")
         this.stateManager = stateManager
         this.localStateHolder = localStateHolder
@@ -44,22 +47,23 @@ object FeebaFacade {
             localStateHolder.forceRefreshFeebaConfig()
         }
     }
+
     fun triggerEvent(eventName: String, value: String? = null) {
         Logger.log(LogLevel.DEBUG, "onEvent -> $eventName, value: $value")
-        localStateHolder.onEvent(eventName)
         // check if we have a survey for this event
         val validatorResult = triggerValidator.onEvent(eventName, value, localStateHolder)
         validatorResult?.let {
+            localStateHolder.surveyExecutionPlanned(eventName, value.orEmpty(), it.surveyPlan.id)
             stateManager.showEventSurvey(it.surveyPresentation, it.ruleSet, eventName)
         }
     }
 
     fun pageOpened(pageName: String) {
         Logger.log(LogLevel.DEBUG, "pageOpened -> $pageName")
-        localStateHolder.pageOpened(pageName)
         // check if we have a survey for this event
         val validationResult = triggerValidator.pageOpened(pageName, localStateHolder)
         validationResult?.let {
+            localStateHolder.pageOpened(pageName, "", it.surveyPlan.id)
             stateManager.showPageSurvey(it.surveyPresentation, it.ruleSet, pageName)
         }
     }
@@ -103,7 +107,10 @@ object FeebaFacade {
         fun setLanguage(language: String) {
             Logger.log(LogLevel.DEBUG, "setLanguage -> $language")
             if (language.length != 2) {
-                Logger.log(LogLevel.ERROR, "This function expects a ISO 639-1 code. e.g. 'en' for English. Ignoring the call.")
+                Logger.log(
+                    LogLevel.ERROR,
+                    "This function expects a ISO 639-1 code. e.g. 'en' for English. Ignoring the call."
+                )
                 return
             }
             localStateHolder.updateUserData(language = language)
