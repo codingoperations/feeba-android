@@ -4,12 +4,13 @@ import io.feeba.ServiceLocator
 import io.feeba.data.state.AppHistoryState
 import io.feeba.data.state.Defaults
 import io.feeba.data.state.StateStorageInterface
+import io.feeba.data.state.SurveyExecutionLogs
 import io.feeba.data.state.UserData
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
-import kotlinx.serialization.decodeFromString
 
 const val TAG = "LocalStateHolder::"
+
 class LocalStateHolder(
     private val stateStorage: StateStorageInterface,
     private val restClient: RestClient
@@ -92,13 +93,13 @@ class LocalStateHolder(
         stateStorage.eraseEventAndPageLogs()
     }
 
-    fun onEvent(eventName: String) {
+    fun surveyExecutionPlanned(eventName: String, payload: String, triggeredSurveyId: String) {
         eventCountMap[eventName] = (eventCountMap[eventName] ?: 0) + 1
-        stateStorage.addEventRecord(eventName, "")
+        stateStorage.addEventRecord(eventName, payload, triggeredSurveyId)
     }
 
-    fun pageOpened(pageName: String) {
-        stateStorage.addPageOpenRecord(pageName, "")
+    fun pageOpened(pageName: String, value: String, triggeredSurveyId: String) {
+        stateStorage.addPageOpenRecord(pageName, value, triggeredSurveyId)
     }
 
     fun pageClosed(pageName: String) {
@@ -138,4 +139,17 @@ class LocalStateHolder(
             stateStorage.state = this
         }
     }
+
+    fun fetchSurveyShowStats(surveyId: String): SurveyShowStats {
+        val surveyShowRecords = stateStorage.readEventLogs(surveyId)
+        return SurveyShowStats(
+            surveyId = surveyId,
+            executionLogs = surveyShowRecords
+        )
+    }
 }
+
+data class SurveyShowStats(
+    val surveyId: String,
+    val executionLogs: List<SurveyExecutionLogs>
+)

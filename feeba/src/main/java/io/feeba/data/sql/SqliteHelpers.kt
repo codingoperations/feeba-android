@@ -6,19 +6,17 @@ import android.database.sqlite.SQLiteOpenHelper
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 
+const val ExecutedSurveyTypeEvent = "event"
+const val ExecutedSurveyTypePage = "page"
+
 object Contract {
     // Table contents are grouped together in an anonymous object.
-    object PagesEntry : BaseColumns {
-        const val TABLE_NAME = "pages"
-        const val COL_PAGE_NAME = "page_name"
-        const val COL_VALUE = "value"
-        const val COL_CREATED = "created_at"
-    }
-
-    object EventsEntry : BaseColumns {
-        const val TABLE_NAME = "events"
-        const val COL_EVENT_NAME = "event_name"
-        const val COL_VALUE = "value"
+    object SurveyExecutionRecords : BaseColumns {
+        const val TABLE_NAME = "executed_surveys"
+        const val COL_TRIGGERED_SURVEY_ID = "survey_id"
+        const val COL_TRIGGER_VALUE = "triggered_value"
+        const val COL_PAYLOAD = "payload"
+        const val COL_TYPE = "type"
         const val COL_CREATED = "created_at"
     }
 }
@@ -31,24 +29,26 @@ interface BaseColumns {
     }
 }
 
-class FeebaDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class FeebaDbHelper(context: Context) :
+    SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
         Logger.log(LogLevel.DEBUG, "FeebaDbHelper::onCreate")
-        val SQL_CREATE_ENTRIES =
-            "CREATE TABLE ${Contract.PagesEntry.TABLE_NAME} (" +
+        val SQL_CREATE_PAGES_TABLE =
+            "CREATE TABLE ${Contract.SurveyExecutionRecords.TABLE_NAME} (" +
                     "${BaseColumns._ID} INTEGER PRIMARY KEY," +
-                    "${Contract.PagesEntry.COL_PAGE_NAME} TEXT," +
-                    "${Contract.PagesEntry.COL_VALUE} TEXT)"
-        db.execSQL(SQL_CREATE_ENTRIES)
+                    "${Contract.SurveyExecutionRecords.COL_TRIGGERED_SURVEY_ID} TEXT," +
+                    "${Contract.SurveyExecutionRecords.COL_TRIGGER_VALUE} TEXT," +
+                    "${Contract.SurveyExecutionRecords.COL_PAYLOAD} TEXT," +
+                    "${Contract.SurveyExecutionRecords.COL_TYPE} TEXT," +
+                    "${Contract.SurveyExecutionRecords.COL_CREATED} INTEGER)"
+        db.execSQL(SQL_CREATE_PAGES_TABLE)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // This database is only a cache for online data, so its upgrade policy is
         // to simply to discard the data and start over
-        val SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS ${Contract.PagesEntry.TABLE_NAME}"
-
-        db.execSQL(SQL_DELETE_ENTRIES)
+        db.execSQL( "DROP TABLE IF EXISTS ${Contract.SurveyExecutionRecords.TABLE_NAME}")
         onCreate(db)
     }
 
@@ -58,7 +58,7 @@ class FeebaDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME,
 
     companion object {
         // If you change the database schema, you must increment the database version.
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
         const val DATABASE_NAME = "feeba.db"
     }
 }

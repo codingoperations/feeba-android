@@ -5,14 +5,11 @@ import android.content.Context
 import io.feeba.data.FeebaResponse
 import io.feeba.data.state.AppHistoryState
 import io.feeba.data.state.Defaults
-import io.feeba.data.state.EventLog
-import io.feeba.data.state.PageEventLog
+import io.feeba.data.state.SurveyExecutionLogs
 import io.feeba.data.state.StateStorageInterface
-import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.least.core.readLocalFile
 import io.least.core.writeToLocalFile
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -71,37 +68,66 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
             }
         }
 
-    override fun addPageOpenRecord(pageName: String, value: String) {
+    override fun addPageOpenRecord(pageName: String, value: String, triggeredSurveyId: String) {
+        persistExecutionRecord(pageName, triggeredSurveyId, value, ExecutedSurveyTypePage)
+    }
+
+    override fun readPageEvenLogs(surveyId: String): List<SurveyExecutionLogs> {
+        return readSurveyExecutionLogs(surveyId, ExecutedSurveyTypePage)
+    }
+
+    override fun addEventRecord(eventName: String, value: String, triggeredSurveyId: String) {
+        persistExecutionRecord(eventName, triggeredSurveyId, value, ExecutedSurveyTypeEvent)
+    }
+
+    private fun persistExecutionRecord(
+        eventName: String,
+        triggeredSurveyId: String,
+        value: String,
+        type: String
+    ) {
         // Create a new map of values, where column names are the keys
         val values = ContentValues().apply {
-            put(Contract.PagesEntry.COL_PAGE_NAME, pageName)
-            put(Contract.PagesEntry.COL_VALUE, value)
-            put(Contract.PagesEntry.COL_CREATED, System.currentTimeMillis())
+            put(Contract.SurveyExecutionRecords.COL_TRIGGER_VALUE, eventName)
+            put(Contract.SurveyExecutionRecords.COL_TYPE, type)
+            put(Contract.SurveyExecutionRecords.COL_TRIGGERED_SURVEY_ID, triggeredSurveyId)
+            put(Contract.SurveyExecutionRecords.COL_PAYLOAD, value)
+            put(Contract.SurveyExecutionRecords.COL_CREATED, System.currentTimeMillis())
         }
         try {
             // Insert the new row, returning the primary key value of the new row
-            val newRowId = writableDatabase.insert(Contract.PagesEntry.TABLE_NAME, null, values)
+            writableDatabase.insert(Contract.SurveyExecutionRecords.TABLE_NAME, null, values)
         } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to add page open record. Error: $t")
+            Logger.d("AndroidStateStorage::persistExecutionRecord:: Failed to add a record. Error: $t")
         }
     }
 
-    override fun readPageEvenLogs(pageName: String): List<PageEventLog> {
+    override  fun readEventLogs(surveyId: String): List<SurveyExecutionLogs> {
+        return readSurveyExecutionLogs(surveyId, ExecutedSurveyTypeEvent)
+    }
+
+    private fun readSurveyExecutionLogs(
+        surveyId: String,
+        type: String
+    ): MutableList<SurveyExecutionLogs> {
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         val projection = arrayOf(
-            Contract.PagesEntry.COL_PAGE_NAME,
-            Contract.PagesEntry.COL_VALUE,
-            Contract.PagesEntry.COL_CREATED
+            Contract.SurveyExecutionRecords.COL_TYPE,
+            Contract.SurveyExecutionRecords.COL_TRIGGERED_SURVEY_ID,
+            Contract.SurveyExecutionRecords.COL_TRIGGER_VALUE,
+            Contract.SurveyExecutionRecords.COL_PAYLOAD,
+            Contract.SurveyExecutionRecords.COL_CREATED
         )
-        val selection = "${Contract.PagesEntry.COL_PAGE_NAME} = ?"
-        val selectionArgs = arrayOf(pageName)
-        val sortOrder = "${Contract.PagesEntry.COL_CREATED} DESC"
+        val selection =
+            "${Contract.SurveyExecutionRecords.COL_TRIGGERED_SURVEY_ID} = ? AND ${Contract.SurveyExecutionRecords.COL_TYPE} = ?"
+        val selectionArgs = arrayOf(surveyId, type)
+        val sortOrder = "${Contract.SurveyExecutionRecords.COL_CREATED} DESC"
 
-        val items = mutableListOf<PageEventLog>()
+        val items = mutableListOf<SurveyExecutionLogs>()
         try {
             val cursor = readableDatabase.query(
-                Contract.PagesEntry.TABLE_NAME,
+                Contract.SurveyExecutionRecords.TABLE_NAME,
                 projection,
                 selection,
                 selectionArgs,
@@ -112,71 +138,30 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
 
             with(cursor) {
                 while (moveToNext()) {
-                    val pageName =
-                        getString(getColumnIndexOrThrow(Contract.PagesEntry.COL_PAGE_NAME))
-                    val value = getString(getColumnIndexOrThrow(Contract.PagesEntry.COL_VALUE))
-                    val createdAt = getLong(getColumnIndexOrThrow(Contract.PagesEntry.COL_CREATED))
-                    items.add(PageEventLog(pageName, value, createdAt))
-                }
-            }
-        } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to read page logs. Error: $t")
-        }
-        return items
-    }
-
-    override fun addEventRecord(eventName: String, value: String) {
-        // Create a new map of values, where column names are the keys
-        val values = ContentValues().apply {
-            put(Contract.EventsEntry.COL_EVENT_NAME, eventName)
-            put(Contract.EventsEntry.COL_VALUE, value)
-            put(Contract.EventsEntry.COL_CREATED, System.currentTimeMillis())
-        }
-        try {
-            // Insert the new row, returning the primary key value of the new row
-            val newRowId = writableDatabase.insert(Contract.EventsEntry.TABLE_NAME, null, values)
-        } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to add event record. Error: $t")
-        }
-    }
-
-    override fun readEventLogs(eventName: String): List<EventLog> {
-        // Define a projection that specifies which columns from the database
-        // you will actually use after this query.
-        val projection = arrayOf(
-            Contract.EventsEntry.COL_EVENT_NAME,
-            Contract.EventsEntry.COL_VALUE,
-            Contract.EventsEntry.COL_CREATED
-        )
-        val selection = "${Contract.EventsEntry.COL_EVENT_NAME} = ?"
-        val selectionArgs = arrayOf(eventName)
-        val sortOrder = "${Contract.EventsEntry.COL_CREATED} DESC"
-
-        val items = mutableListOf<EventLog>()
-        try {
-            val cursor = readableDatabase.query(
-                Contract.EventsEntry.TABLE_NAME,
-                projection,
-                selection,
-                selectionArgs,
-                null,
-                null,
-                sortOrder
-            )
-
-            with(cursor) {
-                while (moveToNext()) {
+                    val readSurveyId =
+                        getString(getColumnIndexOrThrow(Contract.SurveyExecutionRecords.COL_TRIGGERED_SURVEY_ID))
+                    val readType =
+                        getString(getColumnIndexOrThrow(Contract.SurveyExecutionRecords.COL_TYPE))
                     val eventName =
-                        getString(getColumnIndexOrThrow(Contract.EventsEntry.COL_EVENT_NAME))
-                    val value = getString(getColumnIndexOrThrow(Contract.EventsEntry.COL_VALUE))
-                    val createdAt = getLong(getColumnIndexOrThrow(Contract.EventsEntry.COL_CREATED))
-                    items.add(EventLog(eventName, value, createdAt))
+                        getString(getColumnIndexOrThrow(Contract.SurveyExecutionRecords.COL_TRIGGER_VALUE))
+                    val value =
+                        getString(getColumnIndexOrThrow(Contract.SurveyExecutionRecords.COL_PAYLOAD))
+                    val createdAt =
+                        getLong(getColumnIndexOrThrow(Contract.SurveyExecutionRecords.COL_CREATED))
+                    items.add(
+                        SurveyExecutionLogs(
+                            eventName,
+                            value,
+                            readSurveyId,
+                            readType,
+                            createdAt
+                        )
+                    )
                 }
             }
         } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to read event logs. Error: $t")
+            Logger.d("AndroidStateStorage:: Failed to read survey execution logs. Error: $t")
         }
-
         return items
     }
 
@@ -191,27 +176,27 @@ class AndroidStateStorage(private val context: Context) : StateStorageInterface 
                 arrayOf((System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000).toString())
 
             writableDatabase.delete(
-                Contract.PagesEntry.TABLE_NAME,
-                "${Contract.PagesEntry.COL_CREATED} < ?",
+                Contract.SurveyExecutionRecords.TABLE_NAME,
+                "${Contract.SurveyExecutionRecords.COL_CREATED} < ?",
                 selectionArgs
             )
             writableDatabase.delete(
-                Contract.EventsEntry.TABLE_NAME,
-                "${Contract.EventsEntry.COL_CREATED} < ?",
+                Contract.SurveyExecutionRecords.TABLE_NAME,
+                "${Contract.SurveyExecutionRecords.COL_CREATED} < ?",
                 selectionArgs
             )
             // TODO delete all Event Logs that are older than 30 days
         } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to trim data. Error: $t")
+            Logger.d("AndroidStateStorage:: Failed to trim data. Error: $t")
         }
     }
 
     override fun eraseEventAndPageLogs() {
         try {
-            writableDatabase.delete(Contract.PagesEntry.TABLE_NAME, null, null)
-            writableDatabase.delete(Contract.EventsEntry.TABLE_NAME, null, null)
+            writableDatabase.delete(Contract.SurveyExecutionRecords.TABLE_NAME, null, null)
+            writableDatabase.delete(Contract.SurveyExecutionRecords.TABLE_NAME, null, null)
         } catch (t: Throwable) {
-//            Logger.log(LogLevel.ERROR, "AndroidStateStorage:: Failed to erase event and page logs. Error: $t")
+            Logger.d("AndroidStateStorage:: Failed to erase event and page logs. Error: $t")
         }
     }
 }

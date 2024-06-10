@@ -1,16 +1,22 @@
 package io.feeba.lifecycle
 
 import android.app.Activity
+import android.util.Log
 import io.feeba.data.LocalStateHolder
+import io.feeba.data.RepeatType
 import io.feeba.data.RuleSet
 import io.feeba.data.RuleType
+import io.feeba.data.ScheduleConfig
+import io.feeba.data.StopShowingType
+import io.feeba.data.SurveyPlan
 import io.feeba.data.SurveyPresentation
+import io.feeba.data.SurveyShowStats
 import io.feeba.data.TriggerCondition
 import io.feeba.data.isEvent
 import io.feeba.data.isPageTrigger
+import java.util.Date
 
 class TriggerValidator {
-
 
     fun onEvent(eventName: String, value: String? = null, localStateHolder: LocalStateHolder): ValidatorResult? {
         Logger.log(LogLevel.DEBUG, "TriggerValidator:: onEvent -> $eventName, value: $value")
@@ -27,13 +33,16 @@ class TriggerValidator {
                         allConditionsMet = true
                     }
                 }
+                val shouldBeScheduled = areSchedulingConditionsMet(localStateHolder.fetchSurveyShowStats(surveyPlan.id), surveyPlan.distribution.scheduleConfig)
+                Logger.log(LogLevel.DEBUG, "TriggerValidator:: shouldBeScheduled -> $shouldBeScheduled")
+                allConditionsMet = allConditionsMet.and(shouldBeScheduled)
+
                 if (allConditionsMet) {
-                    return ValidatorResult(surveyPlan.surveyPresentation, 0, ruleSet)
+                    return ValidatorResult(surveyPlan.surveyPresentation, 0, ruleSet, surveyPlan)
                 }
             }
         }
         return null
-
     }
 
     fun pageOpened(pageName: String, localStateHolder: LocalStateHolder): ValidatorResult? {
@@ -55,12 +64,21 @@ class TriggerValidator {
                         continue
                     }
                     val surveyOpenDelaySec = try {
-                        ruleSet.triggers.filter { it.type == RuleType.SESSION_DURATION }.getOrNull(0)?.value?.toLongOrNull() ?: 0
+                        ruleSet.triggers.filter { it.type == RuleType.SESSION_DURATION }
+                            .getOrNull(0)?.value?.toLongOrNull() ?: 0
                     } catch (throwable: Throwable) {
-                        Logger.log(LogLevel.ERROR, "Failed to parse page timing condition value: $throwable")
+                        Logger.log(
+                            LogLevel.ERROR,
+                            "Failed to parse page timing condition value: $throwable"
+                        )
                         0
                     }
-                    return ValidatorResult(surveyPlan.surveyPresentation, surveyOpenDelaySec * 1000, ruleSet)
+                    return ValidatorResult(
+                        surveyPlan.surveyPresentation,
+                        surveyOpenDelaySec * 1000,
+                        ruleSet,
+                        surveyPlan
+                    )
                 }
             }
         }
@@ -71,7 +89,8 @@ class TriggerValidator {
 data class ValidatorResult(
     val surveyPresentation: SurveyPresentation,
     val delay: Long,
-    val ruleSet: RuleSet
+    val ruleSet: RuleSet,
+    val surveyPlan: SurveyPlan
 )
 
 fun validateEvent(triggerCondition: TriggerCondition) {
@@ -90,36 +109,39 @@ fun validateEvent(triggerCondition: TriggerCondition) {
     }
 }
 
-fun onActivityPaused(activity: Activity) {
-    Logger.log(LogLevel.DEBUG, "onActivityPaused: $activity")
-    // TODO remove any callbacks that are waiting to run on this activity
-}
+fun areSchedulingConditionsMet(stat: SurveyShowStats, scheduleConfig: ScheduleConfig): Boolean {
+    // check if the schedule conditions are met
+    // if the show start time is in the past
+    val now = Date()
+    if (scheduleConfig.showConfig.time.time > now.time) {
+        return false
+    }
+    // if the show end time is in the future
+    when (scheduleConfig.stopConfig.selection) {
+        StopShowingType.SHOW_FOREVER -> {
+            // No need to return false yet. We keep checking other conditions
+        }
 
-fun onActivityResumed(activity: Activity) {
-    Logger.log(LogLevel.DEBUG, "onActivityResumed: $activity")
-    // TODO Check if there is any pending survey to show
-}
+        StopShowingType.STOP_AFTER_TIME -> {
+            if (scheduleConfig.stopConfig.time != null && scheduleConfig.stopConfig.time.time < now.time) {
+                return false
+            }
+        }
+    }
+    // we check the repeat config
+    when (scheduleConfig.repeat.selection) {
+        RepeatType.ONCE -> {
+            if (stat.executionLogs.isNotEmpty()) {
+                return false
+            }
+        }
+        RepeatType.ALWAYS -> {
+            // No need to return false yet. We keep checking other conditions
+        }
+        RepeatType.MANY_TIMES -> {
+            // NOT supported yet
+        }
+    }
 
-fun onAppOpened(starterActivity: Activity) {
-    Logger.log(LogLevel.DEBUG, "onAppOpened: $starterActivity")
-    // TODO Check if there is any pending survey to show
-}
-
-private fun showSurveyDialog(activity: Activity) {
-    // TODO show survey dialog
-//        val fm: FragmentManager = activity.fragmentManager
-//        SurveyFragment()
-//            .apply {
-//                arguments = Bundle().apply {
-//                    putString(
-//                        KEY_SURVEY_URL,
-//                        "http://dev-dashboard.feeba.io/s/feeba/6504ee57ba0d101292e066a8"
-//                    )
-//                }
-//            }
-//            .show(
-//                fm,
-//                "SurveyFragment"
-//            )
-//        showSurveyFragment(activity.fragmentManager, "http://dev-dashboard.feeba.io/s/feeba/6504ee57ba0d101292e066a8")
+    return true
 }
