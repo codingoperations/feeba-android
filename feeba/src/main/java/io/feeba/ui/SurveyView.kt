@@ -59,17 +59,6 @@ class SurveyView : FrameLayout {
                 } else if (loadType is SurveyRendered) {
                     // Trigger JS -> Feeba call with document height
                     webView.loadUrl("javascript:Mobile.resize(document.body.getBoundingClientRect().height)");
-                } else if (loadType is PageResized) {
-                    Logger.log(
-                        LogLevel.DEBUG,
-                        "SurveyView::   heightSize: ${(loadType.heightSize * resources.displayMetrics.density).toInt()}"
-                    )
-                    Utils.runOnMainUIThread {
-                        webView.layoutParams = FrameLayout.LayoutParams(
-                            resources.displayMetrics.widthPixels,
-                            (loadType.heightSize * resources.displayMetrics.density).toInt()
-                        )
-                    }
                 }
             },
             onError = {

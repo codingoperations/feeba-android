@@ -30,6 +30,8 @@ import io.feeba.Utils
 import io.feeba.appendQueryParameter
 import io.feeba.data.SurveyPresentation
 import io.feeba.data.state.AppHistoryState
+import io.feeba.getSanitizedHeightPercent
+import io.feeba.getSanitizedWidthPercent
 import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.feeba.survey.CallToAction
@@ -204,7 +206,8 @@ fun createWebViewInstance(
         appHistoryState,
         onError,
         onPageLoaded,
-        onOutsideTouch
+        onOutsideTouch,
+        getSanitizedWidthPercent(presentation.maxWidgetWidthInPercent), getSanitizedHeightPercent(presentation.maxWidgetHeightInPercent)
     ).apply {
         loadUrl(
             appendQueryParameter(
@@ -221,13 +224,16 @@ fun createWebViewInstance(
     context: Context, appHistoryState: AppHistoryState,
     onError: () -> Unit,
     onPageLoaded: (WebView, LoadType) -> Unit,
-    onOutsideTouch: (() -> Unit)? = null
+    onOutsideTouch: (() -> Unit)? = null,
+    maxWidth: Int = 100,
+    maxHeight: Int = 100
 ): FeebaWebView {
-    return FeebaWebView(context).apply {
-        WebView.setWebContentsDebuggingEnabled(true);
+    return FeebaWebView(context, maxWidth, maxHeight).apply {
+        WebView.setWebContentsDebuggingEnabled(true)
+
         layoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
+            FrameLayout.LayoutParams.WRAP_CONTENT
         )
         setBackgroundColor(Color.TRANSPARENT)
         isNestedScrollingEnabled = true
@@ -254,9 +260,9 @@ fun createWebViewInstance(
                         }
                     }
                 },
-                onResize = {
-                    Logger.log(LogLevel.DEBUG, "FeebaWebView::JsInterface::onResize, height=$it")
-                    Utils.runOnMainUIThread { onPageLoaded(this, PageResized(it)) }
+                onResize = { w, h ->
+                    Logger.log(LogLevel.DEBUG, "FeebaWebView::JsInterface::onResize, width=${(w * context.resources.displayMetrics.density).toInt()}, height=${(h * context.resources.displayMetrics.density).toInt()}, density=${context.resources.displayMetrics.density}")
+
                 }),
             "Mobile"
         )
@@ -338,4 +344,3 @@ fun createWebViewInstance(
 sealed interface LoadType
 data object PageFrame : LoadType;
 data object SurveyRendered : LoadType;
-class PageResized(val heightSize: Int) : LoadType;
