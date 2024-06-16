@@ -17,7 +17,7 @@ data class SurveyPlan(
     val id: String,
     val surveyPresentation: SurveyPresentation,
     val ruleSetList: List<RuleSet>,
-    val distribution: DistributionModel
+    val distribution: DistributionModel? = null
 )
 
 @Serializable
