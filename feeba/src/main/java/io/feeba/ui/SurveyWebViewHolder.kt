@@ -50,6 +50,7 @@ internal class SurveyWebViewHolder(
         val surveyWrapper = createCardView(activity, presentation).apply {
             val webView = createWebViewInstance(activity, presentation, appHistoryState,
                 onPageLoaded = { webView, loadType ->
+                    Logger.log(LogLevel.DEBUG, "SurveyWebViewHolder::onPageLoaded: loadType=$loadType")
                     when (loadType) {
                         PageFrame -> {
                             removeAllViews()
@@ -62,9 +63,10 @@ internal class SurveyWebViewHolder(
                 },
                 onError = {
                     dismiss()
-                }) {
-                dismiss()
-            }
+                },
+                onOutsideTouch = {
+                    dismiss()
+                })
 
             webView.setOnKeyListener { v, keyCode, event ->
                 Logger.log(LogLevel.DEBUG, "onKeyListener: keyCode=$keyCode, event=$event")

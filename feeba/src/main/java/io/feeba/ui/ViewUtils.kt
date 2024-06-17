@@ -199,7 +199,8 @@ fun isPointInsideView(xToCheck: Int, yToCheck: Int, view: View): Boolean {
 fun createWebViewInstance(
     context: Context, presentation: SurveyPresentation, appHistoryState: AppHistoryState,
     onPageLoaded: (WebView, LoadType) -> Unit,
-    onError: () -> Unit, onOutsideTouch: (() -> Unit)?
+    onError: () -> Unit,
+    onOutsideTouch: (() -> Unit)?
 ): FeebaWebView {
     return createWebViewInstance(
         context,
@@ -261,7 +262,10 @@ fun createWebViewInstance(
                     }
                 },
                 onResize = { w, h ->
-                    Logger.log(LogLevel.DEBUG, "FeebaWebView::JsInterface::onResize, width=${(w * context.resources.displayMetrics.density).toInt()}, height=${(h * context.resources.displayMetrics.density).toInt()}, density=${context.resources.displayMetrics.density}")
+                    Logger.log(
+                        LogLevel.DEBUG,
+                        "FeebaWebView::JsInterface::onResize, width=${(w * context.resources.displayMetrics.density).toInt()}, height=${(h * context.resources.displayMetrics.density).toInt()}, density=${context.resources.displayMetrics.density}"
+                    )
 
                 }),
             "Mobile"
