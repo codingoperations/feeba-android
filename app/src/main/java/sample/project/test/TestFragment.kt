@@ -1,5 +1,6 @@
 package sample.project.test
 
+import ResizableFrameLayout
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -32,28 +33,37 @@ class TestFragment : Fragment() {
             setBackgroundColor(Color.BLUE)
         }
         val survey = arguments?.getSerializable("survey") as SurveyPresentation
-        parent.addView(createWebViewInstance(requireContext(), survey, Defaults.appHistoryState, IntegrationMode.Modal,
-            onPageLoaded = { webView, loadType ->
-                if (loadType is PageResized) {
-                    webView.layoutParams = webView.layoutParams.apply {
-                        width = loadType.w
-                        height = loadType.h
-                    }
+        parent.addView(ResizableFrameLayout(requireContext()).apply {
+            setBackgroundColor(Color.GREEN)
+            addView(
+                createWebViewInstance(requireContext(), survey, Defaults.appHistoryState, IntegrationMode.Modal,
+                    onPageLoaded = { webView, loadType ->
+                        if (loadType is PageResized) {
+                            webView.layoutParams = webView.layoutParams.apply {
+                                width = loadType.w
+                                height = loadType.h
+                            }
 
-                    val handler = Handler(Looper.getMainLooper())
-                    handler.postDelayed({
+                            val handler = Handler(Looper.getMainLooper())
+                            handler.postDelayed({
 
-                    }, 6000)
-                }
+                            }, 6000)
+                        }
 
-            }, onError = {}, onOutsideTouch = {}).apply {
-            layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+                    }, onError = {}, onOutsideTouch = {}).apply {
+                    layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+                })
         })
-//        parent.addView(createWebViewInstance(requireContext(), survey, Defaults.appHistoryState, IntegrationMode.Modal,
-//            onPageLoaded = { webView, loadType ->
-//            }, onError = {}, onOutsideTouch = {}).apply {
-//            layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
-//        })
+        parent.addView(
+            FrameLayout(requireContext()).apply {
+                setBackgroundColor(Color.GREEN)
+                addView(createWebViewInstance(requireContext(), survey, Defaults.appHistoryState, IntegrationMode.Modal,
+                    onPageLoaded = { webView, loadType ->
+                    }, onError = {}, onOutsideTouch = {}).apply {
+                    layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+                })
+            }
+        )
         return this.parent
     }
 }

@@ -231,10 +231,10 @@ fun createWebViewInstanceForManualLoad(
         WebView.setWebContentsDebuggingEnabled(true)
 
         layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT,
             FrameLayout.LayoutParams.WRAP_CONTENT
         )
-        setBackgroundColor(Color.TRANSPARENT)
+        setBackgroundColor(Color.YELLOW)
         isNestedScrollingEnabled = true
         settings.apply {
             javaScriptEnabled = true
