@@ -264,11 +264,11 @@ fun RuleSet.getSurveyDelaySec(): Long {
     return triggers.filter { it.type == RuleType.SESSION_DURATION }.getOrNull(0)?.value?.toLongOrNull() ?: 0
 }
 
-fun appendQueryParameter(url: String, key: String, value: String): String {
+fun appendQueryParameter(url: String, keyValues: Array<Pair<String, String>>): String {
     return try {
         val uri = Uri.parse(url)
         val builder = uri.buildUpon()
-        builder.appendQueryParameter(key, value)
+        keyValues.forEach { (key, value) -> builder.appendQueryParameter(key, value) }
         builder.build().toString()
     } catch (e: Exception) {
         Logger.log(LogLevel.ERROR, "Failed to append query parameter to url: $url, ${Log.getStackTraceString(e)}")

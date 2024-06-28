@@ -2,6 +2,7 @@ package io.feeba.ui
 
 import android.app.Activity
 import android.graphics.Color
+import android.os.Build
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -48,16 +49,36 @@ internal class SurveyWebViewHolder(
 
     private fun createContentView(): View {
         val surveyWrapper = createCardView(activity, presentation).apply {
-            val webView = createWebViewInstance(activity, presentation, appHistoryState,
+            val cardViewRef = this
+            val surveyIntegrationModel: IntegrationMode = if (presentation.displayLocation == Position.FULL_SCREEN) IntegrationMode.FullScreen else IntegrationMode.Modal
+            val webView = createWebViewInstance(activity, presentation, appHistoryState, surveyIntegrationModel,
                 onPageLoaded = { webView, loadType ->
-                    Logger.log(LogLevel.DEBUG, "SurveyWebViewHolder::onPageLoaded: loadType=$loadType")
                     when (loadType) {
                         PageFrame -> {
-                            removeAllViews()
-                            addView(webView)
+                            // React is loaded. There is nothing has rendered yet. No need to take actions yet
+                        }
+
+                        is PageResized -> {
+                            if (presentation.displayLocation == Position.FULL_SCREEN) {
+                                // Do nothing. Shortcircut the logic
+                                return@createWebViewInstance
+                            }
+
+                            // We resize the cardViewRef to respect the restriction set by SurveyPresentation if necessary
+                            val maxWidthPercentage = if (presentation.maxWidgetWidthInPercent in 1..100) presentation.maxWidgetWidthInPercent else 90
+                            val maxAllowedWidth = (ViewUtils.getWindowWidth(activity) * (maxWidthPercentage / 100f)).toInt()
+                            val maxHeightPercentage = if (presentation.maxWidgetHeightInPercent in 1..100) presentation.maxWidgetHeightInPercent else 70
+                            val maxAllowedHeight = (ViewUtils.getWindowHeight(activity) * (maxHeightPercentage / 100f)).toInt()
+
+                            //  update height and width of cardViewRef. Use the existing layoutParams
+                            Logger.d("PageResized: h=${loadType.h}, maxAllowedHeight=$maxAllowedHeight")
+                            Logger.d("PageResized: finalHeight=${if (loadType.h < maxHeightPercentage) loadType.h else maxAllowedHeight}")
+//                            setLayoutParamsForCardView(presentation, cardViewRef, maxAllowedWidth, maxAllowedHeight)
                         }
 
                         SurveyRendered -> {
+                            removeAllViews()
+                            addView(webView)
                         }
                     }
                 },
@@ -150,36 +171,39 @@ internal class SurveyWebViewHolder(
  */
 private fun createCardView(activity: Activity, content: SurveyPresentation): CardView {
     val cardView = CardView(activity.applicationContext).apply {
-        // Start the view with small rectangle. The actual size with enforced max dimensions will be set when the Page is fully loaded
-        layoutParams = FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
-            when (content.displayLocation) {
-                Position.TOP_BANNER -> {
-                    it.gravity = Gravity.CENTER or Gravity.TOP
-                }
-
-                Position.BOTTOM_BANNER -> {
-                    it.gravity = Gravity.CENTER or Gravity.BOTTOM
-                }
-
-                Position.FULL_SCREEN -> {
-                    it.gravity = Gravity.CENTER
-                    // Override the width and height to match the screen size in case of full screen
-                    it.height = FrameLayout.LayoutParams.MATCH_PARENT
-                    it.width = FrameLayout.LayoutParams.MATCH_PARENT
-                }
-
-                Position.CENTER_MODAL -> {
-                    it.gravity = Gravity.CENTER
-                }
-            }
-        }
+        setLayoutParamsForCardView(content, this)
     }
     cardView.cardElevation = ViewUtils.dpToPx(5).toFloat()
     cardView.radius = ViewUtils.dpToPx(8).toFloat()
     cardView.clipChildren = false
     cardView.clipToPadding = false
     cardView.preventCornerOverlap = false
+    cardView.setCardBackgroundColor(Color.WHITE)
     return cardView
+}
+
+private fun setLayoutParamsForCardView(content: SurveyPresentation, cardView: CardView, width: Int = FrameLayout.LayoutParams.WRAP_CONTENT, height: Int = FrameLayout.LayoutParams.WRAP_CONTENT) {
+    val params = FrameLayout.LayoutParams(width, height)
+    when (content.displayLocation) {
+        Position.TOP_BANNER -> {
+            params.gravity = Gravity.CENTER or Gravity.TOP
+        }
+
+        Position.BOTTOM_BANNER -> {
+            params.gravity = Gravity.CENTER or Gravity.BOTTOM
+        }
+
+        Position.FULL_SCREEN -> {
+            params.gravity = Gravity.CENTER
+            params.height = FrameLayout.LayoutParams.MATCH_PARENT
+            params.width = FrameLayout.LayoutParams.MATCH_PARENT
+        }
+
+        Position.CENTER_MODAL -> {
+            params.gravity = Gravity.CENTER
+        }
+    }
+    cardView.layoutParams = params
 }
 
 private fun adjustCardViewSize(activity: Activity, cardView: View, presentation: SurveyPresentation, width: Int, height: Int) {

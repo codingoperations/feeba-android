@@ -27,7 +27,6 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import io.feeba.Utils
-import io.feeba.appendQueryParameter
 import io.feeba.data.SurveyPresentation
 import io.feeba.data.state.AppHistoryState
 import io.feeba.getSanitizedHeightPercent
@@ -196,13 +195,16 @@ fun isPointInsideView(xToCheck: Int, yToCheck: Int, view: View): Boolean {
             && yToCheck >= view.y && yToCheck <= view.y + view.height
 }
 
+/**
+ * This function is used when we already have a URL to load. So we create a WebView and immediately load the URL
+ */
 fun createWebViewInstance(
     context: Context, presentation: SurveyPresentation, appHistoryState: AppHistoryState,
+    integrationMode: IntegrationMode,
     onPageLoaded: (WebView, LoadType) -> Unit,
-    onError: () -> Unit,
-    onOutsideTouch: (() -> Unit)?
+    onError: () -> Unit, onOutsideTouch: (() -> Unit)?,
 ): FeebaWebView {
-    return createWebViewInstance(
+    return createWebViewInstanceForManualLoad(
         context,
         appHistoryState,
         onError,
@@ -210,18 +212,14 @@ fun createWebViewInstance(
         onOutsideTouch,
         getSanitizedWidthPercent(presentation.maxWidgetWidthInPercent), getSanitizedHeightPercent(presentation.maxWidgetHeightInPercent)
     ).apply {
-        loadUrl(
-            appendQueryParameter(
-                presentation.surveyWebAppUrl,
-                "lang",
-                appHistoryState.userData?.langCode ?: "en"
-            )
-        )
+        load(presentation.surveyWebAppUrl, appHistoryState, integrationMode)
     }
 }
 
-
-fun createWebViewInstance(
+/**
+ * This function is used when you don't have a URL to load yet, but load the URL later to the existing FeebaInlineView
+ */
+fun createWebViewInstanceForManualLoad(
     context: Context, appHistoryState: AppHistoryState,
     onError: () -> Unit,
     onPageLoaded: (WebView, LoadType) -> Unit,
@@ -262,11 +260,10 @@ fun createWebViewInstance(
                     }
                 },
                 onResize = { w, h ->
-                    Logger.log(
-                        LogLevel.DEBUG,
-                        "FeebaWebView::JsInterface::onResize, width=${(w * context.resources.displayMetrics.density).toInt()}, height=${(h * context.resources.displayMetrics.density).toInt()}, density=${context.resources.displayMetrics.density}"
-                    )
-
+                    val wPx = (w * context.resources.displayMetrics.density).toInt()
+                    val hPx = (h * context.resources.displayMetrics.density).toInt()
+                    Logger.d("FeebaWebView::JsInterface::onResize, width=${wPx}, height=${hPx}, density=${context.resources.displayMetrics.density}")
+                    Utils.runOnMainUIThread { onPageLoaded(this, PageResized(wPx, hPx)) }
                 }),
             "Mobile"
         )
@@ -348,3 +345,23 @@ fun createWebViewInstance(
 sealed interface LoadType
 data object PageFrame : LoadType;
 data object SurveyRendered : LoadType;
+class PageResized(val w: Int, val h: Int) : LoadType;
+
+/**
+ * This value is translated into "im" query param in the URL
+ */
+enum class IntegrationMode {
+    FullScreen, Inline, Modal;
+
+    override fun toString() = when (this) {
+        FullScreen -> "f"
+        Inline -> "i"
+        Modal -> "m"
+        else -> {
+            // Fallback value is Modal for Mobile SDKs
+            Logger.w("IntegrationMode::toString, unknown value: $this")
+            "m"
+        }
+    }
+
+}

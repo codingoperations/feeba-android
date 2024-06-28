@@ -14,10 +14,19 @@ import sample.utils.PreferenceWrapper
 
 fun extractEvents(feebaResponse: FeebaResponse): List<EventTriggerUiModel> {
     return feebaResponse.surveyPlans
-        .flatMap { it.ruleSetList }
-        .filter { it.triggers.any { it.type == RuleType.EVENT } }
-        .map { EventTriggerUiModel(
-            it.triggers.first { it.type == RuleType.EVENT }.eventName, "") }
+        .map { surveyPlan ->
+            val eventTrigger = mutableListOf<EventTriggerUiModel>()
+            surveyPlan.ruleSetList.forEach {ruleSet ->
+                for (trigger in ruleSet.triggers) {
+                    if (trigger.type == RuleType.EVENT) {
+                        eventTrigger.add(EventTriggerUiModel(trigger.eventName, "", surveyPlan))
+                        break
+                    }
+                }
+            }
+            eventTrigger
+        }
+        .flatten()
 }
 
 fun extractPageTriggers(feebaResponse: FeebaResponse): List<PageTriggerUiModel> {
@@ -26,7 +35,7 @@ fun extractPageTriggers(feebaResponse: FeebaResponse): List<PageTriggerUiModel> 
     for (surveyPlan in feebaResponse.surveyPlans) {
         // iterate over all rule sets
         for (ruleSet in surveyPlan.ruleSetList) {
-            var pageTriggerName:String? = null
+            var pageTriggerName: String? = null
             var duration = 0
             // iterate over all triggers
             for (trigger in ruleSet.triggers) {
