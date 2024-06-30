@@ -238,10 +238,8 @@ fun createWebViewInstanceForManualLoad(
         isNestedScrollingEnabled = true
         settings.apply {
             javaScriptEnabled = true
-            domStorageEnabled = true
-            useWideViewPort = true
+            useWideViewPort = false
             allowFileAccess = true
-
             domStorageEnabled = true
             // Below is trying to fetch a JS bundle that is outdated. Requires deeper investigation
         }

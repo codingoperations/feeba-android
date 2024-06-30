@@ -35,35 +35,24 @@ class TestFragment : Fragment() {
         val survey = arguments?.getSerializable("survey") as SurveyPresentation
         parent.addView(ResizableFrameLayout(requireContext()).apply {
             setBackgroundColor(Color.GREEN)
+            fun resizeTheContainer(w: Int, h: Int) {
+                this.layoutParams = this.layoutParams.apply {
+                    width = w
+                    height = h
+                }
+            }
             addView(
                 createWebViewInstance(requireContext(), survey, Defaults.appHistoryState, IntegrationMode.Modal,
                     onPageLoaded = { webView, loadType ->
                         if (loadType is PageResized) {
-                            webView.layoutParams = webView.layoutParams.apply {
-                                width = loadType.w
-                                height = loadType.h
-                            }
-
-                            val handler = Handler(Looper.getMainLooper())
-                            handler.postDelayed({
-
-                            }, 6000)
+                            resizeTheContainer(loadType.w, loadType.h)
                         }
 
                     }, onError = {}, onOutsideTouch = {}).apply {
                     layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
                 })
+            layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
         })
-        parent.addView(
-            FrameLayout(requireContext()).apply {
-                setBackgroundColor(Color.GREEN)
-                addView(createWebViewInstance(requireContext(), survey, Defaults.appHistoryState, IntegrationMode.Modal,
-                    onPageLoaded = { webView, loadType ->
-                    }, onError = {}, onOutsideTouch = {}).apply {
-                    layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
-                })
-            }
-        )
         return this.parent
     }
 }

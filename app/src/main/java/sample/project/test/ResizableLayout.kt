@@ -4,6 +4,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Region
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.widget.FrameLayout
 
@@ -42,7 +43,7 @@ class ResizableFrameLayout(context: Context, attrs: AttributeSet? = null, defSty
         canvas.drawPath(notchPath, paint)
     }
 
-    override fun onTouchEvent(event: MotionEvent): Boolean {
+    override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 lastTouchX = event.x
@@ -52,33 +53,46 @@ class ResizableFrameLayout(context: Context, attrs: AttributeSet? = null, defSty
                     notchSize *= 1.5f
                     paint.color = notchHoverColor
                     invalidate()
+                    return true
                 }
             }
+        }
+        return super.onInterceptTouchEvent(event)
+    }
 
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!isResizing) {
+            return super.onTouchEvent(event)
+        }
+
+        when (event.action) {
             MotionEvent.ACTION_MOVE -> {
                 val dx = event.x - lastTouchX
                 val dy = event.y - lastTouchY
 
-                if (isResizing) {
-                    val newWidth = (width + dx).toInt()
-                    val newHeight = (height + dy).toInt()
+                val newWidth = (width + dx).toInt()
+                val newHeight = (height + dy).toInt()
 
-                    layoutParams = layoutParams.apply {
-                        width = newWidth
-                        height = newHeight
-                    }
+                layoutParams = layoutParams.apply {
+                    width = newWidth
+                    height = newHeight
                 }
                 lastTouchX = event.x
                 lastTouchY = event.y
             }
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (isResizing) {
-                    isResizing = false
-                    notchSize /= 1.5f
-                    paint.color = notchColor
-                    invalidate()
+                isResizing = false
+                notchSize /= 1.5f
+                paint.color = notchColor
+                invalidate()
+                // Iterate child views and their class names
+                for (i in 0 until childCount) {
+                    Log.d("ResizableFrameLayout::onTouchEvent", "Child $i: ${getChildAt(i).javaClass.simpleName}")
+                    getChildAt(i).requestLayout()
                 }
+//                Log.d("ResizableFrameLayout::requestLayout", "Width: $width, Height: $height")
+//                forceLayout() // Trigger a re-measure of the children®
             }
         }
         return true

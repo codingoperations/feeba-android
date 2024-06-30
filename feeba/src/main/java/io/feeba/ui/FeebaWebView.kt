@@ -16,7 +16,9 @@ class FeebaWebView(context: Context, maxWidthPercentage: Int = 100, maxHeightPer
         overScrollMode = OVER_SCROLL_NEVER
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        Logger.d("FeebaWebView::onMeasure: $widthMeasureSpec, $heightMeasureSpec")
         // Adjust width as necessary
         var widthMeasureSpec = widthMeasureSpec
         var heightMeasureSpec = heightMeasureSpec
