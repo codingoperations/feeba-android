@@ -60,6 +60,6 @@ public  fun prepareLogoutButton(button: View, fragment: Fragment) {
         Feeba.User.logout()
         PreferenceWrapper.jwtToken = ""
         // pop back to the upmost fragment
-        fragment.findNavController().popBackStack(R.id.fragmentLogin, false)
+        fragment.findNavController().navigate(R.id.action_logout)
     }
 }
