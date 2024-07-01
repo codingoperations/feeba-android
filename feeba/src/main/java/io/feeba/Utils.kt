@@ -264,7 +264,7 @@ fun RuleSet.getSurveyDelaySec(): Long {
     return triggers.filter { it.type == RuleType.SESSION_DURATION }.getOrNull(0)?.value?.toLongOrNull() ?: 0
 }
 
-fun appendQueryParameter(url: String, keyValues: Array<Pair<String, String>>): String {
+public fun appendQueryParameter(url: String, keyValues: Array<Pair<String, String>>): String {
     return try {
         val uri = Uri.parse(url)
         val builder = uri.buildUpon()

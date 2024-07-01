@@ -340,6 +340,23 @@ fun createWebViewInstanceForManualLoad(
     }
 }
 
+/**
+ * xs, extra-small: 0px
+ * sm, small: 600px
+ * md, medium: 960px
+ * lg, large: 1280px
+ * xl, extra-large: 1920px
+ */
+fun readCssBreakPointValue(activity: Activity) = ViewUtils.getWindowWidth(activity).let {
+    when {
+        it < 600 -> "xs"
+        it < 960 -> "sm"
+        it < 1280 -> "md"
+        it < 1920 -> "lg"
+        else -> "xl"
+    }
+}
+
 sealed interface LoadType
 data object PageFrame : LoadType;
 data object SurveyRendered : LoadType;

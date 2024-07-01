@@ -12,7 +12,7 @@ import sample.project.events.EventTriggerUiModel
 import sample.project.page.PageTriggerUiModel
 import sample.utils.PreferenceWrapper
 
-fun extractEvents(feebaResponse: FeebaResponse): List<EventTriggerUiModel> {
+public fun extractEvents(feebaResponse: FeebaResponse): List<EventTriggerUiModel> {
     return feebaResponse.surveyPlans
         .map { surveyPlan ->
             val eventTrigger = mutableListOf<EventTriggerUiModel>()
@@ -29,7 +29,7 @@ fun extractEvents(feebaResponse: FeebaResponse): List<EventTriggerUiModel> {
         .flatten()
 }
 
-fun extractPageTriggers(feebaResponse: FeebaResponse): List<PageTriggerUiModel> {
+public  fun extractPageTriggers(feebaResponse: FeebaResponse): List<PageTriggerUiModel> {
     val result = mutableListOf<PageTriggerUiModel>()
     // iterate over all survey plans
     for (surveyPlan in feebaResponse.surveyPlans) {
@@ -55,7 +55,7 @@ fun extractPageTriggers(feebaResponse: FeebaResponse): List<PageTriggerUiModel> 
     return result
 }
 
-fun prepareLogoutButton(button: View, fragment: Fragment) {
+public  fun prepareLogoutButton(button: View, fragment: Fragment) {
     button.setOnClickListener {
         Feeba.User.logout()
         PreferenceWrapper.jwtToken = ""
