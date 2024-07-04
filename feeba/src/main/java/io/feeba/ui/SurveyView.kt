@@ -44,26 +44,31 @@ class SurveyView : FrameLayout {
 
     //Create a function called init
     private fun init() {
-        webView = createWebViewInstanceForManualLoad(context, appHistoryState, onPageLoaded = { webView, loadType ->
-            Logger.log(LogLevel.DEBUG, "SurveyView::   onPageLoaded: $loadType")
-            if (loadType is PageFrame) {
-                removeAllViews()
-                addView(webView)
-            } else if (loadType is SurveyRendered) {
-                // Trigger JS -> Feeba call with document height
+        webView = createWebViewInstanceForManualLoad(context, appHistoryState,
+            onPageLoaded = { webView, loadType ->
+                Logger.log(LogLevel.DEBUG, "SurveyView::   onPageLoaded: $loadType")
+                if (loadType is PageFrame) {
+                    removeAllViews()
+                    addView(webView)
+                } else if (loadType is SurveyRendered) {
+                    // Trigger JS -> Feeba call with document height
 //                    webView.loadUrl("javascript:Mobile.resize(document.body.getBoundingClientRect().height)");
-            } else if (loadType is PageResized) {
-                val updatedWidth = (loadType.w * resources.displayMetrics.density).toInt()
-                val updatedHeight = (loadType.h * resources.displayMetrics.density).toInt()
-                Logger.d("SurveyView:: w=$updatedWidth, h=${updatedHeight}")
-                Utils.runOnMainUIThread {
-                    webView.layoutParams = FrameLayout.LayoutParams(updatedHeight, updatedWidth)
+                } else if (loadType is PageResized) {
+                    val updatedWidth = (loadType.w * resources.displayMetrics.density).toInt()
+                    val updatedHeight = (loadType.h * resources.displayMetrics.density).toInt()
+                    Logger.d("SurveyView:: w=$updatedWidth, h=${updatedHeight}")
+                    Utils.runOnMainUIThread {
+                        webView.layoutParams = FrameLayout.LayoutParams(updatedHeight, updatedWidth)
+                    }
                 }
-            }
-        }, onError = {
-            // In case of error, remove the view
-            removeAllViews()
-        })
+            },
+            onError = {
+                // In case of error, remove the view
+                removeAllViews()
+            },
+            width = FrameLayout.LayoutParams.WRAP_CONTENT,
+            height = FrameLayout.LayoutParams.WRAP_CONTENT
+        )
         isFocusableInTouchMode = true
         requestFocus()
     }

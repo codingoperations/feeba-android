@@ -49,7 +49,6 @@ internal class SurveyWebViewHolder(
 
     private fun createContentView(): View {
         val surveyWrapper = createCardView(activity, presentation).apply {
-            val cardViewRef = this
             val surveyIntegrationModel: IntegrationMode = if (presentation.displayLocation == Position.FULL_SCREEN) IntegrationMode.FullScreen else IntegrationMode.Modal
             val webView = createWebViewInstance(activity, presentation, appHistoryState, surveyIntegrationModel,
                 onPageLoaded = { webView, loadType ->
@@ -63,17 +62,10 @@ internal class SurveyWebViewHolder(
                                 // Do nothing. Shortcircut the logic
                                 return@createWebViewInstance
                             }
-
-                            // We resize the cardViewRef to respect the restriction set by SurveyPresentation if necessary
-                            val maxWidthPercentage = if (presentation.maxWidgetWidthInPercent in 1..100) presentation.maxWidgetWidthInPercent else 90
-                            val maxAllowedWidth = (ViewUtils.getWindowWidth(activity) * (maxWidthPercentage / 100f)).toInt()
-                            val maxHeightPercentage = if (presentation.maxWidgetHeightInPercent in 1..100) presentation.maxWidgetHeightInPercent else 70
-                            val maxAllowedHeight = (ViewUtils.getWindowHeight(activity) * (maxHeightPercentage / 100f)).toInt()
-
-                            //  update height and width of cardViewRef. Use the existing layoutParams
-                            Logger.d("PageResized: h=${loadType.h}, maxAllowedHeight=$maxAllowedHeight")
-                            Logger.d("PageResized: finalHeight=${if (loadType.h < maxHeightPercentage) loadType.h else maxAllowedHeight}")
-//                            setLayoutParamsForCardView(presentation, cardViewRef, maxAllowedWidth, maxAllowedHeight)
+                            this.layoutParams = this.layoutParams.apply {
+                                width = loadType.w
+                                height = loadType.h
+                            }
                         }
 
                         SurveyRendered -> {

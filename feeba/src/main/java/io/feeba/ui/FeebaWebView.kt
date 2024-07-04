@@ -2,10 +2,13 @@ package io.feeba.ui
 
 import android.app.Activity
 import android.content.Context
+import android.view.View.MeasureSpec.EXACTLY
 import android.webkit.WebView
 import io.feeba.appendQueryParameter
 import io.feeba.data.state.AppHistoryState
 import io.feeba.lifecycle.Logger
+import kotlin.math.max
+import kotlin.math.min
 
 // Custom WebView to lock scrolling
 class FeebaWebView(context: Context, maxWidthPercent: Int = 100, maxHeightPercent: Int = 100, minWidthPercent: Int = 1, minHeightPercent: Int = 1) : WebView(context) {
@@ -25,17 +28,19 @@ class FeebaWebView(context: Context, maxWidthPercent: Int = 100, maxHeightPercen
         // Adjust width as necessary
         var widthMeasureSpec = widthMeasureSpec
         var heightMeasureSpec = heightMeasureSpec
-        val measuredWidth = MeasureSpec.getSize(widthMeasureSpec)
-        if (maxWidthPx in 1..<measuredWidth) {
-            val measureMode = MeasureSpec.getMode(widthMeasureSpec)
-            widthMeasureSpec = MeasureSpec.makeMeasureSpec(maxWidthPx, measureMode)
-        }
-        // Adjust height as necessary
-        val measuredHeight = MeasureSpec.getSize(heightMeasureSpec)
-        if (maxHeightPx in 1..<measuredHeight) {
-            val measureMode = MeasureSpec.getMode(heightMeasureSpec)
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeightPx, measureMode)
-        }
+        // Adjust width as necessary to ensure it is within the max and min width
+//        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
+//        val adjustedWidth = min(maxWidthPx, max(minWidthPx, widthSize))
+//        widthMeasureSpec = MeasureSpec.makeMeasureSpec(adjustedWidth, EXACTLY)
+//
+//        // Adjust height as necessary to ensure it is within the max and min height
+//        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
+//        val adjustedHeight = min(maxHeightPx, max(minHeightPx, heightSize))
+//        heightMeasureSpec = MeasureSpec.makeMeasureSpec(adjustedHeight, EXACTLY)
+//
+//        Logger.d("FeebaWebView:: h=${heightSize}, maxH=${maxHeightPx}, minH=${minHeightPx}, adjustedH=${adjustedHeight}")
+//        Logger.d("FeebaWebView:: w=${widthSize}, maxW=${maxWidthPx}, minW=${minWidthPx}, adjustedW=${adjustedWidth}")
+
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 

@@ -47,7 +47,6 @@ class TestFragment : Fragment() {
                         if (loadType is PageResized) {
                             resizeTheContainer(loadType.w, loadType.h)
                         }
-
                     }, onError = {}, onOutsideTouch = {}).apply {
                     layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
                 })

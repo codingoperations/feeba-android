@@ -27,6 +27,7 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import io.feeba.Utils
+import io.feeba.data.Position
 import io.feeba.data.SurveyPresentation
 import io.feeba.data.state.AppHistoryState
 import io.feeba.getSanitizedHeightPercent
@@ -204,13 +205,15 @@ fun createWebViewInstance(
     onPageLoaded: (WebView, LoadType) -> Unit,
     onError: () -> Unit, onOutsideTouch: (() -> Unit)?,
 ): FeebaWebView {
+    var wrapType = if (presentation.displayLocation == Position.FULL_SCREEN) FrameLayout.LayoutParams.MATCH_PARENT else FrameLayout.LayoutParams.WRAP_CONTENT
     return createWebViewInstanceForManualLoad(
         context,
         appHistoryState,
         onError,
         onPageLoaded,
         onOutsideTouch,
-        getSanitizedWidthPercent(presentation.maxWidgetWidthInPercent), getSanitizedHeightPercent(presentation.maxWidgetHeightInPercent)
+        getSanitizedWidthPercent(presentation.maxWidgetWidthInPercent), getSanitizedHeightPercent(presentation.maxWidgetHeightInPercent),
+        wrapType, wrapType
     ).apply {
         load(presentation.surveyWebAppUrl, appHistoryState, integrationMode)
     }
@@ -225,15 +228,13 @@ fun createWebViewInstanceForManualLoad(
     onPageLoaded: (WebView, LoadType) -> Unit,
     onOutsideTouch: (() -> Unit)? = null,
     maxWidth: Int = 100,
-    maxHeight: Int = 100
+    maxHeight: Int = 100,
+    width: Int = FrameLayout.LayoutParams.WRAP_CONTENT, height: Int = FrameLayout.LayoutParams.WRAP_CONTENT
 ): FeebaWebView {
     return FeebaWebView(context, maxWidth, maxHeight).apply {
         WebView.setWebContentsDebuggingEnabled(true)
 
-        layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.WRAP_CONTENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT
-        )
+        layoutParams = FrameLayout.LayoutParams(width, height)
         setBackgroundColor(Color.YELLOW)
         isNestedScrollingEnabled = true
         settings.apply {
