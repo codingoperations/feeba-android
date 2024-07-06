@@ -8,8 +8,8 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.FrameLayout.LayoutParams
 import androidx.cardview.widget.CardView
 import io.feeba.data.Position
 import io.feeba.data.SurveyPresentation
@@ -18,6 +18,7 @@ import io.feeba.lifecycle.LogLevel
 import io.feeba.lifecycle.Logger
 import io.feeba.navigationBarHeight
 import io.feeba.statusBarHeight
+import kotlin.math.min
 
 internal class SurveyWebViewHolder(
     private val activity: Activity,
@@ -47,16 +48,46 @@ internal class SurveyWebViewHolder(
     }
 
     private fun createContentView(): View {
-        val cardView = createCardView(activity, presentation).apply {
-            val webView = createWebViewInstance(activity, presentation, appHistoryState,
+        val surveyWrapper = createCardView(activity, presentation).apply {
+            val cardRef = this
+            val surveyIntegrationModel: IntegrationMode = if (presentation.displayLocation == Position.FULL_SCREEN) IntegrationMode.FullScreen else IntegrationMode.Modal
+            val webView = createWebViewInstance(activity, presentation, appHistoryState, surveyIntegrationModel,
                 onPageLoaded = { webView, loadType ->
-                    removeAllViews()
-                    addView(webView)
+                    when (loadType) {
+                        PageFrame -> {
+                            // React is loaded. There is nothing has rendered yet. No need to take actions yet
+                        }
+
+                        is PageResized -> {
+                            Logger.d("SurveyWebViewHolder::PageResized w=${loadType.w}, h=${loadType.h}")
+                            Logger.d("SurveyWebViewHolder::PageResized::currWidth w=${cardRef.layoutParams.width}")
+                            if (presentation.displayLocation == Position.FULL_SCREEN) {
+                                // Do nothing. Shortcircut the logic
+                                return@createWebViewInstance
+                            }
+
+                            cardRef.layoutParams = cardRef.layoutParams.apply {
+                                width = min(loadType.w, ViewUtils.getWindowWidth(activity))
+                                height = loadType.h
+                            }
+                        }
+
+                        SurveyRendered -> {
+                            removeAllViews()
+                            addView(webView)
+                        }
+                    }
                 },
                 onError = {
                     dismiss()
-                }) {
-                dismiss()
+                },
+                onOutsideTouch = {
+                    dismiss()
+                }).apply {
+                settings.setSupportZoom(false)
+                settings.setSupportZoom(false)
+                settings.setGeolocationEnabled(true)
+                settings.setLightTouchEnabled(true)
             }
 
             webView.setOnKeyListener { v, keyCode, event ->
@@ -69,14 +100,15 @@ internal class SurveyWebViewHolder(
             }
         }
 
+        // This is a frame that covers the entire screen and is used to dismiss the card view when clicked outside of it
         return FrameLayout(activity).apply {
             layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT).apply {
                 gravity = Gravity.BOTTOM
             }
-            Logger.log(LogLevel.DEBUG, "statusBarHeight: ${activity.statusBarHeight}, navigationBarHeight: ${activity.navigationBarHeight}")
+            Logger.log(LogLevel.DEBUG, "SurveyWebViewHolder::statusBarHeight: ${activity.statusBarHeight}, navigationBarHeight: ${activity.navigationBarHeight}")
             setPadding(0, activity.statusBarHeight, 0, activity.navigationBarHeight)
 
-            addView(cardView)
+            addView(surveyWrapper)
             var viewLocation: IntArray? = null
             setOnTouchListener { v, event ->
                 val x = event.rawX.toInt()
@@ -100,7 +132,7 @@ internal class SurveyWebViewHolder(
                         // Add any additional logic for when the drag is released if necessary
                         Logger.log(LogLevel.DEBUG, "onTouch: ACTION_UP")
                         viewLocation?.let {
-                            if (!isPointInsideView(it[0], it[1], cardView)) {
+                            if (!isPointInsideView(it[0], it[1], surveyWrapper)) {
                                 // Consider as a click event
                                 dismiss()
                             }
@@ -140,44 +172,37 @@ internal class SurveyWebViewHolder(
  */
 private fun createCardView(activity: Activity, content: SurveyPresentation): CardView {
     val cardView = CardView(activity.applicationContext).apply {
-        val adjustedHeight: Int = if (content.maxWidgetHeightInPercent in 1..100) content.maxWidgetHeightInPercent else 70
-        val height = ViewUtils.getWindowHeight(activity) * (adjustedHeight / 100f)
-        val adjustedWidth: Int = if (content.maxWidgetWidthInPercent in 1..100) content.maxWidgetWidthInPercent else 90
-        val width = ViewUtils.getWindowWidth(activity) * (adjustedWidth / 100f)
-        Logger.log(LogLevel.DEBUG, "Activity height -> ${ViewUtils.getWindowHeight(activity)}, width -> ${ViewUtils.getWindowWidth(activity)}")
-        Logger.log(LogLevel.DEBUG, "createCardView::height: $height, width: $width")
-        FrameLayout.LayoutParams(width.toInt(), height.toInt()).also {
-            when (content.displayLocation) {
-                Position.TOP_BANNER -> {
-                    it.gravity = Gravity.CENTER or Gravity.TOP
-                }
-
-                Position.BOTTOM_BANNER -> {
-                    it.gravity = Gravity.CENTER or Gravity.BOTTOM
-                }
-
-                Position.FULL_SCREEN -> {
-                    it.gravity = Gravity.CENTER
-                    it.height = FrameLayout.LayoutParams.MATCH_PARENT
-                    it.width = FrameLayout.LayoutParams.MATCH_PARENT
-                }
-
-                Position.CENTER_MODAL -> {
-                    it.gravity = Gravity.CENTER
-                }
-            }
-            layoutParams = it
-        }
+        setLayoutParamsForCardView(content, this)
     }
-
-    // Set the initial elevation of the CardView to 0dp if using Android 6 API 23
-    //  Fixes bug when animating a elevated CardView class
-//    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M) cardView.cardElevation = 0f else
-        cardView.cardElevation = ViewUtils.dpToPx(5).toFloat()
+    cardView.cardElevation = ViewUtils.dpToPx(5).toFloat()
     cardView.radius = ViewUtils.dpToPx(8).toFloat()
     cardView.clipChildren = false
     cardView.clipToPadding = false
     cardView.preventCornerOverlap = false
     cardView.setCardBackgroundColor(Color.WHITE)
     return cardView
+}
+
+private fun setLayoutParamsForCardView(content: SurveyPresentation, cardView: CardView, width: Int = 0, height: Int = 0) {
+    val params = FrameLayout.LayoutParams(width, height)
+    when (content.displayLocation) {
+        Position.TOP_BANNER -> {
+            params.gravity = Gravity.CENTER or Gravity.TOP
+        }
+
+        Position.BOTTOM_BANNER -> {
+            params.gravity = Gravity.CENTER or Gravity.BOTTOM
+        }
+
+        Position.FULL_SCREEN -> {
+            params.gravity = Gravity.CENTER
+            params.height = FrameLayout.LayoutParams.MATCH_PARENT
+            params.width = FrameLayout.LayoutParams.MATCH_PARENT
+        }
+
+        Position.CENTER_MODAL -> {
+            params.gravity = Gravity.CENTER
+        }
+    }
+    cardView.layoutParams = params
 }
