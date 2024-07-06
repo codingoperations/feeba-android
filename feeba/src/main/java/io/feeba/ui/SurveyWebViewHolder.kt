@@ -49,6 +49,7 @@ internal class SurveyWebViewHolder(
 
     private fun createContentView(): View {
         val surveyWrapper = createCardView(activity, presentation).apply {
+            val cardRef = this
             val surveyIntegrationModel: IntegrationMode = if (presentation.displayLocation == Position.FULL_SCREEN) IntegrationMode.FullScreen else IntegrationMode.Modal
             val webView = createWebViewInstance(activity, presentation, appHistoryState, surveyIntegrationModel,
                 onPageLoaded = { webView, loadType ->
@@ -58,12 +59,15 @@ internal class SurveyWebViewHolder(
                         }
 
                         is PageResized -> {
+                            Logger.d("SurveyWebViewHolder::PageResized w=${loadType.w}, h=${loadType.h}")
+                            Logger.d("SurveyWebViewHolder::PageResized::currWidth w=${cardRef.layoutParams.width}")
                             if (presentation.displayLocation == Position.FULL_SCREEN) {
                                 // Do nothing. Shortcircut the logic
                                 return@createWebViewInstance
                             }
-                            this.layoutParams = this.layoutParams.apply {
-                                width = loadType.w
+
+                            cardRef.layoutParams = cardRef.layoutParams.apply {
+                                width = min(loadType.w, ViewUtils.getWindowWidth(activity))
                                 height = loadType.h
                             }
                         }
@@ -79,7 +83,12 @@ internal class SurveyWebViewHolder(
                 },
                 onOutsideTouch = {
                     dismiss()
-                })
+                }).apply {
+                settings.setSupportZoom(false)
+                settings.setSupportZoom(false)
+                settings.setGeolocationEnabled(true)
+                settings.setLightTouchEnabled(true)
+            }
 
             webView.setOnKeyListener { v, keyCode, event ->
                 Logger.log(LogLevel.DEBUG, "onKeyListener: keyCode=$keyCode, event=$event")
@@ -174,7 +183,7 @@ private fun createCardView(activity: Activity, content: SurveyPresentation): Car
     return cardView
 }
 
-private fun setLayoutParamsForCardView(content: SurveyPresentation, cardView: CardView, width: Int = FrameLayout.LayoutParams.WRAP_CONTENT, height: Int = FrameLayout.LayoutParams.WRAP_CONTENT) {
+private fun setLayoutParamsForCardView(content: SurveyPresentation, cardView: CardView, width: Int = 0, height: Int = 0) {
     val params = FrameLayout.LayoutParams(width, height)
     when (content.displayLocation) {
         Position.TOP_BANNER -> {
@@ -196,22 +205,4 @@ private fun setLayoutParamsForCardView(content: SurveyPresentation, cardView: Ca
         }
     }
     cardView.layoutParams = params
-}
-
-private fun adjustCardViewSize(activity: Activity, cardView: View, presentation: SurveyPresentation, width: Int, height: Int) {
-    Logger.d("SurveyWebViewHolder::Activity height -> ${ViewUtils.getWindowHeight(activity)}, width -> ${ViewUtils.getWindowWidth(activity)}")
-    Logger.d("SurveyWebViewHolder::cardViewInstance::height: $height, width: $width")
-
-    if (presentation.displayLocation != Position.FULL_SCREEN) {
-        // Set the actual size of the card view based on the content
-        val heightPercentage: Int = if (presentation.maxWidgetHeightInPercent in 1..100) presentation.maxWidgetHeightInPercent else 70
-        val widthPercentage: Int = if (presentation.maxWidgetWidthInPercent in 1..100) presentation.maxWidgetWidthInPercent else 90
-        val maxAllowedHeight = (ViewUtils.getWindowHeight(activity) * (heightPercentage / 100f)).toInt()
-        val maxAllowedWidth = (ViewUtils.getWindowWidth(activity) * (widthPercentage / 100f)).toInt()
-        Logger.d("SurveyWebViewHolder:: maxAllowedHeight: $maxAllowedHeight, maxAllowedWidth: $maxAllowedWidth")
-        cardView.layoutParams = cardView.layoutParams.also {
-            it.height = min(maxAllowedHeight, height)
-            it.width = min(maxAllowedWidth, width)
-        }
-    }
 }

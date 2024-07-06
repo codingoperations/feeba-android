@@ -49,8 +49,6 @@ class LoginFragment : Fragment() {
         super.onResume()
         viewModel.loginStatus.observe(viewLifecycleOwner) {
             if (it == LoginStatus.SUCCESS) {
-                val nav = NavHostFragment.findNavController(this)
-                nav.graph
                 findNavController().navigate(R.id.action_open_project_list)
             } else if (it == LoginStatus.ON_AIR) {
                 binding.buttonLogin.isEnabled = false
