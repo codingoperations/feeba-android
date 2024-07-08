@@ -23,8 +23,8 @@ class TriggerValidator {
         // check if we have a survey for this event
         val config = localStateHolder.readLocalConfig()
         // check if we have a survey for this event
-        Logger.log(LogLevel.DEBUG, "TriggerValidator:: surveyPlans -> ${config.surveyPlans}")
         for (surveyPlan in config.surveyPlans) {
+//            Logger.d("TriggerValidator:: SurveyPlay name -> ${surveyPlan}")
             for (ruleSet in surveyPlan.ruleSetList) {
                 // if all conditions are met, return the survey
                 var allConditionsMet = false
@@ -34,7 +34,8 @@ class TriggerValidator {
                     }
                 }
                 val shouldBeScheduled = areSchedulingConditionsMet(localStateHolder.fetchSurveyShowStats(surveyPlan.id), surveyPlan.distribution?.scheduleConfig)
-                Logger.log(LogLevel.DEBUG, "TriggerValidator:: shouldBeScheduled -> $shouldBeScheduled")
+//                Logger.d("TriggerValidator:: allConditionsMet -> $allConditionsMet")
+//                Logger.d("TriggerValidator:: shouldBeScheduled -> $shouldBeScheduled")
                 allConditionsMet = allConditionsMet.and(shouldBeScheduled)
 
                 if (allConditionsMet) {

@@ -236,14 +236,17 @@ fun createWebViewInstanceForManualLoad(
 
         layoutParams = FrameLayout.LayoutParams(width, height)
 
-        setBackgroundColor(Color.YELLOW)
-
         isNestedScrollingEnabled = true
         settings.apply {
             javaScriptEnabled = true
             useWideViewPort = false
             allowFileAccess = true
             domStorageEnabled = true
+
+            setSupportZoom(false)
+            setSupportZoom(false)
+            setGeolocationEnabled(true)
+            setLightTouchEnabled(true)
             // Below is trying to fetch a JS bundle that is outdated. Requires deeper investigation
         }
         addJavascriptInterface(
@@ -381,5 +384,4 @@ enum class IntegrationMode {
             "m"
         }
     }
-
 }
