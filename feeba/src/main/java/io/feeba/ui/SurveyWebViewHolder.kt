@@ -61,6 +61,7 @@ internal class SurveyWebViewHolder(
                         is PageResized -> {
                             Logger.d("SurveyWebViewHolder::PageResized w=${loadType.w}, h=${loadType.h}")
                             Logger.d("SurveyWebViewHolder::PageResized::currWidth w=${cardRef.layoutParams.width}")
+                            Logger.d("SurveyWebViewHolder::PageResized::screen width w=${ViewUtils.getWindowWidth(activity)}")
                             if (presentation.displayLocation == Position.FULL_SCREEN) {
                                 // Do nothing. Shortcircut the logic
                                 return@createWebViewInstance
@@ -83,12 +84,7 @@ internal class SurveyWebViewHolder(
                 },
                 onOutsideTouch = {
                     dismiss()
-                }).apply {
-                settings.setSupportZoom(false)
-                settings.setSupportZoom(false)
-                settings.setGeolocationEnabled(true)
-                settings.setLightTouchEnabled(true)
-            }
+                })
 
             webView.setOnKeyListener { v, keyCode, event ->
                 Logger.log(LogLevel.DEBUG, "onKeyListener: keyCode=$keyCode, event=$event")
@@ -114,23 +110,23 @@ internal class SurveyWebViewHolder(
                 val x = event.rawX.toInt()
                 val y = event.rawY.toInt()
 
-                Logger.log(LogLevel.DEBUG, "onTouch: x=$x, y=$y")
-                Logger.log(LogLevel.DEBUG, "View size: ${v.width}x${v.height}")
-                Logger.log(LogLevel.DEBUG, "View name: ${v.javaClass.simpleName}")
+//                Logger.log(LogLevel.DEBUG, "onTouch: x=$x, y=$y")
+//                Logger.log(LogLevel.DEBUG, "View size: ${v.width}x${v.height}")
+//                Logger.log(LogLevel.DEBUG, "View name: ${v.javaClass.simpleName}")
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
                         // calculate X and Y coordinates of view relative to screen
                         viewLocation = IntArray(2)
                         v.getLocationOnScreen(viewLocation)
                         viewLocation?.let {
-                            Logger.log(LogLevel.DEBUG, "View on Screen: x=${it[0]} y=${it[1]}")
+//                            Logger.log(LogLevel.DEBUG, "View on Screen: x=${it[0]} y=${it[1]}")
                         }
                         true // Important to return false so the touch event isn't consumed and is passed to children
                     }
 
                     MotionEvent.ACTION_UP -> {
                         // Add any additional logic for when the drag is released if necessary
-                        Logger.log(LogLevel.DEBUG, "onTouch: ACTION_UP")
+//                        Logger.log(LogLevel.DEBUG, "onTouch: ACTION_UP")
                         viewLocation?.let {
                             if (!isPointInsideView(it[0], it[1], surveyWrapper)) {
                                 // Consider as a click event

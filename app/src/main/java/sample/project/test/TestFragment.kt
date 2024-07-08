@@ -12,6 +12,7 @@ import android.widget.ScrollView
 import androidx.fragment.app.Fragment
 import io.feeba.data.SurveyPresentation
 import io.feeba.data.state.Defaults
+import io.feeba.lifecycle.Logger
 import io.feeba.ui.IntegrationMode
 import io.feeba.ui.PageResized
 import io.feeba.ui.createWebViewInstance
@@ -35,6 +36,9 @@ class TestFragment : Fragment() {
 
                     fun resizeTheContainer(w: Int, h: Int) {
                         resizableFrameLayout.layoutParams = resizableFrameLayout.layoutParams.apply {
+                            Logger.d("TestFragment::PageResized w=${w}, h=${h}")
+                            Logger.d("TestFragment::PageResized::currWidth w=${this.width}")
+
                             width = w
                             height = h
                         }
@@ -44,7 +48,6 @@ class TestFragment : Fragment() {
                             onPageLoaded = { webView, loadType ->
                                 if (loadType is PageResized) {
                                     // Changing the container while webView size is statically set  is working
-//                                    webView.setInitialScale(100)
                                     resizeTheContainer(loadType.w, loadType.h)
                                     // Changing the webview size is not working. It is causing scaled content
 //                                    webView.layoutParams = webView.layoutParams.apply {
