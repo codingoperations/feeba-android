@@ -45,6 +45,12 @@ class JsInterface(
         Logger.log(LogLevel.DEBUG, "JsInterface::onSurveyFullyRendered")
         onSurveyFullyRendered()
     }
+    @JavascriptInterface
+    fun resize(width: Int, height: Int) {
+        Logger.log(LogLevel.DEBUG, "JsInterface::resize, width=$width, height=$height")
+        onResize(width, height)
+    }
+    // ----------------- Getters -------------------
 
     /**
      * Returns unparsed server response back to the webview.
@@ -58,11 +64,5 @@ class JsInterface(
         Logger.log(LogLevel.DEBUG, "JsInterface::onSurveyFullyRendered")
         onSurveyFullyRendered()
         return null
-    }
-
-    @JavascriptInterface
-    fun resize(width: Int, height: Int) {
-        Logger.log(LogLevel.DEBUG, "JsInterface::resize, width=$width, height=$height")
-        onResize(width, height)
     }
 }

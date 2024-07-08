@@ -50,14 +50,26 @@ class FeebaWebView(context: Context, maxWidthPercent: Int = 100, maxHeightPercen
     }
 
     fun load(originalUrl: String, appHistoryState: AppHistoryState, integrationMode: IntegrationMode) {
+        val queryParamsArray = mutableListOf(
+            Pair("lang", appHistoryState.userData?.langCode ?: "en"),
+            Pair("im", integrationMode.toString()),
+            // Breakpoint
+            Pair("bp", readCssBreakPointValue(context as Activity)),
+        )
+
+        try {
+            val maxWidthWebPixels = maxWidthPx / resources.displayMetrics.density
+            val minWidthWebPixels = minWidthPx / resources.displayMetrics.density
+            queryParamsArray.add(Pair("mxw", maxWidthWebPixels.toString()))
+            queryParamsArray.add(Pair("mnw", minWidthWebPixels.toString()))
+        } catch (e: Exception) {
+            Logger.e("Error while adding max width to query params: ${e.message}")
+        }
+
+
         val url = appendQueryParameter(
             originalUrl,
-            arrayOf(
-                Pair("lang", appHistoryState.userData?.langCode ?: "en"),
-                Pair("im", integrationMode.toString()),
-                // Breakpoint
-                Pair("bp", readCssBreakPointValue(context as Activity)),
-            )
+            queryParamsArray
         )
         super.loadUrl(url)
     }
