@@ -1,0 +1,25 @@
+name: Publishing library to Jitpack
+on:
+  workflow_dispatch: # Allow manual invocation of the workflow
+
+permissions:
+  contents: write
+  packages: write
+jobs:
+  publish:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      # Retrieve ipa file from GitHub artifacts
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required due to the way Git works, without it this action won't be able to find any or the correct tags
+      - name: Tag update
+        run: |
+          # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          ./new_release.sh
