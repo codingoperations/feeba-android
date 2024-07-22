@@ -1,10 +1,9 @@
 package sample.project.project_list
 
-import android.annotation.SuppressLint
+import android.animation.LayoutTransition
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.feeba.Feeba
-import io.feeba.ui.SurveyView
+import io.feeba.ui.InlineSurveyView
 import io.least.demo.R
 import io.least.demo.databinding.FragmentSampleShowcaseBinding
 import sample.data.UserData
@@ -91,17 +90,17 @@ class  ShowCaseFragment : Fragment() {
                 }
                 // Inline Surveys
                 it.inlineSurveys?.forEach {
-                    binding.llSurveys.addView(SurveyView(requireContext()).apply {
+                    binding.llSurveys.addView(InlineSurveyView(requireContext()).apply {
+                        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                        layoutTransition = LayoutTransition()
                         loadSurvey(it.webPageUrl)
                     })
+                    // Inserting a divider
                     binding.llSurveys.addView(View(requireContext()).apply {
                         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 20)
                         setBackgroundColor(resources.getColor(R.color.black))
                     })
                 }
-                binding.llSurveys.addView(SurveyView(requireContext()).apply {
-                    loadSurvey("https://sv.feeba.io/s/my-taxi/660a87e5a0416b54325c9a35")
-                })
             }
         }
     }

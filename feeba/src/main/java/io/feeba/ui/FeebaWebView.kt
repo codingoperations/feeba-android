@@ -24,7 +24,6 @@ class FeebaWebView(context: Context, maxWidthPercent: Int = 100, maxHeightPercen
 
     @Deprecated("Deprecated in Java")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        Logger.d("FeebaWebView::onMeasure: $widthMeasureSpec, $heightMeasureSpec")
         // Adjust width as necessary
         var widthMeasureSpec = widthMeasureSpec
         var heightMeasureSpec = heightMeasureSpec
@@ -42,6 +41,7 @@ class FeebaWebView(context: Context, maxWidthPercent: Int = 100, maxHeightPercen
 //        Logger.d("FeebaWebView:: w=${widthSize}, maxW=${maxWidthPx}, minW=${minWidthPx}, adjustedW=${adjustedWidth}")
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        Logger.d("FeebaWebView::onMeasure:measured => $measuredWidth, $measuredHeight")
     }
 
     @Deprecated("Deprecated. This function is not supported.", ReplaceWith("load(url, headers)"))

@@ -60,8 +60,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewEventTriggers"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="match_parent" />
     </LinearLayout>
 
     <LinearLayout
@@ -87,8 +86,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewPageTriggers"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="match_parent" />
     </LinearLayout>
 
     <LinearLayout
@@ -119,7 +117,15 @@
                 android:id="@+id/llSurveys"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical" />
+                android:orientation="vertical">
+
+                <io.feeba.ui.InlineSurveyView
+                    android:id="@+id/inlineSurveyView1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
         </androidx.core.widget.NestedScrollView>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
