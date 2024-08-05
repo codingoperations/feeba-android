@@ -97,7 +97,7 @@ class  ShowCaseFragment : Fragment() {
                     })
                     // Inserting a divider
                     binding.llSurveys.addView(View(requireContext()).apply {
-                        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 20)
+                        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 21)
                         setBackgroundColor(resources.getColor(R.color.black))
                     })
                 }
