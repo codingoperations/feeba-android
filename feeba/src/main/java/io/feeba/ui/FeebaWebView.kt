@@ -25,20 +25,6 @@ class FeebaWebView(context: Context, maxWidthPercent: Int = 100, maxHeightPercen
     @Deprecated("Deprecated in Java")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         // Adjust width as necessary
-        var widthMeasureSpec = widthMeasureSpec
-        var heightMeasureSpec = heightMeasureSpec
-        // Adjust width as necessary to ensure it is within the max and min width
-//        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
-//        val adjustedWidth = min(maxWidthPx, max(minWidthPx, widthSize))
-//        widthMeasureSpec = MeasureSpec.makeMeasureSpec(adjustedWidth, EXACTLY)
-//
-//        // Adjust height as necessary to ensure it is within the max and min height
-//        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
-//        val adjustedHeight = min(maxHeightPx, max(minHeightPx, heightSize))
-//        heightMeasureSpec = MeasureSpec.makeMeasureSpec(adjustedHeight, EXACTLY)
-//
-//        Logger.d("FeebaWebView:: h=${heightSize}, maxH=${maxHeightPx}, minH=${minHeightPx}, adjustedH=${adjustedHeight}")
-//        Logger.d("FeebaWebView:: w=${widthSize}, maxW=${maxWidthPx}, minW=${minWidthPx}, adjustedW=${adjustedWidth}")
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         Logger.d("FeebaWebView::onMeasure:measured => $measuredWidth, $measuredHeight")
