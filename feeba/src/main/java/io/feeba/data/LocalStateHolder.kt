@@ -51,7 +51,7 @@ class LocalStateHolder(
                 stateStorage.feebaResponse = it
             }
         } catch (t: Throwable) {
-            Logger.log(LogLevel.ERROR, "${TAG} Failed to parse response. Error: $t")
+            Logger.log(LogLevel.ERROR, "${TAG} Failed to parse response. Error: $t")ga
         }
     }
 
