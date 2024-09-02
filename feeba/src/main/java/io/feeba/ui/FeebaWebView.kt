@@ -39,7 +39,7 @@ class FeebaWebView(context: Context, maxWidthPercent: Int = 100, maxHeightPercen
         val queryParamsArray = mutableListOf(
             Pair("im", integrationMode.toString()),
             // Breakpoint
-            Pair("bp", readCssBreakPointValue(context as Activity)),
+            Pair("bp", readCssBreakPointValue(ViewUtils.unwrapContextToActivity(context))),
         )
         // if lang code is not found, do not set it to the query params
         appHistoryState.userData?.langCode?.let {

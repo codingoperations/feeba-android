@@ -3,17 +3,16 @@ package io.feeba.ui
 import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
 import android.net.http.SslError
 import android.os.Build
 import android.util.DisplayMetrics
 import android.view.View
-import android.view.ViewTreeObserver
 import android.view.Window
 import android.view.inputmethod.InputMethodManager
 import android.webkit.ConsoleMessage
@@ -27,7 +26,6 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import io.feeba.Utils
-import io.feeba.appendQueryParameter
 import io.feeba.data.Position
 import io.feeba.data.SurveyPresentation
 import io.feeba.data.state.AppHistoryState
@@ -38,6 +36,7 @@ import io.feeba.lifecycle.Logger
 import io.feeba.survey.CallToAction
 import io.feeba.survey.JsInterface
 import java.lang.ref.WeakReference
+
 
 internal object ViewUtils {
     private val MARGIN_ERROR_PX_SIZE = dpToPx(24)
@@ -167,12 +166,12 @@ internal object ViewUtils {
         val insetsAttached = decorView.rootWindowInsets != null
         return hasToken && insetsAttached
     }
-
-    fun removeOnGlobalLayoutListener(
-        view: View,
-        listener: ViewTreeObserver.OnGlobalLayoutListener?
-    ) {
-        view.viewTreeObserver.removeOnGlobalLayoutListener(listener)
+    fun unwrapContextToActivity(context: Context): Activity {
+        var activityContext: Context = context
+        while (context !is Activity && context is ContextWrapper) {
+            activityContext = context.baseContext
+        }
+        return activityContext as Activity
     }
 }
 
